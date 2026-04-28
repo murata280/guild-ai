@@ -1,14 +1,13 @@
 "use client";
 
-// GUILD AI — /sell page (出品 UI). Inherits the listing_008 structure.
-// Steps: GitHub URL → CCAF upload/auto-gen → AI rank preview → price → submit.
-
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { audit, computeFloorPrice } from "@/lib/ai-auditor";
 import { computeTrustScore } from "@/lib/trust-score";
 import TrustScore from "@/components/trust-score/TrustScore";
 import { RankBadge } from "@/components/RankBadge";
 import { formatJPY, isGithubUrl } from "@/utils/format";
+import { generateRemixDescription } from "@/lib/listing-generator";
 import type { CCAF } from "@/types";
 
 const defaultCCAF: CCAF = {
@@ -16,15 +15,33 @@ const defaultCCAF: CCAF = {
   thoughtDensity: 72,
   iterations: 14,
   authorId: "me",
-  createdAt: new Date().toISOString()
+  createdAt: new Date().toISOString(),
 };
 
-export default function SellPage() {
+const inputClass =
+  "mt-1 w-full rounded-lg border border-kuroko/20 bg-white px-3 py-2 text-sm text-kuroko placeholder-[#9890A8] focus:border-kaki focus:outline-none focus:ring-1 focus:ring-kaki/30";
+
+// ─── Inner form (reads search params) ────────────────────────────────────────
+
+function SellContent() {
+  const params = useSearchParams();
+  const remixId = params.get("remix");
+  const remixFrom = params.get("from");
+
+  const remixDescription = remixFrom ? generateRemixDescription(remixFrom) : "";
+
   const [githubUrl, setGithubUrl] = useState("");
+  const [description, setDescription] = useState(remixDescription);
+  const [inheritApiKey, setInheritApiKey] = useState(remixId !== null);
   const [ccaf, setCcaf] = useState<CCAF>(defaultCCAF);
   const [vercelUptimeDays, setUptime] = useState(30);
   const [basePrice, setBasePrice] = useState(5000);
   const [submitted, setSubmitted] = useState<null | { id: string }>(null);
+
+  // Re-sync description if remix params change on client
+  useEffect(() => {
+    if (remixFrom) setDescription(generateRemixDescription(remixFrom));
+  }, [remixFrom]);
 
   const trust = useMemo(
     () => computeTrustScore({ qualityHistory: 70, discordContribution: 55, xAmplification: 40 }),
@@ -41,9 +58,6 @@ export default function SellPage() {
     setSubmitted({ id: `listing_${Date.now()}` });
   };
 
-  const inputClass =
-    "mt-1 w-full rounded-lg border border-kuroko/20 bg-white px-3 py-2 text-sm text-kuroko placeholder-[#9890A8] focus:border-kaki focus:outline-none focus:ring-1 focus:ring-kaki/30";
-
   return (
     <main className="px-4 sm:px-6 lg:px-8 py-8 max-w-3xl mx-auto">
 
@@ -54,6 +68,14 @@ export default function SellPage() {
           Trust Score が高いほど Floor Price と露出が上がる。良質な出品が、売れる。
         </p>
       </div>
+
+      {/* Remix chip */}
+      {remixFrom && (
+        <div className="mt-4 inline-flex items-center gap-2 rounded-lg border border-kaki/30 bg-kaki/10 px-3 py-2">
+          <span className="text-xs text-kaki font-medium">Remix元:</span>
+          <span className="text-xs text-kuroko font-semibold truncate max-w-[240px]">{remixFrom}</span>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
 
@@ -74,6 +96,32 @@ export default function SellPage() {
               ? githubOk ? "✓ 有効な GitHub URL" : "URL の形式が正しくありません"
               : "GitHub のリポジトリ URL を入力してください"}
           </p>
+
+          {/* Description */}
+          <label className="mt-3 flex flex-col text-sm text-[#4A4464]">
+            説明文
+            <textarea
+              rows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="この知能資産が解決する課題と特徴を記述してください"
+              className={`${inputClass} resize-none`}
+            />
+          </label>
+
+          {/* Inherit API key (remix only) */}
+          {remixId && (
+            <label className="mt-3 flex items-center gap-2 cursor-pointer text-sm text-[#4A4464]">
+              <input
+                type="checkbox"
+                checked={inheritApiKey}
+                onChange={(e) => setInheritApiKey(e.target.checked)}
+                className="rounded border-kuroko/30 text-kaki focus:ring-kaki/30"
+              />
+              API キーを継承する
+              <span className="text-xs text-[#9890A8]">（Remix 元の認証情報を引き継ぐ）</span>
+            </label>
+          )}
         </section>
 
         {/* Step 2 */}
@@ -203,5 +251,21 @@ export default function SellPage() {
       </aside>
 
     </main>
+  );
+}
+
+// ─── Page wrapper with Suspense (required for useSearchParams) ────────────────
+
+export default function SellPage() {
+  return (
+    <Suspense fallback={
+      <main className="px-4 sm:px-6 lg:px-8 py-8 max-w-3xl mx-auto">
+        <div className="section-card p-8 text-center mt-12">
+          <p className="text-sm text-[#9890A8]">読み込み中…</p>
+        </div>
+      </main>
+    }>
+      <SellContent />
+    </Suspense>
   );
 }

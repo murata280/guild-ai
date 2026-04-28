@@ -30,6 +30,7 @@ export interface Listing {
   basePrice: number;
   floorPrice: number;
   githubUrl?: string;
+  remixedFrom?: string; // parent asset ID — royalty lineage anchor
 }
 
 /**
