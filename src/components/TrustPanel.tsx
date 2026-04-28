@@ -34,7 +34,7 @@ export function TrustPanel({ assetId, rank, trustScore, vercelUptimeDays }: Trus
     {
       icon: "📅",
       label: `Vercelで${vercelUptimeDays}日間安定稼働中`,
-      value: `稼働率 ${health.uptimePct}%`,
+      value: `稼働率 ${health.uptimePercent}%`,
       highlight: false,
     },
     {
