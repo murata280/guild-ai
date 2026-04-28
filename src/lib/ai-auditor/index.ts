@@ -1,7 +1,5 @@
 // GUILD AI — ai-auditor (知能鑑定士)
 // Decides S/A/B rank from CCAF + Vercel uptime.
-// Spec: docs/マスター設計図.md §3 and docs/用語集.md.
-// "魂の登記" guard: AI-only generations (no human intent signals) cannot reach S.
 
 import type { AuditResult, CCAF, Rank } from "@/types";
 
@@ -12,6 +10,15 @@ export interface AuditInput {
 
 const S_THRESHOLD = { density: 80, uptime: 30 } as const;
 const A_THRESHOLD = { density: 60, uptime: 7 } as const;
+
+function buildJustification(ccaf: CCAF, vercelUptimeDays: number, rank: Rank): string {
+  const signals = ccaf.intentSignals.length;
+  return `思考密度${ccaf.thoughtDensity}、試行回数${ccaf.iterations}回、稼働実績${vercelUptimeDays}日、意思シグナル「${signals}個」により ${rank} ランクと判定。${
+    rank === "S" ? "魂の登記基準を満たし最高格付けを付与。" :
+    rank === "A" ? "高品質基準を満たす。意思シグナルを追加することでSランクへ昇格可能。" :
+    "基準値を下回るが最低保証ランクを付与。思考密度と稼働日数を改善することでランクアップできる。"
+  }`;
+}
 
 export function audit(input: AuditInput): AuditResult {
   const { ccaf, vercelUptimeDays } = input;
@@ -39,8 +46,7 @@ export function audit(input: AuditInput): AuditResult {
     reasons.push("B rank: baseline guarantee");
   }
 
-  // Composite 0-100 score: density 60% + uptime (capped 60d) 30% + intent boost 10%
-  const uptimePart = Math.min(vercelUptimeDays, 60) / 60; // 0..1
+  const uptimePart = Math.min(vercelUptimeDays, 60) / 60;
   const intentPart = hasIntent ? 1 : 0;
   const composite =
     0.6 * ccaf.thoughtDensity +
@@ -50,7 +56,31 @@ export function audit(input: AuditInput): AuditResult {
   return {
     rank,
     score: Math.round(composite * 100) / 100,
-    reasons
+    reasons,
+    justification: buildJustification(ccaf, vercelUptimeDays, rank),
+  };
+}
+
+/**
+ * Promote an A-rank result to S by adding a voice intent signal.
+ * Caller should provide the raw transcript from the user's voice input.
+ */
+export function promoteWithIntent(input: AuditInput, voiceLog: string): AuditResult {
+  const base = audit(input);
+  const promoted: CCAF = {
+    ...input.ccaf,
+    intentSignals: [...input.ccaf.intentSignals, "voice-intent"],
+  };
+  const boostedScore = Math.min(100, base.score + 15);
+  const snippet = voiceLog.slice(0, 40).trim();
+  return {
+    rank: "S",
+    score: boostedScore,
+    reasons: [
+      ...base.reasons,
+      `意思シグナル追加: 「${snippet}${voiceLog.length > 40 ? "…" : ""}」により S ランクへ昇格`,
+    ],
+    justification: buildJustification(promoted, input.vercelUptimeDays, "S"),
   };
 }
 

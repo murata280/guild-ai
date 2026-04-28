@@ -64,6 +64,7 @@ export interface AuditResult {
   rank: Rank;
   score: number; // composite score (0-100)
   reasons: string[];
+  justification?: string; // AI解説サマリー
 }
 
 // ─── Marketplace ───────────────────────────────────────────────────────────

@@ -26,6 +26,64 @@ const REPO_TEMPLATES: { name: string; desc: string }[] = [
 
 const LANGUAGES = ["TypeScript", "Python", "Go", "Rust", "JavaScript"];
 
+const README_TEMPLATES: Array<{ keywords: string[]; content: string }> = [
+  {
+    keywords: ["agent", "llm", "chat", "code"],
+    content: `# {name}
+{desc}
+
+このリポジトリは LangChain と OpenAI GPT-4 を使った自律型エージェントの実装です。TypeScript + Next.js で構築されており、Vercel に即座にデプロイできます。
+
+## 技術スタック
+- TypeScript / Next.js
+- OpenAI API
+- LangChain
+- Vercel
+
+## 特徴
+- ストリーミングレスポンス対応
+- マルチターン会話管理
+- ツール呼び出し（Function Calling）
+`,
+  },
+  {
+    keywords: ["data", "pipeline", "ml", "runner"],
+    content: `# {name}
+{desc}
+
+高パフォーマンスなデータ処理パイプラインです。Python と Go で実装され、大規模データセットを効率的に処理します。Docker コンテナで動作します。
+
+## 技術スタック
+- Python
+- Go
+- Docker
+
+## 特徴
+- 並列処理対応
+- リアルタイムモニタリング
+- エラーリカバリー機能
+`,
+  },
+  {
+    keywords: ["embed", "search", "vector", "db"],
+    content: `# {name}
+{desc}
+
+ベクトル類似検索エンジンです。TypeScript と Rust で実装され、高速なセマンティック検索を提供します。
+
+## 技術スタック
+- TypeScript
+- Rust
+- React
+
+## 特徴
+- ミリ秒レベルの検索速度
+- 多次元ベクトル対応
+- REST API 付き
+`,
+  },
+];
+
 function djb2(s: string): number {
   let h = 5381;
   for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
@@ -43,4 +101,13 @@ export function listRepos(user: string): MockRepo[] {
     language: LANGUAGES[(seed + i) % LANGUAGES.length],
     stars: ((seed * (i + 1)) % 500) + 10,
   }));
+}
+
+/** Returns a deterministic mock README for a given repo. */
+export function fetchReadme(repo: MockRepo): string {
+  const seed = djb2(repo.name);
+  const template = README_TEMPLATES[seed % README_TEMPLATES.length];
+  return template.content
+    .replace("{name}", repo.fullName)
+    .replace("{desc}", repo.description);
 }
