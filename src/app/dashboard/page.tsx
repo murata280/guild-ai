@@ -14,6 +14,7 @@ import { getNotifications, getUnreadCount } from "@/lib/notifications";
 import { useLiveEarnings } from "@/lib/live-earnings";
 import { SlotNumber } from "@/components/SlotNumber";
 import { toggleMute, playSuccessChime } from "@/lib/sound";
+import { UserIcon, BanknoteIcon } from "@/components/icons";
 
 // ─── Rank styling ─────────────────────────────────────────────────────────────
 
@@ -58,18 +59,18 @@ function PassbookCard({ owned }: { owned: OwnershipRecord[] }) {
 
   const maxTrust = Math.max(...snap.trustHistory, 1);
   const TX_TYPE_LABELS: Record<string, string> = {
-    card: "お仕事の入金",
-    jpyc: "ロイヤリティ受領",
+    card: "スキル利用収益",
+    jpyc: "還元（リワード）受領",
   };
 
   return (
     <div className="mt-5 section-card p-5">
-      <h2 className="text-sm font-bold text-[#9890A8] uppercase tracking-widest mb-4">今月の通帳</h2>
+      <h2 className="text-sm font-bold text-[#9890A8] uppercase tracking-widest mb-4 flex items-center gap-1.5"><BanknoteIcon size={14} />今月の収益明細</h2>
 
       {/* Monthly earnings hero */}
       <div className="rounded-2xl bg-kuroko px-5 py-4 mb-4">
         <div className="flex items-center gap-2 mb-1">
-          <p className="text-xs text-white/60">今月、あなたの知能がAIにお仕事をして稼いだ金額</p>
+          <p className="text-xs text-white/60">今月、あなたのスキルがAIに採用されて生み出した収益</p>
           {/* Live badge */}
           <span className="inline-flex items-center gap-1 rounded-full bg-accent-green/20 px-2 py-0.5 text-[10px] font-bold text-accent-green">
             <span className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse" aria-hidden />
@@ -91,8 +92,8 @@ function PassbookCard({ owned }: { owned: OwnershipRecord[] }) {
           )}
         </div>
         <div className="flex gap-4 mt-2 text-xs text-white/70">
-          <span>お仕事件数 {monthly.aiJobs}件</span>
-          <span>知能の柿（公開済み）{monthly.assetCount}個</span>
+          <span>AI採用件数 {monthly.aiJobs}件</span>
+          <span>公開資産 {monthly.assetCount}点</span>
         </div>
         {/* Breakdown */}
         <div className="mt-3 space-y-1">
@@ -142,7 +143,7 @@ function PassbookCard({ owned }: { owned: OwnershipRecord[] }) {
 
         {/* Right: Asset count + rank breakdown */}
         <div className="flex-1 rounded-xl bg-surface-inset border border-kuroko/10 px-4 py-4">
-          <p className="text-xs text-[#9890A8]">登記済み資産</p>
+          <p className="text-xs text-[#9890A8]">登録済み資産</p>
           <div className="flex items-baseline gap-1 mt-1">
             <span className="text-3xl font-bold text-kuroko tabular-nums">{assetCount}</span>
             <span className="text-base text-[#9890A8]">件</span>
@@ -165,7 +166,7 @@ function PassbookCard({ owned }: { owned: OwnershipRecord[] }) {
 
       {/* Recent transactions */}
       <div className="mt-4 pt-4 border-t border-kuroko/10">
-        <p className="text-xs font-semibold text-[#9890A8] mb-3">最近のお仕事履歴</p>
+        <p className="text-xs font-semibold text-[#9890A8] mb-3">最近の取引履歴</p>
         <ul className="space-y-2">
           {snap.recentTransactions.map((tx) => (
             <li key={tx.id} className="flex items-center gap-3 text-sm">
@@ -196,7 +197,7 @@ function SesLeverageChart() {
 
   const segments = [
     { label: "直接労働対価", value: directLabor, color: "bg-kaki" },
-    { label: "ロイヤリティ収入", value: royaltyIncome, color: "bg-accent-green" },
+    { label: "還元（リワード）収入", value: royaltyIncome, color: "bg-accent-green" },
     { label: "予測トレンド", value: projectedTrend, color: "bg-kaki/30" },
   ];
 
@@ -207,11 +208,11 @@ function SesLeverageChart() {
         <div className="group relative">
           <span className="w-4 h-4 rounded-full border border-kuroko/30 flex items-center justify-center text-[10px] text-[#9890A8] cursor-help" aria-label="SESレバレッジとは">?</span>
           <div className="hidden group-hover:block absolute left-6 top-0 z-10 w-64 rounded-xl border border-kuroko/15 bg-white px-3 py-2 text-xs text-[#4A4464] shadow-card leading-relaxed">
-            SESレバレッジとは：あなたが残した資産が会社の収益にかける乗数効果。ロイヤリティが積み上がるほど倍率が上がります。
+            SESレバレッジとは：あなたが登録した資産が会社の収益にかける乗数効果。還元（リワード）が積み上がるほど倍率が上がります。
           </div>
         </div>
       </div>
-      <p className="text-sm text-[#9890A8] mb-4">登記した知能資産が収益に与える乗数効果（法人向け）</p>
+      <p className="text-sm text-[#9890A8] mb-4">登録済み資産が収益に与える乗数効果（法人向け）</p>
 
       <div className="flex items-baseline gap-2 mb-4">
         <span className="text-4xl font-bold text-kuroko tabular-nums">{result.multiplier}×</span>
@@ -267,7 +268,7 @@ function GamificationHeader({ owned }: { owned: OwnershipRecord[] }) {
             <span className={`rounded-full px-3 py-0.5 text-xs font-bold ${style.bg} ${style.text}`}>
               {rankResult.rank}
             </span>
-            <p className="text-xs uppercase tracking-widest text-[#9890A8]">知能貢献ランク</p>
+            <p className="text-xs uppercase tracking-widest text-[#9890A8]">貢献ランク</p>
           </div>
           {rankResult.nextRank ? (
             <>
@@ -280,7 +281,7 @@ function GamificationHeader({ owned }: { owned: OwnershipRecord[] }) {
               <p className="mt-1 text-sm text-[#9890A8]">累計スコア {rankResult.score} pt</p>
             </>
           ) : (
-            <p className="mt-2 text-base font-medium text-kaki">最高ランク達成！知能経済のパイオニア</p>
+            <p className="mt-2 text-base font-medium text-kaki">最高ランク達成！スキルエコノミーのパイオニア</p>
           )}
         </div>
         <div className="sm:max-w-[220px] rounded-xl border border-kaki/20 bg-white px-4 py-3 shadow-sm">
@@ -335,7 +336,7 @@ function AssetCard({ record }: { record: OwnershipRecord }) {
 
       <div className="flex items-center gap-2 mb-3">
         <span className="inline-flex items-center gap-1 rounded-full border border-kaki/30 bg-kaki/10 px-2.5 py-0.5 text-xs font-semibold text-kaki">
-          AI鑑定済み
+          AI評価済み
         </span>
         <span className="relative flex h-2 w-2 flex-shrink-0">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-green opacity-75" />
@@ -384,9 +385,9 @@ function AssetCard({ record }: { record: OwnershipRecord }) {
         <Link
           href={`/sell?remix=${record.assetId}&from=${encodeURIComponent(record.assetTitle)}`}
           className="ml-auto text-sm border border-kuroko/20 text-[#3A3664] rounded-lg px-3 py-1.5 hover:bg-kuroko/5 active:scale-[0.97] transition-all"
-          aria-label="この知能を組み合わせて出品"
+          aria-label="この資産を組み合わせて登録"
         >
-          組み合わせて出品
+          組み合わせて登録
         </Link>
       </div>
     </li>
@@ -407,7 +408,7 @@ function PayoutPreferencePanel() {
   return (
     <div className="mt-5 section-card p-5">
       <h2 className="text-base font-semibold text-kuroko">売上の受け取り方</h2>
-      <p className="mt-0.5 text-sm text-[#9890A8]">出品資産が売れたときの振込先</p>
+      <p className="mt-0.5 text-sm text-[#9890A8]">資産が売れたときの収益受け取り方法</p>
       <div className="mt-3 flex gap-4">
         {(["JPY", "JPYC"] as Currency[]).map((c) => (
           <label key={c} className="flex items-center gap-2 cursor-pointer">
@@ -496,9 +497,9 @@ export default function DashboardPage() {
 
       <div className="mt-4 flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-kuroko leading-snug">管理画面</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-kuroko leading-snug flex items-center gap-2"><UserIcon size={22} className="text-kaki" />マイページ</h1>
           <p className="mt-1 text-base text-[#9890A8] leading-relaxed">
-            購入済み知能資産と信用スコアを一覧できます。
+            保有資産と信用スコアを一覧できます。
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -532,11 +533,11 @@ export default function DashboardPage() {
           {/* Summary stats */}
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
             <div className="section-card p-4">
-              <p className="text-xs uppercase tracking-widest text-[#9890A8]">保有資産</p>
+              <p className="text-xs uppercase tracking-widest text-[#9890A8]">登録済み資産</p>
               <p className="mt-1 text-2xl font-bold text-kuroko tabular-nums">{owned.length}</p>
             </div>
             <div className="section-card p-4">
-              <p className="text-xs uppercase tracking-widest text-[#9890A8]">AI鑑定済み</p>
+              <p className="text-xs uppercase tracking-widest text-[#9890A8]">AI評価済み</p>
               <p className="mt-1 text-2xl font-bold text-kaki tabular-nums">{owned.length}</p>
             </div>
             <PaymentStats />
@@ -567,9 +568,9 @@ export default function DashboardPage() {
           {owned.length === 0 ? (
             <div className="mt-8 section-card p-8 text-center">
               <p className="text-base text-[#9890A8]">まだ保有資産がありません。</p>
-              <p className="mt-1 text-sm text-[#9890A8]">良質な知能資産を購入すると、ここに表示されます。</p>
-              <Link href="/marketplace" className="btn-primary mt-5" aria-label="お店で資産を探す">
-                お店を見る →
+              <p className="mt-1 text-sm text-[#9890A8]">マーケットでスキル資産を購入すると、ここに表示されます。</p>
+              <Link href="/marketplace" className="btn-primary mt-5" aria-label="マーケットで資産を探す">
+                マーケットを見る →
               </Link>
             </div>
           ) : (

@@ -12,10 +12,11 @@ import {
 import { RankBadge } from "@/components/RankBadge";
 import { StepIndicator } from "@/components/StepIndicator";
 import type { Rank, MarketplaceListing } from "@/types";
+import { ShoppingBagIcon } from "@/components/icons";
 
 const SORT_LABELS: { key: SortKey; label: string }[] = [
   { key: "trust", label: "信用スコア" },
-  { key: "ccaf",  label: "制作の証明" },
+  { key: "ccaf",  label: "こだわり（実績）" },
   { key: "price", label: "価格" },
 ];
 
@@ -66,13 +67,13 @@ function MarketplaceContent() {
 
       <div className="mt-4 flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-kuroko leading-snug">お店（マーケット）</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-kuroko leading-snug flex items-center gap-2"><ShoppingBagIcon size={22} className="text-kaki" />マーケット</h1>
           <p className="mt-1 text-base text-[#9890A8] leading-relaxed">
-            鑑定済み知能資産の一覧。良質な出品ほど高評価・高価格で表示される。
+            AI評価済みスキル資産の一覧。良質な資産ほど高評価・高価格で表示されます。
           </p>
         </div>
-        <Link href="/sell" className="btn-primary shrink-0" aria-label="知能を出品する">
-          出品する →
+        <Link href="/sell" className="btn-primary shrink-0" aria-label="スキルを資産として登録する">
+          登録する →
         </Link>
       </div>
 
@@ -179,7 +180,7 @@ function MarketplaceContent() {
                     </dd>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <dt className="text-[#9890A8]">制作の証明</dt>
+                    <dt className="text-[#9890A8]">こだわり（実績）</dt>
                     <dd className="font-semibold tabular-nums text-kuroko">{item.auditResult.score.toFixed(1)}</dd>
                   </div>
                   <div className="flex justify-between items-baseline pt-2 border-t border-kuroko/10">

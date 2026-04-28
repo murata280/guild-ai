@@ -17,6 +17,7 @@ import { listRepos, fetchReadme } from "@/lib/github-picker";
 import type { MockRepo } from "@/lib/github-picker";
 import { voiceLogToProofOfMake, generateProductPitch } from "@/lib/proof-of-make";
 import type { CCAF, MarketplaceListing, Currency, Rank } from "@/types";
+import { PackageIcon, SearchIcon } from "@/components/icons";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -81,7 +82,7 @@ const AUTO_STEPS = [
   "おすすめポイントを抽出中…",
   "最適なお値段を算出中…",
   "AIが中身をチェック中…",
-  "お店に出品中…",
+  "マーケットに登録中…",
   "公開URLを発行中…",
 ];
 
@@ -177,7 +178,7 @@ function CompletionCard({ data }: { data: CompletionData }) {
 
         {/* Reception desk */}
         <div className="section-card p-4">
-          <p className="text-xs text-[#9890A8] font-semibold mb-2">お仕事の受付窓口</p>
+          <p className="text-xs text-[#9890A8] font-semibold mb-2">利用窓口（API）</p>
           <p className="font-mono text-xs text-kaki truncate">{data.apiEndpoint.slice(0, 40)}…</p>
           <button
             type="button"
@@ -191,15 +192,15 @@ function CompletionCard({ data }: { data: CompletionData }) {
 
         {/* Management */}
         <div className="section-card p-4 flex flex-col">
-          <p className="text-xs text-[#9890A8] font-semibold mb-2">管理画面</p>
-          <p className="text-sm text-kuroko leading-relaxed flex-1">資産を管理・確認できます</p>
+          <p className="text-xs text-[#9890A8] font-semibold mb-2">マイページ</p>
+          <p className="text-sm text-kuroko leading-relaxed flex-1">保有資産の管理・確認ができます</p>
           <button
             type="button"
             onClick={() => router.push("/dashboard")}
-            aria-label="管理画面へ移動"
+            aria-label="マイページへ移動"
             className="btn-primary w-full !py-1.5 !text-xs mt-2"
           >
-            管理画面へ →
+            マイページへ →
           </button>
         </div>
       </div>
@@ -464,7 +465,7 @@ function VoicePath({ onComplete }: { onComplete: (data: CompletionData) => void 
     const ccaf: CCAF = { intentSignals: proof.intentSignals, thoughtDensity: 72, iterations: 14, authorId: "demo-user", createdAt: new Date().toISOString() };
     const auditResult = audit({ ccaf, vercelUptimeDays: 30 });
     const floor = computeFloorPrice(5000, trust.score);
-    const title = pitch?.description.slice(0, 30) + "…" || `音声登記 — ${new Date().toLocaleDateString("ja-JP")}`;
+    const title = pitch?.description.slice(0, 30) + "…" || `音声登録 — ${new Date().toLocaleDateString("ja-JP")}`;
     const description = pitch?.description || proof.refinedDescription;
 
     const ml: MarketplaceListing = autoList(
@@ -582,7 +583,7 @@ function TextPath({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const finalTitle = title.trim() || "新しい知能資産";
+    const finalTitle = title.trim() || "新しいスキル資産";
     const newId = `listing_${Date.now()}`;
 
     const ml: MarketplaceListing = autoList(
@@ -628,7 +629,7 @@ function TextPath({
 
       {/* 制作の証明 */}
       <div className="section-card p-5 space-y-3">
-        <h2 className="text-base font-bold text-kuroko">制作の証明</h2>
+        <h2 className="text-base font-bold text-kuroko">こだわり（実績ログ）</h2>
         <div className="grid grid-cols-2 gap-3">
           <label className="flex flex-col gap-1 text-sm text-[#3A3664]">
             考えの深さ (0–100)
@@ -653,7 +654,7 @@ function TextPath({
 
       {/* 知能の品質ランク + Radar */}
       <div className="section-card p-5">
-        <h2 className="text-base font-bold text-kuroko mb-4">知能の品質ランク</h2>
+        <h2 className="text-base font-bold text-kuroko mb-4 flex items-center gap-1.5"><SearchIcon size={16} className="text-kaki" />クオリティ・スコア</h2>
         <div className="flex flex-col items-center sm:flex-row gap-6">
           <div className="relative">
             {/* Magical audit animation overlay */}
@@ -692,7 +693,7 @@ function TextPath({
       <div className="section-card p-5 space-y-3">
         <h2 className="text-base font-bold text-kuroko">値段を決める</h2>
         <p className="text-sm text-[#9890A8]">
-          類似の知能は <span className="font-semibold text-kuroko">¥{MARKET_REFERENCE_PRICE.toLocaleString()}</span> で取引されています
+          類似のスキルは <span className="font-semibold text-kuroko">¥{MARKET_REFERENCE_PRICE.toLocaleString()}</span> で取引されています
         </p>
         <div className="flex items-center gap-4">
           <input
@@ -711,7 +712,7 @@ function TextPath({
           <span>¥500</span><span>¥10,000</span>
         </div>
         <p className="text-xs text-[#9890A8]">
-          ※ お値段の目安。信用スコアにより自動調整されます。
+          ※ 最低価格の目安です。信用スコアにより自動調整されます。
         </p>
         <div>
           <p className="text-sm font-semibold text-[#3A3664] mb-2">売上の受け取り方</p>
@@ -727,8 +728,8 @@ function TextPath({
         </div>
       </div>
 
-      <button type="submit" aria-label="お店に出品する" className="btn-primary w-full !py-4 !text-base">
-        AIが鑑定してお店に出品する
+      <button type="submit" aria-label="スキルを資産として登録する" className="btn-primary w-full !py-4 !text-base">
+        AIが評価して資産として登録する
       </button>
     </form>
   );
@@ -762,7 +763,7 @@ function SellContent() {
     const floor = computeFloorPrice(7000, trust.score);
 
     const ml: MarketplaceListing = autoList(
-      { id: newId, ownerId: "demo-user", title: "AI全自動 — 知能資産", description: "AIが全自動で生成した知能資産。高品質なコードとマニュアルを自動最適化。", ccaf, vercelUptimeDays: 30, basePrice: 7000 },
+      { id: newId, ownerId: "demo-user", title: "AI全自動 — スキル資産", description: "AIが全自動で生成したスキル資産。高品質なコードとマニュアルを自動最適化。", ccaf, vercelUptimeDays: 30, basePrice: 7000 },
       { qualityHistory: 70, discordContribution: 55, xAmplification: 40 },
       new Date().toISOString()
     );
@@ -773,7 +774,7 @@ function SellContent() {
 
     setDoItForMeActive(false);
     setCompletion({
-      listingId: newId, title: "AI全自動 — 知能資産",
+      listingId: newId, title: "AI全自動 — スキル資産",
       rank: auditResult.rank, floorPrice: floor,
       deployUrl: `https://vercel.com/new/clone?repository-url=https://github.com/demo/ai-asset`,
       apiEndpoint: `https://guild-ai.vercel.app/api/atoa/${newId}`,
@@ -785,7 +786,7 @@ function SellContent() {
 
   const PATH_TABS: Array<{ id: RegistrationPath; label: string; time: string; desc: string }> = [
     { id: "ai",    label: "AIにお任せ",   time: "1分", desc: "作品を選ぶだけ" },
-    { id: "voice", label: "声で登記",      time: "2分", desc: "話すだけでOK" },
+    { id: "voice", label: "声で登録",      time: "2分", desc: "話すだけでOK" },
     { id: "text",  label: "手動で入力",    time: "3分", desc: "詳細を自分で入力" },
   ];
 
@@ -802,8 +803,8 @@ function SellContent() {
       {/* Header */}
       <div className="mt-4 flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-kuroko leading-snug">知能を出品する</h1>
-          <p className="mt-1 text-sm text-[#9890A8]">3分以内にお店に並べられます</p>
+          <h1 className="text-2xl font-bold tracking-tight text-kuroko leading-snug flex items-center gap-2"><PackageIcon size={22} className="text-kaki" />スキルを資産として登録する</h1>
+          <p className="mt-1 text-sm text-[#9890A8]">3分以内にマーケットへ掲載できます</p>
         </div>
         <button
           type="button"

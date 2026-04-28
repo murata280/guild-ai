@@ -7,6 +7,7 @@ import { ValuationSection } from "@/components/ValuationSection";
 import { TrustPanel } from "@/components/TrustPanel";
 import { HelpHint } from "@/components/HelpHint";
 import { messages } from "@/lib/microcopy";
+import { SearchIcon, LinkIcon } from "@/components/icons";
 
 export function generateStaticParams() {
   return MOCK_MARKETPLACE.map((item) => ({ id: item.listing.id }));
@@ -64,7 +65,7 @@ export default function AssetPage({ params }: { params: { id: string } }) {
       {listing.proofOfMakeNote && (
         <section className="mt-4 section-card p-5">
           <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8]">
-            クリエイターのこだわり（制作の証明）
+            クリエイターのこだわり（実績ログ）
           </h2>
           <p className="mt-3 text-sm text-[#4A4464] leading-relaxed whitespace-pre-wrap">
             {listing.proofOfMakeNote}
@@ -84,7 +85,7 @@ export default function AssetPage({ params }: { params: { id: string } }) {
         </div>
         <div className="section-card p-4 overflow-hidden">
           <p className="text-[11px] uppercase tracking-widest text-[#9890A8] truncate flex items-center">
-            制作の証明
+            こだわり（実績ログ）
             <HelpHint content={messages.helpProofOfMake} />
           </p>
           <p className="mt-1 text-2xl font-bold tabular-nums text-kuroko">{auditResult.score.toFixed(1)}</p>
@@ -118,7 +119,7 @@ export default function AssetPage({ params }: { params: { id: string } }) {
       {/* CCAF detail */}
       <section className="mt-4 section-card p-5">
         <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8] flex items-center">
-          制作の証明 — Proof of Make
+          こだわり（実績ログ）
           <HelpHint content={messages.helpProofOfMake} />
         </h2>
         <dl className="mt-3 space-y-2.5 text-sm">
@@ -131,7 +132,7 @@ export default function AssetPage({ params }: { params: { id: string } }) {
             <dd className="font-semibold tabular-nums text-kuroko">{listing.ccaf.iterations}</dd>
           </div>
           <div>
-            <dt className="text-[#4A4464] mb-1.5">意思シグナル（魂の登記）</dt>
+            <dt className="text-[#4A4464] mb-1.5">意思シグナル（お墨付き証明）</dt>
             {listing.ccaf.intentSignals.length > 0 ? (
               <ul className="flex flex-wrap gap-1.5">
                 {listing.ccaf.intentSignals.map((s) => (
@@ -153,7 +154,7 @@ export default function AssetPage({ params }: { params: { id: string } }) {
       {/* Audit reasons */}
       <section className="mt-3 section-card p-5">
         <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8]">
-          AI 鑑定士 判定理由
+          <SearchIcon size={13} className="mr-1 opacity-60 inline-block" />AI 評価レポート
         </h2>
         <ul className="mt-3 space-y-1.5 text-sm text-[#4A4464]">
           {auditResult.reasons.map((r) => (
@@ -176,23 +177,23 @@ export default function AssetPage({ params }: { params: { id: string } }) {
       <section className="mt-4 section-card p-5">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8]">
-            AI同士のお仕事の場
+            <LinkIcon size={13} className="mr-1 opacity-60 inline-block" />AI連携窓口
           </h2>
           <span className="inline-flex items-center gap-1 rounded-full border border-kaki/20 bg-kaki/5 px-3 py-1 text-[11px] font-semibold text-kaki">
-            AIエージェント対応
+            AI連携（Agent-to-Agent）対応
           </span>
         </div>
         <p className="mt-2 text-sm text-[#4A4464]">
-          AIエージェントが直接お仕事を依頼できます — 人間の介在なしに購入・実行が完結します。
+          AIエージェントが直接このスキルを利用できます — 人間の介在なしに採用・実行が完結します。
         </p>
         <p className="mt-1 text-xs text-[#9890A8]">
-          この資産は AI が自動的に起動→監視→不良時返金します。
+          この資産はAIが自動的に起動→監視→不良時返金いたします。
         </p>
 
         <div className="mt-4 space-y-3">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8] mb-1.5 flex items-center">
-              お仕事の受付窓口
+              利用窓口（API）
               <HelpHint content={messages.helpEndpoint} />
             </p>
             {/* コードフェンス内はjargon-lint例外 */}
