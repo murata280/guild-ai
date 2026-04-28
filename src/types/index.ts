@@ -193,6 +193,86 @@ export interface PassbookSnapshot {
   trustHistory: number[]; // 7 data points (oldest → newest)
 }
 
+// ─── AtoA Autonomous Execution Engine ────────────────────────────────────────
+
+export interface AgentCatalogEntry {
+  id: string;
+  title: string;
+  description: string;
+  rank: Rank;
+  floorPrice: number;
+  endpoint: string;           // POST /api/atoa/{id}
+  tags: string[];
+  trustScore: number;         // 0-1000
+}
+
+export interface MatchRequest {
+  task: string;
+  budget?: number;            // JPY upper limit
+  tags?: string[];
+}
+
+export interface MatchResult {
+  agent: AgentCatalogEntry;
+  confidence: number;         // 0-1
+  reason: string;
+}
+
+export interface AtoaEscrowSession {
+  id: string;                 // esw_...
+  agentId: string;
+  callerId: string;
+  amount: number;
+  status: "held" | "released" | "refunded";
+  createdAt: number;
+  releasedAt?: number;
+}
+
+export interface MicropaymentRecord {
+  id: string;                 // pay_...
+  escrowId: string;
+  agentId: string;
+  perCallAmount: number;
+  callCount: number;
+  totalBilled: number;
+  status: "pending" | "settled";
+}
+
+export interface AgentInstance {
+  instanceId: string;         // inst_...
+  agentId: string;
+  startedAt: number;
+  status: "running" | "healthy" | "degraded" | "stopped";
+}
+
+export interface HealthCheckResult {
+  instanceId: string;
+  ok: boolean;
+  latencyMs: number;
+  checkedAt: number;
+}
+
+export interface AtoaRunResult {
+  success: boolean;
+  instanceId: string;
+  output: string;
+  refundIssued: boolean;
+  refundReason?: string;
+  durationMs: number;
+}
+
+export type NotificationType = "job_income" | "royalty" | "rank_up" | "refund";
+
+export interface IncomeNotification {
+  id: string;                 // notif_...
+  type: NotificationType;
+  title: string;
+  message: string;
+  amount?: number;
+  read: boolean;
+  createdAt: string;
+}
+
 // ─── SES Leverage ─────────────────────────────────────────────────────────────
 
 export interface LeverageBreakdown {

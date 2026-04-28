@@ -9,6 +9,8 @@ import { getAssetHealth } from "@/lib/asset-health";
 import { getPassbookSnapshot, getMonthlyEarnings } from "@/lib/passbook";
 import { computeLeverage } from "@/lib/ses-leverage";
 import { StepIndicator } from "@/components/StepIndicator";
+import { NotificationBell } from "@/components/NotificationBell";
+import { getNotifications, getUnreadCount } from "@/lib/notifications";
 
 // ─── Rank styling ─────────────────────────────────────────────────────────────
 
@@ -432,6 +434,9 @@ export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
   const [corporateMode, setCorporateMode] = useState(false);
 
+  const notifications = getNotifications("demo-user");
+  const unreadCount = getUnreadCount("demo-user");
+
   useEffect(() => {
     setMounted(true);
     try {
@@ -447,16 +452,19 @@ export default function DashboardPage() {
 
       <StepIndicator current="manage" />
 
-      <div className="mt-4 flex items-baseline justify-between gap-4">
+      <div className="mt-4 flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-kuroko leading-snug">管理画面</h1>
           <p className="mt-1 text-base text-[#9890A8] leading-relaxed">
             購入済み知能資産と信用スコアを一覧できます。
           </p>
         </div>
-        <Link href="/marketplace" className="btn-secondary shrink-0" aria-label="お店を見る">
-          お店を見る →
-        </Link>
+        <div className="flex items-center gap-2 shrink-0">
+          <NotificationBell notifications={notifications} unreadCount={unreadCount} />
+          <Link href="/marketplace" className="btn-secondary" aria-label="お店を見る">
+            お店を見る →
+          </Link>
+        </div>
       </div>
 
       {!mounted ? (
