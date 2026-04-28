@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import { SidebarNav, BottomNav } from "@/components/SidebarNav";
+import { OnboardingGuide } from "@/components/OnboardingGuide";
 
 const notoSansJP = Noto_Sans_JP({
   subsets: ["latin"],
@@ -59,6 +60,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           {/* Mobile bottom nav */}
           <BottomNav />
         </div>
+
+        {/* Onboarding guide — renders only on first visit */}
+        <OnboardingGuide />
 
       </body>
     </html>
