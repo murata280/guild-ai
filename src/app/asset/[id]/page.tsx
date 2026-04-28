@@ -10,8 +10,31 @@ import { messages } from "@/lib/microcopy";
 import { SearchIcon, LinkIcon } from "@/components/icons";
 import { RawDataPanel } from "@/components/RawDataPanel";
 
+const BASE_URL = "https://guild-ai.vercel.app";
+
 export function generateStaticParams() {
   return MOCK_MARKETPLACE.map((item) => ({ id: item.listing.id }));
+}
+
+export function generateMetadata({ params }: { params: { id: string } }) {
+  const item = MOCK_MARKETPLACE.find((m) => m.listing.id === params.id);
+  if (!item) return {};
+  const { listing, trustScore } = item;
+  const title = `${listing.title} — GUILD AI`;
+  const description = `${listing.description} 信用スコア ${trustScore.score}/1000 · ランク ${listing.rank} · ¥${listing.floorPrice.toLocaleString("ja-JP")}`;
+  const url = `${BASE_URL}/asset/${listing.id}`;
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url,
+      images: [{ url: "/og.png", width: 1200, height: 630, alt: listing.title }],
+      type: "website",
+    },
+    twitter: { card: "summary_large_image", title, description, images: ["/og.png"] },
+  };
 }
 
 export default function AssetPage({ params }: { params: { id: string } }) {
