@@ -151,3 +151,35 @@ CI で常時実行し、NG用語の混入を防ぐ。
 | `chore(copy): jargon removal in marketplace + asset pages` | マーケット・資産詳細の用語置換 |
 | `feat(libs): generateProductPitch + getMonthlyEarnings + recommended flag` | 新規ライブラリ関数 |
 | `test(jargon-lint): add forbidden-term linter + unit tests` | ジャーゴンリンター + 新規ユニットテスト |
+
+---
+
+## Sweet Spot 修正（#26 Professional & Friendly）
+
+#25（Ultra-Simple Language）で過剰にひらがな化した語彙を修正。
+大人が自然に読める「コンシェルジュ語」に統一し直した。
+
+### 修正対象語彙（#25 → #26）
+
+| #25 表記（修正前） | #26 表記（修正後） |
+|---|---|
+| 知能 | スキル |
+| 出品する / 登記する | 登録する |
+| 制作の証明 | こだわり（実績ログ） |
+| AI鑑定士 / 鑑定 | AI評価 |
+| AI同士のお仕事の場 | AI連携窓口 |
+| 管理画面 | マイページ |
+| ロイヤリティ | 還元（リワード） |
+| お仕事（AtoAジョブ） | 採用 |
+| AI鑑定済み | AI評価済み |
+| お仕事の受付窓口 | 利用窓口（API） |
+
+### 追加機能
+
+- **SVGアイコンセット** (`src/components/icons/index.tsx`) — RankBadge + セクション見出しに使用
+- **Raw Data タブ** (`src/components/RawDataPanel.tsx`) — エンジニア向け `<details>` アコーディオン。`/asset/[id]` と `/dashboard` に配置
+- **マイクロコピー concierge 化** — `src/lib/microcopy/index.ts` を全面 Sweet Spot トーンに書き直し
+
+### Jargon-lint 例外
+
+`data-raw="true"` の `<details>` 内はエンジニア向けのため、CCAF構造体・APIエンドポイント等の技術用語を解禁。
