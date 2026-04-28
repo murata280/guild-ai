@@ -2,6 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: light;
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  /* Card component matching reference site: white bg, subtle border, soft shadow */
+  .section-card {
+    @apply bg-white rounded-2xl border border-kuroko/10;
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.04), 0px 2px 6px rgba(0, 0, 0, 0.03);
+  }
+
+  /* Frosted header/nav backdrop */
+  .glass-header {
+    background-color: rgba(248, 246, 242, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Primary CTA button — brand purple */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg bg-kaki px-5 py-2.5 text-sm font-medium text-white transition-all active:scale-[0.98] hover:opacity-90;
+  }
+
+  /* Secondary CTA button — ghost style */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-kuroko/20 bg-transparent px-5 py-2.5 text-sm font-medium text-[#4A4464] transition-all active:scale-[0.98] hover:bg-kuroko/5;
+  }
 }

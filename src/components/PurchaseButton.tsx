@@ -47,25 +47,19 @@ export function PurchaseButton({ assetId, assetTitle, price }: Props) {
 
   if (purchased) {
     return (
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <span className="inline-flex items-center gap-1 rounded-xl border border-green-400 px-5 py-3 text-green-700 font-semibold">
-          購入済み ✓
+      <div className="flex flex-col sm:flex-row gap-2">
+        <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700">
+          ✓ 購入済み
         </span>
-        <Link
-          href="/dashboard"
-          className="inline-block rounded-xl bg-kuroko/10 px-5 py-3 text-kuroko hover:bg-kuroko/20 font-medium"
-        >
-          ダッシュボードへ →
+        <Link href="/dashboard" className="btn-secondary text-sm">
+          Dashboard へ →
         </Link>
       </div>
     );
   }
 
   return (
-    <button
-      onClick={handlePurchase}
-      className="rounded-xl bg-kuroko px-5 py-3 text-kami hover:bg-kuroko/90 font-semibold"
-    >
+    <button onClick={handlePurchase} className="btn-primary !py-3 !px-6 text-base">
       購入する ¥{price.toLocaleString("ja-JP")}
     </button>
   );

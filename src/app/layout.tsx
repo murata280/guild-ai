@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
 import "./globals.css";
+import { SidebarNav, BottomNav } from "@/components/SidebarNav";
 
 export const metadata = {
   title: "GUILD AI — 知能資産の登記と信用の循環経済圏",
@@ -10,26 +10,48 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ja">
-      <body className="bg-kami text-kuroko font-sans antialiased">
-        <header className="sticky top-0 z-10 border-b border-kuroko/10 bg-kami/90 backdrop-blur">
-          <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
-            <Link href="/" className="text-lg font-bold tracking-tight text-kuroko">
-              GUILD AI
-            </Link>
-            <nav className="flex gap-5 text-sm font-medium text-kuroko/70">
-              <Link href="/marketplace" className="hover:text-kuroko">
-                Marketplace
-              </Link>
-              <Link href="/sell" className="hover:text-kuroko">
-                Sell
-              </Link>
-              <Link href="/dashboard" className="hover:text-kuroko">
-                Dashboard
-              </Link>
-            </nav>
+      <body className="h-screen h-dvh flex bg-kami overflow-hidden text-kuroko font-sans antialiased">
+
+        {/* ── Desktop sidebar ───────────────────────────────── */}
+        <aside className="hidden lg:flex w-52 flex-shrink-0 flex-col border-r border-kuroko/10 bg-surface-inset">
+          {/* Logo */}
+          <div className="h-14 flex items-center gap-2.5 px-4 border-b border-kuroko/10 flex-shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-kaki flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-xs font-black tracking-wider">G</span>
+            </div>
+            <span className="text-sm font-bold text-kuroko">GUILD AI</span>
           </div>
-        </header>
-        {children}
+          {/* Nav links (client component for active state) */}
+          <SidebarNav />
+          {/* Footer hint */}
+          <div className="px-4 py-4 border-t border-kuroko/10 flex-shrink-0">
+            <p className="text-[11px] text-[#9890A8] leading-snug">
+              良質な知能を出品すると売れる。
+            </p>
+          </div>
+        </aside>
+
+        {/* ── Right column ──────────────────────────────────── */}
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          {/* Mobile header */}
+          <header className="lg:hidden h-14 flex items-center justify-between px-4 border-b border-kuroko/10 glass-header z-40 flex-shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-kaki flex items-center justify-center flex-shrink-0">
+                <span className="text-white text-[10px] font-black">G</span>
+              </div>
+              <span className="text-sm font-bold text-kuroko">GUILD AI</span>
+            </div>
+          </header>
+
+          {/* Scrollable page content */}
+          <div className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain">
+            {children}
+          </div>
+
+          {/* Mobile bottom nav */}
+          <BottomNav />
+        </div>
+
       </body>
     </html>
   );

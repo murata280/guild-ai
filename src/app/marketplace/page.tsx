@@ -12,9 +12,9 @@ import { RankBadge } from "@/components/RankBadge";
 import type { Rank } from "@/types";
 
 const SORT_LABELS: { key: SortKey; label: string }[] = [
-  { key: "trust", label: "Trust Score順" },
-  { key: "ccaf", label: "CCAF順" },
-  { key: "price", label: "Floor Price順" },
+  { key: "trust", label: "Trust Score" },
+  { key: "ccaf", label: "CCAF" },
+  { key: "price", label: "Floor Price" },
 ];
 
 const ALL_RANKS: Rank[] = ["S", "A", "B"];
@@ -40,28 +40,35 @@ export default function MarketplacePage() {
   };
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-12">
-      <h1 className="text-4xl font-bold tracking-tight">Marketplace</h1>
-      <p className="mt-2 text-sm text-kuroko/60">
-        鑑定済み知能資産の一覧。CCAF・Trust Score・Floor Price を比較して選択。
-      </p>
+    <main className="px-4 sm:px-6 lg:px-8 py-8 max-w-4xl mx-auto">
+
+      {/* Header */}
+      <div className="flex items-baseline justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-kuroko">Marketplace</h1>
+          <p className="mt-1 text-sm text-[#9890A8]">
+            鑑定済み知能資産の一覧。良質な出品ほど高評価・高価格で表示される。
+          </p>
+        </div>
+        <Link href="/sell" className="btn-primary shrink-0">
+          出品する →
+        </Link>
+      </div>
 
       {/* Controls */}
-      <div className="mt-8 flex flex-wrap gap-6">
+      <div className="mt-6 section-card p-4 flex flex-wrap gap-5 items-end">
         {/* Sort */}
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-kuroko/50">
-            並び順
-          </p>
-          <div className="flex gap-2">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-[#9890A8]">並び順</p>
+          <div className="flex gap-1.5">
             {SORT_LABELS.map(({ key, label }) => (
               <button
                 key={key}
                 onClick={() => setSortKey(key)}
-                className={`rounded-lg border px-3 py-1 text-sm transition-colors ${
+                className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-all active:scale-[0.97] ${
                   sortKey === key
-                    ? "border-kuroko bg-kuroko text-kami"
-                    : "border-kuroko/20 text-kuroko hover:border-kuroko/50"
+                    ? "border-kaki bg-kaki text-white"
+                    : "border-kuroko/20 text-[#4A4464] hover:border-kaki/40"
                 }`}
               >
                 {label}
@@ -72,22 +79,20 @@ export default function MarketplacePage() {
 
         {/* Rank filter */}
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-kuroko/50">
-            ランク
-          </p>
-          <div className="flex gap-2">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-[#9890A8]">ランク</p>
+          <div className="flex gap-1.5">
             {ALL_RANKS.map((rank) => (
               <button
                 key={rank}
                 onClick={() => toggleRank(rank)}
-                className={`rounded-lg border px-3 py-1 text-sm font-semibold transition-colors ${
+                className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all active:scale-[0.97] ${
                   filterRanks.includes(rank)
                     ? rank === "S"
-                      ? "border-kaki bg-kaki text-kuroko"
+                      ? "border-kaki bg-kaki text-white"
                       : rank === "A"
                       ? "border-zinc-400 bg-zinc-300 text-kuroko"
                       : "border-amber-800 bg-amber-700 text-white"
-                    : "border-kuroko/20 text-kuroko/40"
+                    : "border-kuroko/20 text-[#9890A8]"
                 }`}
               >
                 {rank}
@@ -98,8 +103,9 @@ export default function MarketplacePage() {
 
         {/* Min Trust Score */}
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-kuroko/50">
-            最低 Trust Score: <span className="text-kuroko">{minTrustScore}</span>
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-[#9890A8]">
+            最低 Trust Score:{" "}
+            <span className="text-kuroko">{minTrustScore}</span>
           </p>
           <input
             type="range"
@@ -108,48 +114,53 @@ export default function MarketplacePage() {
             step={50}
             value={minTrustScore}
             onChange={(e) => setMinTrustScore(Number(e.target.value))}
-            className="w-40 accent-kuroko"
+            className="w-32 accent-kaki"
           />
         </div>
-      </div>
 
-      {/* Listing count */}
-      <p className="mt-6 text-xs text-kuroko/50">{items.length} 件</p>
+        <p className="ml-auto text-xs text-[#9890A8] self-end">{items.length} 件</p>
+      </div>
 
       {/* Asset grid */}
       {items.length === 0 ? (
-        <p className="mt-12 text-center text-kuroko/40">
-          条件に一致する資産がありません。フィルタを緩めてください。
-        </p>
+        <div className="mt-12 text-center">
+          <p className="text-[#9890A8]">条件に一致する資産がありません。</p>
+        </div>
       ) : (
-        <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => (
             <li key={item.listing.id}>
               <Link
                 href={`/asset/${item.listing.id}`}
-                className="block rounded-2xl border border-kuroko/10 bg-white/60 p-5 shadow-sm transition-shadow hover:shadow-md"
+                className="section-card block p-4 transition-all active:scale-[0.97] hover:shadow-card-hover"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <h2 className="text-base font-semibold leading-snug">{item.listing.title}</h2>
+                  <h2 className="text-sm font-semibold leading-snug text-kuroko line-clamp-2">
+                    {item.listing.title}
+                  </h2>
                   <RankBadge rank={item.listing.rank} />
                 </div>
 
-                <p className="mt-2 line-clamp-2 text-xs text-kuroko/60">
+                <p className="mt-2 line-clamp-2 text-xs text-[#9890A8] leading-relaxed">
                   {item.listing.description}
                 </p>
 
-                <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                  <div>
-                    <dt className="text-kuroko/50">Trust Score</dt>
-                    <dd className="font-semibold tabular-nums">{item.trustScore.score} / 1000</dd>
+                <dl className="mt-4 space-y-1.5">
+                  <div className="flex justify-between text-xs">
+                    <dt className="text-[#9890A8]">Trust Score</dt>
+                    <dd className="font-semibold tabular-nums text-kuroko">
+                      {item.trustScore.score} <span className="text-[#9890A8] font-normal">/ 1000</span>
+                    </dd>
                   </div>
-                  <div>
-                    <dt className="text-kuroko/50">CCAF</dt>
-                    <dd className="font-semibold tabular-nums">{item.auditResult.score.toFixed(1)}</dd>
+                  <div className="flex justify-between text-xs">
+                    <dt className="text-[#9890A8]">CCAF</dt>
+                    <dd className="font-semibold tabular-nums text-kuroko">
+                      {item.auditResult.score.toFixed(1)}
+                    </dd>
                   </div>
-                  <div className="col-span-2">
-                    <dt className="text-kuroko/50">Floor Price</dt>
-                    <dd className="text-base font-bold">
+                  <div className="flex justify-between items-baseline pt-1 border-t border-kuroko/10">
+                    <dt className="text-xs text-[#9890A8]">Floor Price</dt>
+                    <dd className="text-base font-bold text-kuroko">
                       ¥{item.listing.floorPrice.toLocaleString("ja-JP")}
                     </dd>
                   </div>
