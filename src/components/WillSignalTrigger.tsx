@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import type { Rank } from "@/types";
+import { Confetti } from "@/components/Confetti";
+import { messages } from "@/lib/microcopy";
 
 interface WillSignalTriggerProps {
   currentRank: Rank;
@@ -17,6 +19,7 @@ export function WillSignalTrigger({ currentRank, onPromoted, floorPrice }: WillS
   const [seconds, setSeconds] = useState(0);
   const [showToast, setShowToast] = useState(false);
   const [hasSpeechApi, setHasSpeechApi] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const recogRef = useRef<unknown>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -62,9 +65,12 @@ export function WillSignalTrigger({ currentRank, onPromoted, floorPrice }: WillS
     setTimeout(() => {
       setState("done");
       setShowToast(true);
+      setShowConfetti(true);
+      // Haptic feedback on supported devices
+      navigator.vibrate?.([20, 40, 20]);
       const newPrice = Math.round(floorPrice * 1.5);
       onPromoted?.(newPrice);
-      setTimeout(() => setShowToast(false), 4000);
+      setTimeout(() => { setShowToast(false); setShowConfetti(false); }, 4000);
     }, 1200);
   }, [floorPrice, onPromoted]);
 
@@ -74,6 +80,7 @@ export function WillSignalTrigger({ currentRank, onPromoted, floorPrice }: WillS
 
   return (
     <>
+      <Confetti active={showConfetti} duration={1400} />
       {/* Toast */}
       {showToast && (
         <div
@@ -81,7 +88,7 @@ export function WillSignalTrigger({ currentRank, onPromoted, floorPrice }: WillS
           aria-live="polite"
           className="fixed top-6 left-1/2 -translate-x-1/2 z-50 rounded-2xl bg-kuroko px-6 py-3 text-white font-bold shadow-2xl animate-bounce"
         >
-          🎉 Sランクへ昇格しました！ (+50% 価格)
+          🎉 {messages.rankUpToS}
         </div>
       )}
 
