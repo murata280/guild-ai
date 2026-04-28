@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import type { OwnershipRecord, Currency } from "@/types";
 import { computeContributionRank } from "@/lib/contribution-rank";
@@ -13,6 +13,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { getNotifications, getUnreadCount } from "@/lib/notifications";
 import { useLiveEarnings } from "@/lib/live-earnings";
 import { SlotNumber } from "@/components/SlotNumber";
+import { toggleMute, playSuccessChime } from "@/lib/sound";
 
 // ─── Rank styling ─────────────────────────────────────────────────────────────
 
@@ -44,7 +45,16 @@ function PassbookCard({ owned }: { owned: OwnershipRecord[] }) {
   const snap = getPassbookSnapshot("demo-user");
   const monthly = getMonthlyEarnings("demo-user");
   const live = useLiveEarnings("demo-user");
+  const prevBumpRef = useRef(0);
   const assetCount = owned.length || snap.assetCount;
+
+  // Play chime when a new AtoA bump arrives
+  useEffect(() => {
+    if (live.bumpCount > prevBumpRef.current) {
+      prevBumpRef.current = live.bumpCount;
+      playSuccessChime();
+    }
+  }, [live.bumpCount]);
 
   const maxTrust = Math.max(...snap.trustHistory, 1);
   const TX_TYPE_LABELS: Record<string, string> = {
@@ -451,9 +461,23 @@ export default function DashboardPage() {
   const [owned, setOwned] = useState<OwnershipRecord[]>([]);
   const [mounted, setMounted] = useState(false);
   const [corporateMode, setCorporateMode] = useState(false);
+  const [soundMuted, setSoundMuted] = useState(false);
 
   const notifications = getNotifications("demo-user");
   const unreadCount = getUnreadCount("demo-user");
+
+  function handleToggleMute() {
+    const newMuted = toggleMute();
+    setSoundMuted(newMuted);
+    try { localStorage.setItem("guild_sound_muted", String(newMuted)); } catch { /* ignore */ }
+  }
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("guild_sound_muted");
+      if (stored === "true") { setSoundMuted(true); }
+    } catch { /* ignore */ }
+  }, []);
 
   useEffect(() => {
     setMounted(true);
@@ -478,6 +502,14 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          {/* Sound mute toggle */}
+          <button
+            onClick={handleToggleMute}
+            aria-label={soundMuted ? "通知音をオンにする" : "通知音をオフにする"}
+            className="p-2 rounded-full hover:bg-kuroko/5 transition-colors text-xl"
+          >
+            {soundMuted ? "🔕" : "🔔"}
+          </button>
           <NotificationBell notifications={notifications} unreadCount={unreadCount} />
           <Link href="/marketplace" className="btn-secondary" aria-label="お店を見る">
             お店を見る →
