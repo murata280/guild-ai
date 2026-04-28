@@ -14,7 +14,6 @@ import { getNotifications, getUnreadCount } from "@/lib/notifications";
 import { useLiveEarnings } from "@/lib/live-earnings";
 import { SlotNumber } from "@/components/SlotNumber";
 import { toggleMute, playSuccessChime } from "@/lib/sound";
-import { MoneyBox } from "@/components/MoneyBox";
 
 // ─── Rank styling ─────────────────────────────────────────────────────────────
 
@@ -65,7 +64,7 @@ function PassbookCard({ owned }: { owned: OwnershipRecord[] }) {
 
   return (
     <div className="mt-5 section-card p-5">
-      <h2 className="text-sm font-bold text-[#9890A8] uppercase tracking-widest mb-4">おこづかい帳</h2>
+      <h2 className="text-sm font-bold text-[#9890A8] uppercase tracking-widest mb-4">今月の通帳</h2>
 
       {/* Monthly earnings hero */}
       <div className="rounded-2xl bg-kuroko px-5 py-4 mb-4">
@@ -106,11 +105,6 @@ function PassbookCard({ owned }: { owned: OwnershipRecord[] }) {
         </div>
       </div>
 
-      {/* MoneyBox — coin drops on AtoA bump */}
-      <div className="flex justify-center py-2">
-        <MoneyBox balance={live.jpy} label="おこづかいばこ" />
-      </div>
-
       <div className="flex flex-col sm:flex-row gap-4">
 
         {/* Left: デジタル円 balance */}
@@ -128,7 +122,7 @@ function PassbookCard({ owned }: { owned: OwnershipRecord[] }) {
 
         {/* Center: Trust Score + 7-day mini chart */}
         <div className="flex-1 rounded-xl bg-surface-inset border border-kuroko/10 px-4 py-4">
-          <p className="text-xs text-[#9890A8]">しんよう ポイント</p>
+          <p className="text-xs text-[#9890A8]">信用スコア</p>
           <div className="flex items-baseline gap-1 mt-1">
             <span className="text-3xl font-bold text-kuroko tabular-nums">{snap.trustScore}</span>
             <span className="text-base text-[#9890A8]">/ 1000</span>
@@ -148,7 +142,7 @@ function PassbookCard({ owned }: { owned: OwnershipRecord[] }) {
 
         {/* Right: Asset count + rank breakdown */}
         <div className="flex-1 rounded-xl bg-surface-inset border border-kuroko/10 px-4 py-4">
-          <p className="text-xs text-[#9890A8]">もっている ぶんしん</p>
+          <p className="text-xs text-[#9890A8]">登記済み資産</p>
           <div className="flex items-baseline gap-1 mt-1">
             <span className="text-3xl font-bold text-kuroko tabular-nums">{assetCount}</span>
             <span className="text-base text-[#9890A8]">件</span>
@@ -428,7 +422,7 @@ function PayoutPreferencePanel() {
         ))}
       </div>
       <button type="button" onClick={handleSave} className="mt-3 btn-secondary !py-1.5 !text-sm">
-        {saved ? "✓ きめました" : "きめる"}
+        {saved ? "✓ 保存しました" : "保存する"}
       </button>
     </div>
   );
@@ -502,9 +496,9 @@ export default function DashboardPage() {
 
       <div className="mt-4 flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-kuroko leading-snug">わたしのページ</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-kuroko leading-snug">管理画面</h1>
           <p className="mt-1 text-base text-[#9890A8] leading-relaxed">
-            もっている ぶんしん と しんよう ポイント を みられます。
+            購入済み知能資産と信用スコアを一覧できます。
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -538,11 +532,11 @@ export default function DashboardPage() {
           {/* Summary stats */}
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
             <div className="section-card p-4">
-              <p className="text-xs uppercase tracking-widest text-[#9890A8]">もっている ぶんしん</p>
+              <p className="text-xs uppercase tracking-widest text-[#9890A8]">保有資産</p>
               <p className="mt-1 text-2xl font-bold text-kuroko tabular-nums">{owned.length}</p>
             </div>
             <div className="section-card p-4">
-              <p className="text-xs uppercase tracking-widest text-[#9890A8]">AIが みとめました</p>
+              <p className="text-xs uppercase tracking-widest text-[#9890A8]">AI鑑定済み</p>
               <p className="mt-1 text-2xl font-bold text-kaki tabular-nums">{owned.length}</p>
             </div>
             <PaymentStats />

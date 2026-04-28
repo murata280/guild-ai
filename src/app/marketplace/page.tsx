@@ -14,9 +14,9 @@ import { StepIndicator } from "@/components/StepIndicator";
 import type { Rank, MarketplaceListing } from "@/types";
 
 const SORT_LABELS: { key: SortKey; label: string }[] = [
-  { key: "trust", label: "しんよう ポイント" },
-  { key: "ccaf",  label: "あなたが 作った しょうこ" },
-  { key: "price", label: "お値段" },
+  { key: "trust", label: "信用スコア" },
+  { key: "ccaf",  label: "制作の証明" },
+  { key: "price", label: "価格" },
 ];
 
 const ALL_RANKS: Rank[] = ["S", "A", "B"];
@@ -125,7 +125,7 @@ function MarketplaceContent() {
 
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[#9890A8]">
-            しんよう ポイント（さいてい）: <span className="text-kuroko font-bold">{minTrustScore}</span>
+            最低 信用スコア: <span className="text-kuroko font-bold">{minTrustScore}</span>
           </p>
           <input
             type="range"
@@ -173,13 +173,13 @@ function MarketplaceContent() {
 
                 <dl className="mt-4 space-y-1.5">
                   <div className="flex justify-between text-sm">
-                    <dt className="text-[#9890A8]">しんよう ポイント</dt>
+                    <dt className="text-[#9890A8]">信用スコア</dt>
                     <dd className="font-semibold tabular-nums text-kuroko">
                       {item.trustScore.score} <span className="text-[#9890A8] font-normal">/ 1000</span>
                     </dd>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <dt className="text-[#9890A8]">あなたが 作った しょうこ</dt>
+                    <dt className="text-[#9890A8]">制作の証明</dt>
                     <dd className="font-semibold tabular-nums text-kuroko">{item.auditResult.score.toFixed(1)}</dd>
                   </div>
                   <div className="flex justify-between items-baseline pt-2 border-t border-kuroko/10">
