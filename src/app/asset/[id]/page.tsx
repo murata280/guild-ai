@@ -43,18 +43,18 @@ export default function AssetPage({ params }: { params: { id: string } }) {
 
       {/* Metrics */}
       <div className="mt-6 grid grid-cols-3 gap-3">
-        <div className="section-card p-4">
-          <p className="text-[11px] uppercase tracking-widest text-[#9890A8]">Trust Score</p>
+        <div className="section-card p-4 overflow-hidden">
+          <p className="text-[11px] uppercase tracking-widest text-[#9890A8] truncate">Trust</p>
           <p className="mt-1 text-2xl font-bold tabular-nums text-kuroko">{trustScore.score}</p>
           <p className="text-xs text-[#9890A8]">/ 1000</p>
         </div>
-        <div className="section-card p-4">
-          <p className="text-[11px] uppercase tracking-widest text-[#9890A8]">CCAF</p>
+        <div className="section-card p-4 overflow-hidden">
+          <p className="text-[11px] uppercase tracking-widest text-[#9890A8] truncate">CCAF</p>
           <p className="mt-1 text-2xl font-bold tabular-nums text-kuroko">{auditResult.score.toFixed(1)}</p>
           <p className="text-xs text-[#9890A8]">/ 100</p>
         </div>
-        <div className="section-card p-4">
-          <p className="text-[11px] uppercase tracking-widest text-[#9890A8]">稼働日数</p>
+        <div className="section-card p-4 overflow-hidden">
+          <p className="text-[11px] uppercase tracking-widest text-[#9890A8] truncate">稼働</p>
           <p className="mt-1 text-2xl font-bold tabular-nums text-kuroko">{listing.vercelUptimeDays}</p>
           <p className="text-xs text-[#9890A8]">日</p>
         </div>

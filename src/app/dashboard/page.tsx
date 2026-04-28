@@ -78,7 +78,7 @@ export default function DashboardPage() {
                     href={record.deployUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn-primary shrink-0 text-xs !px-3 !py-2"
+                    className="btn-primary shrink-0 text-xs !px-3 !py-3"
                   >
                     Vercel にデプロイ ↗
                   </a>
