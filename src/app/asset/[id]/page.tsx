@@ -41,8 +41,20 @@ export default function AssetPage({ params }: { params: { id: string } }) {
         </a>
       )}
 
+      {/* クリエイターのこだわり (Proof of Make) */}
+      {listing.proofOfMakeNote && (
+        <section className="mt-4 section-card p-5">
+          <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8]">
+            クリエイターのこだわり（制作の証明）
+          </h2>
+          <p className="mt-3 text-sm text-[#4A4464] leading-relaxed whitespace-pre-wrap">
+            {listing.proofOfMakeNote}
+          </p>
+        </section>
+      )}
+
       {/* Metrics */}
-      <div className="mt-6 grid grid-cols-3 gap-3">
+      <div className="mt-4 grid grid-cols-3 gap-3">
         <div className="section-card p-4 overflow-hidden">
           <p className="text-[11px] uppercase tracking-widest text-[#9890A8] truncate">Trust</p>
           <p className="mt-1 text-2xl font-bold tabular-nums text-kuroko">{trustScore.score}</p>
@@ -63,19 +75,19 @@ export default function AssetPage({ params }: { params: { id: string } }) {
       {/* CCAF detail */}
       <section className="mt-4 section-card p-5">
         <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8]">
-          CCAF — Cognitive Context Audit File
+          制作の証明 — Proof of Make
         </h2>
         <dl className="mt-3 space-y-2.5 text-sm">
           <div className="flex justify-between">
-            <dt className="text-[#4A4464]">Thought Density</dt>
+            <dt className="text-[#4A4464]">思考密度</dt>
             <dd className="font-semibold tabular-nums text-kuroko">{listing.ccaf.thoughtDensity} / 100</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-[#4A4464]">Iterations</dt>
+            <dt className="text-[#4A4464]">試行回数</dt>
             <dd className="font-semibold tabular-nums text-kuroko">{listing.ccaf.iterations}</dd>
           </div>
           <div>
-            <dt className="text-[#4A4464] mb-1.5">Intent Signals（魂の登記）</dt>
+            <dt className="text-[#4A4464] mb-1.5">意思シグナル（魂の登記）</dt>
             {listing.ccaf.intentSignals.length > 0 ? (
               <ul className="flex flex-wrap gap-1.5">
                 {listing.ccaf.intentSignals.map((s) => (
@@ -97,7 +109,7 @@ export default function AssetPage({ params }: { params: { id: string } }) {
       {/* Audit reasons */}
       <section className="mt-3 section-card p-5">
         <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8]">
-          AI Auditor 判定理由
+          AI 鑑定士 判定理由
         </h2>
         <ul className="mt-3 space-y-1.5 text-sm text-[#4A4464]">
           {auditResult.reasons.map((r) => (

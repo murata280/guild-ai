@@ -31,6 +31,7 @@ export interface Listing {
   floorPrice: number;
   githubUrl?: string;
   remixedFrom?: string; // parent asset ID — royalty lineage anchor
+  proofOfMakeNote?: string; // voice transcript displayed as "クリエイターのこだわり"
 }
 
 /**

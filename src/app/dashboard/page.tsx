@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import type { OwnershipRecord } from "@/types";
 import { computeContributionRank } from "@/lib/contribution-rank";
 import type { ContributionRank } from "@/lib/contribution-rank";
 import { getAssetHealth } from "@/lib/asset-health";
+import { StepIndicator } from "@/components/StepIndicator";
 
 // ─── Rank styling ─────────────────────────────────────────────────────────────
 
@@ -85,13 +86,51 @@ function GamificationHeader({ owned }: { owned: OwnershipRecord[] }) {
   );
 }
 
+// ─── 1-Click Deploy checklist ─────────────────────────────────────────────────
+
+const DEPLOY_CHECKS = [
+  "環境変数の確認…",
+  "Vercel プロジェクト設定を生成…",
+  "デプロイ URL を準備中…",
+];
+
+function DeployChecklist() {
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    if (step < DEPLOY_CHECKS.length) {
+      const t = setTimeout(() => setStep((s) => s + 1), 150);
+      return () => clearTimeout(t);
+    }
+  }, [step]);
+  return (
+    <div className="absolute inset-0 z-10 rounded-2xl bg-white/95 flex flex-col items-center justify-center gap-1 text-xs text-[#4A4464]">
+      {DEPLOY_CHECKS.slice(0, step + 1).map((msg) => (
+        <p key={msg} className="flex items-center gap-1.5">
+          <span className="text-emerald-500">✓</span> {msg}
+        </p>
+      ))}
+    </div>
+  );
+}
+
 // ─── Asset card ───────────────────────────────────────────────────────────────
 
 function AssetCard({ record }: { record: OwnershipRecord }) {
   const health = getAssetHealth(record.assetId);
+  const [deploying, setDeploying] = useState(false);
+
+  const handleDeploy = useCallback(() => {
+    setDeploying(true);
+    setTimeout(() => {
+      setDeploying(false);
+      window.open(record.deployUrl, "_blank");
+    }, 500);
+  }, [record.deployUrl]);
 
   return (
-    <li className="section-card p-5 hover:shadow-card-hover transition-shadow">
+    <li className="relative section-card p-5 hover:shadow-card-hover transition-shadow">
+
+      {deploying && <DeployChecklist />}
 
       {/* AI Verified chip + live dot */}
       <div className="flex items-center gap-2 mb-3">
@@ -105,7 +144,7 @@ function AssetCard({ record }: { record: OwnershipRecord }) {
         <span className="text-[11px] text-[#9890A8]">稼働中</span>
       </div>
 
-      {/* Title + deploy button */}
+      {/* Title + 1-Click Deploy button */}
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h2 className="font-semibold text-kuroko truncate">{record.assetTitle}</h2>
@@ -114,14 +153,13 @@ function AssetCard({ record }: { record: OwnershipRecord }) {
           </p>
           <p className="mt-0.5 text-[11px] text-[#9890A8] font-mono truncate">{record.assetId}</p>
         </div>
-        <a
-          href={record.deployUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          type="button"
+          onClick={handleDeploy}
           className="btn-primary shrink-0 text-xs !px-3 !py-3"
         >
-          Vercel にデプロイ ↗
-        </a>
+          ⚡ 1-Click Deploy
+        </button>
       </div>
 
       {/* Trust Graph */}
@@ -183,8 +221,11 @@ export default function DashboardPage() {
   return (
     <main className="px-4 sm:px-6 lg:px-8 py-8 max-w-3xl mx-auto">
 
+      {/* Step indicator */}
+      <StepIndicator current="manage" />
+
       {/* Header */}
-      <div className="flex items-baseline justify-between gap-4">
+      <div className="mt-4 flex items-baseline justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-kuroko">Dashboard</h1>
           <p className="mt-1 text-sm text-[#9890A8]">
