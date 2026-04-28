@@ -4,6 +4,9 @@ import { MOCK_MARKETPLACE } from "@/lib/marketplace";
 import { RankBadge } from "@/components/RankBadge";
 import { CheckoutSection } from "@/components/CheckoutSection";
 import { ValuationSection } from "@/components/ValuationSection";
+import { TrustPanel } from "@/components/TrustPanel";
+import { HelpHint } from "@/components/HelpHint";
+import { messages } from "@/lib/microcopy";
 
 export function generateStaticParams() {
   return MOCK_MARKETPLACE.map((item) => ({ id: item.listing.id }));
@@ -72,12 +75,18 @@ export default function AssetPage({ params }: { params: { id: string } }) {
       {/* Metrics */}
       <div className="mt-4 grid grid-cols-3 gap-3">
         <div className="section-card p-4 overflow-hidden">
-          <p className="text-[11px] uppercase tracking-widest text-[#9890A8] truncate">信用スコア</p>
+          <p className="text-[11px] uppercase tracking-widest text-[#9890A8] truncate flex items-center">
+            信用スコア
+            <HelpHint content={messages.helpTrustScore} />
+          </p>
           <p className="mt-1 text-2xl font-bold tabular-nums text-kuroko">{trustScore.score}</p>
           <p className="text-xs text-[#9890A8]">/ 1000</p>
         </div>
         <div className="section-card p-4 overflow-hidden">
-          <p className="text-[11px] uppercase tracking-widest text-[#9890A8] truncate">制作の証明</p>
+          <p className="text-[11px] uppercase tracking-widest text-[#9890A8] truncate flex items-center">
+            制作の証明
+            <HelpHint content={messages.helpProofOfMake} />
+          </p>
           <p className="mt-1 text-2xl font-bold tabular-nums text-kuroko">{auditResult.score.toFixed(1)}</p>
           <p className="text-xs text-[#9890A8]">/ 100</p>
         </div>
@@ -87,6 +96,14 @@ export default function AssetPage({ params }: { params: { id: string } }) {
           <p className="text-xs text-[#9890A8]">日</p>
         </div>
       </div>
+
+      {/* お墨付きパネル */}
+      <TrustPanel
+        assetId={listing.id}
+        rank={listing.rank}
+        trustScore={trustScore.score}
+        vercelUptimeDays={listing.vercelUptimeDays}
+      />
 
       {/* AI Valuation Radar + Will Signal Trigger */}
       <ValuationSection
@@ -100,8 +117,9 @@ export default function AssetPage({ params }: { params: { id: string } }) {
 
       {/* CCAF detail */}
       <section className="mt-4 section-card p-5">
-        <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8]">
+        <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8] flex items-center">
           制作の証明 — Proof of Make
+          <HelpHint content={messages.helpProofOfMake} />
         </h2>
         <dl className="mt-3 space-y-2.5 text-sm">
           <div className="flex justify-between">
@@ -173,8 +191,9 @@ export default function AssetPage({ params }: { params: { id: string } }) {
 
         <div className="mt-4 space-y-3">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8] mb-1.5">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8] mb-1.5 flex items-center">
               お仕事の受付窓口
+              <HelpHint content={messages.helpEndpoint} />
             </p>
             {/* コードフェンス内はjargon-lint例外 */}
             <code className="block rounded-lg bg-kuroko px-3 py-2 text-xs font-mono text-accent-green break-all">
