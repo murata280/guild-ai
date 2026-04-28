@@ -19,9 +19,9 @@ function polyPath(points: Point[]): string {
 }
 
 const AXES = [
-  { label: "思考密度", angleDeg: 0 },
-  { label: "試行回数", angleDeg: 120 },
-  { label: "稼働日数", angleDeg: 240 },
+  { label: "考えの深さ", angleDeg: 0 },
+  { label: "仕事の速さ", angleDeg: 120 },
+  { label: "安定感",     angleDeg: 240 },
 ];
 
 export function RankRadar({ thoughtDensity, iterations, uptimeDays, size = 240 }: RankRadarProps) {
@@ -62,7 +62,7 @@ export function RankRadar({ thoughtDensity, iterations, uptimeDays, size = 240 }
       width={size}
       height={size}
       viewBox={`0 0 ${size} ${size}`}
-      aria-label="鑑定スコア レーダーチャート"
+      aria-label="知能の品質ランク レーダーチャート"
       role="img"
       className="w-full max-w-[300px]"
     >

@@ -33,7 +33,7 @@ export function ValuationSection({
   return (
     <section className="mt-4 section-card p-5">
       <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8]">
-        AI 鑑定 — バリュエーション
+        知能の品質ランク
       </h2>
 
       <div className="mt-4 flex flex-col items-center sm:flex-row sm:items-start gap-6">
@@ -48,7 +48,7 @@ export function ValuationSection({
             <p className="text-sm text-[#4A4464] leading-relaxed">{justification}</p>
           )}
           <div className="flex items-baseline gap-2">
-            <span className="text-xs text-[#9890A8]">現在のフロア価格</span>
+            <span className="text-xs text-[#9890A8]">お値段の目安</span>
             <span className="text-2xl font-bold tabular-nums text-kuroko">
               ¥{currentFloorPrice.toLocaleString()}
             </span>
