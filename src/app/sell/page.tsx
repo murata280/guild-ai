@@ -628,10 +628,10 @@ function TextPath({
 
       {/* 制作の証明 */}
       <div className="section-card p-5 space-y-3">
-        <h2 className="text-base font-bold text-kuroko">制作の証明</h2>
+        <h2 className="text-base font-bold text-kuroko">あなたが 作った しょうこ</h2>
         <div className="grid grid-cols-2 gap-3">
           <label className="flex flex-col gap-1 text-sm text-[#3A3664]">
-            考えの深さ (0–100)
+            かしこさ レベル (0–100)
             <input type="number" value={ccaf.thoughtDensity} min={0} max={100}
               onChange={(e) => setCcaf({ ...ccaf, thoughtDensity: Number(e.target.value) })}
               aria-label="考えの深さ" className="input-base" />
@@ -643,10 +643,10 @@ function TextPath({
               aria-label="試みた回数" className="input-base" />
           </label>
           <label className="col-span-2 flex flex-col gap-1 text-sm text-[#3A3664]">
-            稼働日数
+            がんばった 日数
             <input type="number" value={vercelUptimeDays} min={0}
               onChange={(e) => setUptime(Number(e.target.value))}
-              aria-label="稼働日数" className="input-base" />
+              aria-label="がんばった日数" className="input-base" />
           </label>
         </div>
       </div>
@@ -711,7 +711,7 @@ function TextPath({
           <span>¥500</span><span>¥10,000</span>
         </div>
         <p className="text-xs text-[#9890A8]">
-          ※ お値段の目安。信用スコアにより自動調整されます。
+          ※ お値段の めやす。しんよう ポイント で 自動 かわります。
         </p>
         <div>
           <p className="text-sm font-semibold text-[#3A3664] mb-2">売上の受け取り方</p>
@@ -728,7 +728,7 @@ function TextPath({
       </div>
 
       <button type="submit" aria-label="お店に出品する" className="btn-primary w-full !py-4 !text-base">
-        AIが鑑定してお店に出品する
+        AIに みてもらって、お店に だす
       </button>
     </form>
   );
@@ -802,8 +802,8 @@ function SellContent() {
       {/* Header */}
       <div className="mt-4 flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-kuroko leading-snug">知能を出品する</h1>
-          <p className="mt-1 text-sm text-[#9890A8]">3分以内にお店に並べられます</p>
+          <h1 className="text-2xl font-bold tracking-tight text-kuroko leading-snug">とくいわざを だす</h1>
+          <p className="mt-1 text-sm text-[#9890A8]">3ぷん以内に お店に ならべられます</p>
         </div>
         <button
           type="button"

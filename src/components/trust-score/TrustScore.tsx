@@ -47,13 +47,13 @@ export function TrustScore({ input, ownerName = "Owner", className = "" }: Trust
       </div>
 
       <dl className="mt-4 space-y-2.5">
-        <Bar label="品質履歴" value={input.qualityHistory} weight={0.5} />
-        <Bar label="Discord 貢献" value={input.discordContribution} weight={0.3} />
-        <Bar label="X 拡散" value={input.xAmplification} weight={0.2} />
+        <Bar label="ひんしつ れきし" value={input.qualityHistory} weight={0.5} />
+        <Bar label="Discord こうけん" value={input.discordContribution} weight={0.3} />
+        <Bar label="X かくさん" value={input.xAmplification} weight={0.2} />
       </dl>
 
       <p className="mt-3 text-[11px] text-[#9890A8]">
-        最終更新: {new Date(result.updatedAt).toLocaleString("ja-JP")}
+        さいしん こうしん: {new Date(result.updatedAt).toLocaleString("ja-JP")}
       </p>
     </section>
   );

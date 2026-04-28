@@ -49,10 +49,10 @@ export function PurchaseButton({ assetId, assetTitle, price }: Props) {
     return (
       <div className="flex flex-col sm:flex-row gap-2">
         <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700">
-          ✓ 購入済み
+          ✓ かいました
         </span>
         <Link href="/dashboard" className="btn-secondary text-sm">
-          Dashboard へ →
+          わたしのページ へ →
         </Link>
       </div>
     );
@@ -60,7 +60,7 @@ export function PurchaseButton({ assetId, assetTitle, price }: Props) {
 
   return (
     <button onClick={handlePurchase} className="btn-primary !py-3 !px-6 text-base">
-      購入する ¥{price.toLocaleString("ja-JP")}
+      かう ¥{price.toLocaleString("ja-JP")}
     </button>
   );
 }
