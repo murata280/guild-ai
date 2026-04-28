@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { createCheckoutSession, confirmPayment } from "@/lib/checkout";
-import { issueApiKeyVerified } from "@/lib/api-gateway";
+import { purchaseAction } from "@/app/actions/checkout";
 import type { PaymentMethod, Currency } from "@/types";
 
 interface CheckoutSectionProps {
@@ -167,42 +166,32 @@ export function CheckoutSection({ assetId, assetTitle: _assetTitle, price, onSuc
     }
     setFlow({ kind: "processing" });
     await new Promise((r) => setTimeout(r, 600));
-    try {
-      const session = createCheckoutSession({
-        assetId,
-        buyerId: "demo-buyer",
-        amountJpy: price,
-        method: selectedMethod,
-        payoutCurrency: selectedTile.payoutCurrency,
-      });
-      const result = confirmPayment(session.id);
-      if (result.status !== "settled") {
-        setFlow({ kind: "error", message: "決済に失敗しました。再度お試しください。" });
-        return;
-      }
-      const apiKeyRecord = issueApiKeyVerified("demo-buyer", assetId, session.id);
-      setShowDeployChecklist(true);
-      setFlow({ kind: "success", apiKey: apiKeyRecord.key, receiptUrl: result.receiptUrl, txHash: result.txHash });
-      onSuccess?.(apiKeyRecord.key, result.receiptUrl, result.txHash);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "エラーが発生しました";
-      setFlow({ kind: "error", message: msg });
+    const out = await purchaseAction({
+      assetId,
+      amountJpy: price,
+      method: selectedMethod,
+      payoutCurrency: selectedTile.payoutCurrency,
+    });
+    if (out.status !== "settled") {
+      setFlow({ kind: "error", message: out.message });
+      return;
     }
+    setShowDeployChecklist(true);
+    setFlow({ kind: "success", apiKey: out.apiKey, receiptUrl: out.receiptUrl, txHash: out.txHash });
+    onSuccess?.(out.apiKey, out.receiptUrl, out.txHash);
   }, [assetId, price, selectedMethod, selectedTile.payoutCurrency, onSuccess]);
 
   const handleOnrampClose = useCallback(() => {
     setShowOnrampModal(false);
     setFlow({ kind: "onramp-loading" });
-    setTimeout(() => {
-      const session = createCheckoutSession({ assetId, buyerId: "demo-buyer", amountJpy: price, method: "onramp", payoutCurrency: "JPYC" });
-      const result = confirmPayment(session.id);
-      if (result.status === "settled") {
-        const apiKeyRecord = issueApiKeyVerified("demo-buyer", assetId, session.id);
+    setTimeout(async () => {
+      const out = await purchaseAction({ assetId, amountJpy: price, method: "onramp", payoutCurrency: "JPYC" });
+      if (out.status === "settled") {
         setShowDeployChecklist(true);
-        setFlow({ kind: "success", apiKey: apiKeyRecord.key, txHash: result.txHash });
-        onSuccess?.(apiKeyRecord.key, undefined, result.txHash);
+        setFlow({ kind: "success", apiKey: out.apiKey, txHash: out.txHash });
+        onSuccess?.(out.apiKey, undefined, out.txHash);
       } else {
-        setFlow({ kind: "error", message: "決済に失敗しました。" });
+        setFlow({ kind: "error", message: out.message });
       }
     }, 700);
   }, [assetId, price, onSuccess]);

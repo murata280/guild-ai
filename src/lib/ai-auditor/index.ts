@@ -87,8 +87,9 @@ export function promoteWithIntent(input: AuditInput, voiceLog: string): AuditRes
 /**
  * Compute Floor Price from base price and Trust Score (0-1000).
  * floorPrice = basePrice * (1 + score/2000) — capped at +50%.
+ * JPY is integer-only by convention; result is rounded to whole yen.
  */
 export function computeFloorPrice(basePrice: number, trustScore: number): number {
   const ratio = 1 + Math.min(trustScore, 1000) / 2000;
-  return Math.round(basePrice * ratio * 100) / 100;
+  return Math.round(basePrice * ratio);
 }

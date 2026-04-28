@@ -58,8 +58,8 @@ describe("ai-auditor.computeFloorPrice", () => {
     expect(computeFloorPrice(1000, 1000)).toBe(1500);
   });
 
-  it("rounds to 2 decimals", () => {
+  it("returns whole-yen integer (JPY has no decimal subunit)", () => {
     const v = computeFloorPrice(123.456, 500);
-    expect(Number.isFinite(v)).toBe(true);
+    expect(Number.isInteger(v)).toBe(true);
   });
 });

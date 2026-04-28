@@ -28,7 +28,7 @@ export function distributeRoyalty(saleAmount: number, lineage: Creator[]): Royal
   for (let i = 0; i < Math.min(reversed.length, TIERS.length); i++) {
     const tier = TIERS[i];
     const creator = reversed[i];
-    const amount = Math.round(saleAmount * tier.pct * 100) / 100;
+    const amount = Math.round(saleAmount * tier.pct);
     totalRoyaltyPaid += amount;
     distributions.push({
       creatorId: creator.creatorId,
@@ -39,10 +39,9 @@ export function distributeRoyalty(saleAmount: number, lineage: Creator[]): Royal
     });
   }
 
-  const totalRounded = Math.round(totalRoyaltyPaid * 100) / 100;
   return {
     distributions,
-    totalRoyaltyPaid: totalRounded,
-    sellerNet: Math.round((saleAmount - totalRounded) * 100) / 100,
+    totalRoyaltyPaid,
+    sellerNet: saleAmount - totalRoyaltyPaid,
   };
 }
