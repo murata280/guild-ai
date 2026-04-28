@@ -10,7 +10,8 @@
       "Bash(vercel whoami *)",
       "Bash(npx vercel *)",
       "Bash(npm test *)",
-      "WebFetch(domain:dist-zeta-ten-15.vercel.app)"
+      "WebFetch(domain:dist-zeta-ten-15.vercel.app)",
+      "Bash(vercel --prod --yes)"
     ]
   }
 }

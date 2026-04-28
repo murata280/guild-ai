@@ -1,6 +1,14 @@
 import type { ReactNode } from "react";
+import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import { SidebarNav, BottomNav } from "@/components/SidebarNav";
+
+const notoSansJP = Noto_Sans_JP({
+  subsets: ["latin"],
+  variable: "--font-noto-jp",
+  display: "swap",
+  weight: ["400", "500", "700", "900"],
+});
 
 export const metadata = {
   title: "GUILD AI — 知能資産の登記と信用の循環経済圏",
@@ -9,7 +17,7 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="ja">
+    <html lang="ja" className={notoSansJP.variable}>
       <body className="h-screen h-dvh flex bg-kami overflow-hidden text-kuroko font-sans antialiased">
 
         {/* ── Desktop sidebar ───────────────────────────────── */}
@@ -25,7 +33,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <SidebarNav />
           {/* Footer hint */}
           <div className="px-4 py-4 border-t border-kuroko/10 flex-shrink-0">
-            <p className="text-[11px] text-[#9890A8] leading-snug">
+            <p className="text-xs text-[#9890A8] leading-relaxed">
               良質な知能を出品すると売れる。
             </p>
           </div>

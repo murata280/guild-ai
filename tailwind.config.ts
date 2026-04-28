@@ -9,23 +9,14 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Updated to match reference site visual language
-        kuroko: "#1A1628",        // 黒衣: dark purple-black (was #0F0F12)
-        kaki: "#9B6BB5",          // 柿: brand purple (was #E8C46A gold)
-        kami: "#F8F6F2",          // 紙: warm off-white (was #F5F2EA)
-        "surface-inset": "#F2F0EB" // sidebar / inset surface
+        kuroko: "#1A1628",             // 黒衣: dark purple-black
+        kaki: "#1A6BB5",              // JPYC blue (primary accent)
+        "accent-green": "#0FA968",    // success / payout highlight
+        kami: "#FAFAFA",              // neutral off-white
+        "surface-inset": "#F4F4F5",   // sidebar / inset surface
       },
       fontFamily: {
-        sans: [
-          "Noto Sans JP",
-          "Hiragino Sans",
-          "Hiragino Kaku Gothic ProN",
-          "Meiryo",
-          "Yu Gothic UI",
-          "-apple-system",
-          "system-ui",
-          "sans-serif"
-        ]
+        sans: ["var(--font-noto-jp)", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Meiryo", "sans-serif"]
       },
       borderRadius: {
         card: "16px"

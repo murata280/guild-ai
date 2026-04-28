@@ -171,3 +171,37 @@ export interface GatewayLog {
   success: boolean;
   latencyMs: number;
 }
+
+// ─── Passbook ─────────────────────────────────────────────────────────────────
+
+export interface PassbookTransaction {
+  id: string;
+  type: "card" | "jpyc";
+  amount: number;
+  assetTitle: string;
+  at: string; // ISO8601
+}
+
+export interface PassbookSnapshot {
+  userId: string;
+  jpycBalance: number;
+  trustScore: number;
+  assetCount: number;
+  rankBreakdown: { S: number; A: number; B: number };
+  recentTransactions: PassbookTransaction[];
+  trustHistory: number[]; // 7 data points (oldest → newest)
+}
+
+// ─── SES Leverage ─────────────────────────────────────────────────────────────
+
+export interface LeverageBreakdown {
+  directLabor: number;    // JPY from salary
+  royaltyIncome: number;  // JPY from asset royalties
+  projectedTrend: number; // JPY projected next period
+}
+
+export interface LeverageResult {
+  multiplier: number;
+  breakdown: LeverageBreakdown;
+  totalIncome: number;
+}
