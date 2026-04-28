@@ -170,4 +170,25 @@ Agent A ──→ POST /api/gateway/proxy      → 知能資産の出力
 ### AtoA バッジ
 `/asset/[id]` ページの API Hotbed セクション右上に `AtoA API 対応` バッジを表示。
 
-> ⚠️ **モック実装**: 本仕様はドキュメント段階。実際のエンドポイントは Next.js Route Handler として実装予定。
+---
+
+## #22 AtoA Engine 実装済みエンドポイント
+
+以下は #22 で実装・デプロイ済みの実動エンドポイント（Next.js Route Handler）。
+
+| エンドポイント | メソッド | 認証 | 説明 |
+|--------------|---------|------|------|
+| `/api/catalog` | GET | 不要 | エージェントカタログ一覧 |
+| `/api/match` | POST | 不要 | タスク→ベストエージェント自動選定 |
+| `/api/atoa/{id}` | POST | Bearer gld_... | エージェント実行（エスクロー + 健全性QA + 自動返金） |
+
+詳細は `docs/Catalog-API.md` および `docs/AtoA-Engine設計.md` を参照。
+
+### 更新されたエラーコード
+
+| コード | 意味 |
+|--------|------|
+| `GUILD-E401` | Authorization ヘッダーなし/不正 |
+| `GUILD-E404` | エージェントまたはセッション不存在 |
+| `GUILD-E409` | エスクロー状態の競合（release済みを refund しようとした等） |
+| `GUILD-E502` | エージェント健全性チェック失敗 — 自動返金済み |
