@@ -76,5 +76,28 @@ export function toggleMute(): boolean {
   return muted;
 }
 
+/**
+ * playCoinChime — 澄んだ500Hz ショートベル for coin-drop / MoneyBox.
+ * Shorter and brighter than the success chime.
+ */
+export function playCoinChime(): void {
+  if (muted) return;
+  const ac = getContext();
+  if (!ac) return;
+
+  try {
+    if (ac.state === "suspended") {
+      ac.resume().catch(() => undefined);
+    }
+    // Coin ping: 500Hz, 0.3s fast decay
+    playPartial(ac, 500, 0.10, 0, 0.30);
+    // Shimmer: 1000Hz, delayed 30ms, 0.15s (bright overtone)
+    playPartial(ac, 1000, 0.04, 0.03, 0.15);
+  } catch {
+    // Silent fail
+  }
+}
+
 /** Deterministic helper: returns the note frequencies used (for tests) */
 export const CHIME_FREQUENCIES = [700, 350, 1400] as const;
+export const COIN_CHIME_FREQUENCIES = [500, 1000] as const;
