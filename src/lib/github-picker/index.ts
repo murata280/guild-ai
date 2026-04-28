@@ -9,6 +9,7 @@ export interface MockRepo {
   url: string;
   language: string;
   stars: number;
+  recommended: boolean;
 }
 
 const REPO_TEMPLATES: { name: string; desc: string }[] = [
@@ -92,6 +93,12 @@ function djb2(s: string): number {
 
 export function listRepos(user: string): MockRepo[] {
   const seed = djb2(user || "demo");
+
+  // Compute stars for each repo to find recommended (highest stars)
+  const starValues = REPO_TEMPLATES.map((_, i) => ((seed * (i + 1)) % 500) + 10);
+  const maxStars = Math.max(...starValues);
+  const recommendedIdx = starValues.indexOf(maxStars);
+
   return REPO_TEMPLATES.map((t, i) => ({
     id: `repo-${seed}-${i}`,
     name: t.name,
@@ -99,7 +106,8 @@ export function listRepos(user: string): MockRepo[] {
     description: t.desc,
     url: `https://github.com/${user || "demo"}/${t.name}`,
     language: LANGUAGES[(seed + i) % LANGUAGES.length],
-    stars: ((seed * (i + 1)) % 500) + 10,
+    stars: starValues[i],
+    recommended: i === recommendedIdx,
   }));
 }
 
