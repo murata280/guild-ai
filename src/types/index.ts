@@ -106,3 +106,68 @@ export interface RoyaltyResult {
   totalRoyaltyPaid: number;
   sellerNet: number;
 }
+
+// ─── Payments / Checkout ──────────────────────────────────────────────────────
+
+export type PaymentMethod = "card" | "bank" | "jpyc" | "onramp";
+export type Currency = "JPY" | "JPYC";
+
+export interface CheckoutSession {
+  id: string;
+  assetId: string;
+  buyerId: string;
+  amountJpy: number;
+  amountJpyc: number; // always 1:1 with amountJpy
+  method: PaymentMethod;
+  payoutCurrency: Currency;
+  status: "pending" | "settled" | "failed";
+  createdAt: string;
+}
+
+export interface PaymentResult {
+  sessionId: string;
+  status: "settled" | "failed";
+  receiptUrl?: string;
+  txHash?: string;
+}
+
+export interface PayoutPreference {
+  creatorId: string;
+  currency: Currency;
+  walletId?: string;
+}
+
+// ─── Escrow ───────────────────────────────────────────────────────────────────
+
+export type EscrowStatus = "held" | "confirmed" | "released";
+
+export interface EscrowRecord {
+  id: string;
+  buyerId: string;
+  sellerId: string;
+  assetId: string;
+  amount: number;
+  method: PaymentMethod;
+  payoutCurrency: Currency;
+  status: EscrowStatus;
+  createdAt: string;
+  releasedAt?: string;
+}
+
+// ─── API Gateway ──────────────────────────────────────────────────────────────
+
+export interface ApiKey {
+  id: string;
+  buyerId: string;
+  assetId: string;
+  key: string; // "gld_..." token
+  issuedAt: string;
+  callCount: number;
+}
+
+export interface GatewayLog {
+  apiKeyId: string;
+  requestedAt: string;
+  success: boolean;
+  latencyMs: number;
+}

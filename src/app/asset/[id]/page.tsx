@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MOCK_MARKETPLACE } from "@/lib/marketplace";
 import { RankBadge } from "@/components/RankBadge";
-import { PurchaseButton } from "@/components/PurchaseButton";
+import { CheckoutSection } from "@/components/CheckoutSection";
 
 export function generateStaticParams() {
   return MOCK_MARKETPLACE.map((item) => ({ id: item.listing.id }));
@@ -121,23 +121,20 @@ export default function AssetPage({ params }: { params: { id: string } }) {
         </ul>
       </section>
 
-      {/* Purchase section */}
-      <section className="mt-4 section-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <p className="text-[11px] uppercase tracking-widest text-[#9890A8]">Floor Price</p>
-          <p className="text-3xl font-bold text-kuroko mt-0.5">
-            ¥{listing.floorPrice.toLocaleString("ja-JP")}
-          </p>
-          <p className="text-xs text-[#9890A8] mt-0.5">
-            Trust Score {trustScore.score} に基づく自動価格
-          </p>
-        </div>
-        <PurchaseButton
-          assetId={listing.id}
-          assetTitle={listing.title}
-          price={listing.floorPrice}
-        />
-      </section>
+      {/* Hybrid Checkout — Dual Payment Interface */}
+      <CheckoutSection
+        assetId={listing.id}
+        assetTitle={listing.title}
+        price={listing.floorPrice}
+      />
+
+      {/* AtoA badge + docs link */}
+      <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-[#9890A8]">
+        <span className="inline-flex items-center gap-1 rounded-full border border-kaki/20 bg-kaki/5 px-3 py-1 text-[11px] font-semibold text-kaki">
+          AtoA API 対応
+        </span>
+        <span>エージェント同士が自律的に購入・支払いを行う</span>
+      </div>
 
     </main>
   );

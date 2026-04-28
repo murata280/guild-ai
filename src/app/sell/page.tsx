@@ -13,7 +13,7 @@ import { listRepos } from "@/lib/github-picker";
 import type { MockRepo } from "@/lib/github-picker";
 import { voiceLogToProofOfMake } from "@/lib/proof-of-make";
 import { extractFromPostUrl } from "@/lib/x-import";
-import type { CCAF, MarketplaceListing } from "@/types";
+import type { CCAF, MarketplaceListing, Currency } from "@/types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -92,6 +92,9 @@ function GithubPickerTab({
       {username.length === 0 && (
         <p className="text-xs text-[#9890A8]">GitHub ユーザー名を入力するとリポジトリ一覧が表示されます</p>
       )}
+      <p className="text-[11px] text-kaki bg-kaki/5 border border-kaki/20 rounded-lg px-3 py-2">
+        ⚡ GitHub から選ぶと、静的コード → 稼働 API への変換が完了します
+      </p>
     </div>
   );
 }
@@ -288,6 +291,7 @@ function SellContent() {
   const [ccaf, setCcaf] = useState<CCAF>(defaultCCAF);
   const [vercelUptimeDays, setUptime] = useState(30);
   const [basePrice, setBasePrice] = useState(5000);
+  const [payoutCurrency, setPayoutCurrency] = useState<Currency>("JPY");
 
   const trust = useMemo(
     () => computeTrustScore({ qualityHistory: 70, discordContribution: 55, xAmplification: 40 }),
@@ -530,7 +534,7 @@ function SellContent() {
           </p>
         </section>
 
-        {/* Step 4 — Pricing */}
+        {/* Step 4 — Pricing + Payout */}
         <section className="section-card p-5">
           <h2 className="text-sm font-semibold text-kuroko">Step 4 · 価格設定</h2>
           <label className="mt-3 flex flex-col text-sm text-[#4A4464]">
@@ -545,11 +549,38 @@ function SellContent() {
           </label>
           <div className="mt-3 flex items-baseline justify-between">
             <span className="text-xs text-[#9890A8]">Floor Price（Trust-Based Pricing 適用後）</span>
-            <span className="text-xl font-bold text-kuroko">{formatJPY(floor)}</span>
+            <div className="text-right">
+              <span className="text-xl font-bold text-kuroko">{formatJPY(floor)}</span>
+              <span className="ml-2 text-sm text-[#9890A8]">= {floor.toLocaleString("ja-JP")} JPYC</span>
+            </div>
           </div>
           <p className="mt-1 text-xs text-[#9890A8]">
-            Trust Score {trust.score} / 1000 に基づき自動算出
+            Trust Score {trust.score} / 1000 に基づき自動算出（JPY = JPYC 1:1）
           </p>
+
+          {/* Payout currency */}
+          <div className="mt-4 pt-4 border-t border-kuroko/10">
+            <p className="text-sm font-medium text-[#4A4464]">報酬の受け取り通貨</p>
+            <p className="mt-0.5 text-xs text-[#9890A8]">売れたときに振り込まれる通貨を選択</p>
+            <div className="mt-2 flex gap-4">
+              {(["JPY", "JPYC"] as Currency[]).map((c) => (
+                <label key={c} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="payoutCurrency"
+                    value={c}
+                    checked={payoutCurrency === c}
+                    onChange={() => setPayoutCurrency(c)}
+                    className="accent-kaki"
+                  />
+                  <span className="text-sm text-kuroko font-medium">{c}</span>
+                  {c === "JPYC" && (
+                    <span className="text-[10px] text-kaki bg-kaki/10 rounded-full px-1.5 py-0.5">ステーブルコイン</span>
+                  )}
+                </label>
+              ))}
+            </div>
+          </div>
         </section>
 
         <button

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import type { OwnershipRecord } from "@/types";
+import type { OwnershipRecord, Currency } from "@/types";
 import { computeContributionRank } from "@/lib/contribution-rank";
 import type { ContributionRank } from "@/lib/contribution-rank";
 import { getAssetHealth } from "@/lib/asset-health";
@@ -200,6 +200,94 @@ function AssetCard({ record }: { record: OwnershipRecord }) {
   );
 }
 
+// ─── Payout Preference ────────────────────────────────────────────────────────
+
+function PayoutPreferencePanel() {
+  const [currency, setCurrency] = useState<Currency>("JPY");
+  const [wallet, setWallet] = useState("");
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = () => {
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  return (
+    <div className="mt-5 section-card p-5">
+      <h2 className="text-sm font-semibold text-kuroko">報酬の受け取り通貨</h2>
+      <p className="mt-0.5 text-xs text-[#9890A8]">出品資産が売れたときの振込先通貨</p>
+
+      <div className="mt-3 flex gap-3">
+        {(["JPY", "JPYC"] as Currency[]).map((c) => (
+          <label key={c} className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              name="payoutCurrency"
+              value={c}
+              checked={currency === c}
+              onChange={() => { setCurrency(c); setSaved(false); }}
+              className="accent-kaki"
+            />
+            <span className="text-sm font-medium text-kuroko">{c}</span>
+            {c === "JPYC" && (
+              <span className="text-[10px] text-kaki bg-kaki/10 rounded-full px-1.5 py-0.5">ステーブルコイン</span>
+            )}
+          </label>
+        ))}
+      </div>
+
+      {currency === "JPYC" && (
+        <input
+          type="text"
+          value={wallet}
+          onChange={(e) => setWallet(e.target.value)}
+          placeholder="ウォレットアドレス（0x...）"
+          className="mt-3 w-full rounded-lg border border-kuroko/20 bg-white px-3 py-2 text-sm font-mono text-kuroko placeholder-[#9890A8] focus:border-kaki focus:outline-none"
+        />
+      )}
+
+      <button
+        type="button"
+        onClick={handleSave}
+        className="mt-3 btn-secondary !py-1.5 !text-xs"
+      >
+        {saved ? "✓ 保存しました" : "保存する"}
+      </button>
+    </div>
+  );
+}
+
+// ─── Payment Stats ─────────────────────────────────────────────────────────────
+
+function PaymentStats() {
+  const data = [
+    { label: "クレカ", count: 3, color: "bg-kaki" },
+    { label: "JPYC",  count: 1, color: "bg-emerald-500" },
+    { label: "振込",  count: 1, color: "bg-[#9890A8]" },
+  ];
+  const max = Math.max(...data.map((d) => d.count));
+
+  return (
+    <div className="section-card p-4">
+      <p className="text-[11px] uppercase tracking-widest text-[#9890A8]">支払い内訳（デモ）</p>
+      <div className="mt-3 space-y-2">
+        {data.map(({ label, count, color }) => (
+          <div key={label} className="flex items-center gap-3">
+            <span className="w-10 shrink-0 text-xs text-[#4A4464]">{label}</span>
+            <div className="flex-1 h-1.5 rounded-full bg-kuroko/10">
+              <div
+                className={`h-1.5 rounded-full ${color} transition-all`}
+                style={{ width: `${(count / max) * 100}%` }}
+              />
+            </div>
+            <span className="w-4 text-xs tabular-nums text-kuroko font-semibold">{count}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
@@ -268,7 +356,11 @@ export default function DashboardPage() {
               <p className="text-[11px] uppercase tracking-widest text-[#9890A8]">AI 検品済み</p>
               <p className="mt-1 text-2xl font-bold text-kaki tabular-nums">{owned.length}</p>
             </div>
+            <PaymentStats />
           </div>
+
+          {/* Payout preference */}
+          <PayoutPreferencePanel />
 
           {/* Asset list */}
           <ul className="mt-5 space-y-3">
