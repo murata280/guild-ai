@@ -15,6 +15,7 @@ import { useLiveEarnings } from "@/lib/live-earnings";
 import { SlotNumber } from "@/components/SlotNumber";
 import { toggleMute, playSuccessChime } from "@/lib/sound";
 import { UserIcon, BanknoteIcon } from "@/components/icons";
+import { RawDataPanel } from "@/components/RawDataPanel";
 
 // ─── Rank styling ─────────────────────────────────────────────────────────────
 
@@ -580,6 +581,33 @@ export default function DashboardPage() {
               ))}
             </ul>
           )}
+
+          {/* Raw Data タブ — エンジニア向け技術詳細 */}
+          <RawDataPanel data={{
+            ownedAssets: owned.map((r) => ({
+              assetId: r.assetId,
+              title: r.assetTitle,
+              acquiredAt: r.acquiredAt,
+              deployUrl: r.deployUrl,
+            })),
+            trustScoreInputs: {
+              qualityHistory: 80,
+              discordContribution: 60,
+              xAmplification: 40,
+            },
+            contributionRank: computeContributionRank({
+              ownedCount: owned.length,
+              salesCount: 0,
+              listingCount: 0,
+              apiCalls: owned.length * 3,
+            }),
+            recentNotifications: notifications.slice(0, 10),
+            atoaEndpoints: {
+              catalog: "https://guild-ai.vercel.app/api/catalog",
+              match: "https://guild-ai.vercel.app/api/match",
+              execute: "https://guild-ai.vercel.app/api/atoa/[id]",
+            },
+          }} />
         </>
       )}
     </main>
