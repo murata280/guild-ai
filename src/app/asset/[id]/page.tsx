@@ -8,6 +8,7 @@ import { TrustPanel } from "@/components/TrustPanel";
 import { HelpHint } from "@/components/HelpHint";
 import { messages } from "@/lib/microcopy";
 import { SearchIcon, LinkIcon } from "@/components/icons";
+import { RawDataPanel } from "@/components/RawDataPanel";
 
 export function generateStaticParams() {
   return MOCK_MARKETPLACE.map((item) => ({ id: item.listing.id }));
@@ -228,6 +229,22 @@ export default function AssetPage({ params }: { params: { id: string } }) {
           </p>
         </div>
       </section>
+
+      {/* Raw Data タブ — エンジニア向け技術詳細 */}
+      <RawDataPanel data={{
+        id: listing.id,
+        rank: listing.rank,
+        basePrice: listing.basePrice,
+        floorPrice: listing.floorPrice,
+        ccaf: listing.ccaf,
+        vercelUptimeDays: listing.vercelUptimeDays,
+        agentEndpoint: `https://guild-ai.vercel.app/api/atoa/${listing.id}`,
+        listedAt: item.listedAt,
+        healthMetrics: {
+          uptimePercent: listing.vercelUptimeDays > 30 ? 99.2 : 97.8,
+          successRate: 98.4,
+        },
+      }} />
 
     </main>
   );
