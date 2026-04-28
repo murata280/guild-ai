@@ -3,6 +3,7 @@ import Link from "next/link";
 import { MOCK_MARKETPLACE } from "@/lib/marketplace";
 import { RankBadge } from "@/components/RankBadge";
 import { CheckoutSection } from "@/components/CheckoutSection";
+import { ValuationSection } from "@/components/ValuationSection";
 
 export function generateStaticParams() {
   return MOCK_MARKETPLACE.map((item) => ({ id: item.listing.id }));
@@ -13,6 +14,21 @@ export default function AssetPage({ params }: { params: { id: string } }) {
   if (!item) notFound();
 
   const { listing, auditResult, trustScore } = item;
+
+  const curlSample = `curl -X POST https://guild-ai.vercel.app/api/atoa/${listing.id} \\
+  -H "Authorization: Bearer gld_<YOUR_API_KEY>" \\
+  -H "Content-Type: application/json" \\
+  -d '{"input": "タスクを入力してください", "agentId": "agent-xyz"}'`;
+
+  const jsonPayload = JSON.stringify(
+    {
+      input: "タスクを入力してください",
+      agentId: "agent-xyz",
+      sessionId: "chk_...",
+    },
+    null,
+    2
+  );
 
   return (
     <main className="px-4 sm:px-6 lg:px-8 py-8 max-w-3xl mx-auto">
@@ -72,6 +88,16 @@ export default function AssetPage({ params }: { params: { id: string } }) {
         </div>
       </div>
 
+      {/* AI Valuation Radar + Will Signal Trigger */}
+      <ValuationSection
+        rank={listing.rank}
+        floorPrice={listing.floorPrice}
+        thoughtDensity={listing.ccaf.thoughtDensity}
+        iterations={listing.ccaf.iterations}
+        uptimeDays={listing.vercelUptimeDays}
+        justification={auditResult.justification}
+      />
+
       {/* CCAF detail */}
       <section className="mt-4 section-card p-5">
         <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8]">
@@ -128,13 +154,49 @@ export default function AssetPage({ params }: { params: { id: string } }) {
         price={listing.floorPrice}
       />
 
-      {/* AtoA badge + docs link */}
-      <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-[#9890A8]">
-        <span className="inline-flex items-center gap-1 rounded-full border border-kaki/20 bg-kaki/5 px-3 py-1 text-[11px] font-semibold text-kaki">
-          AtoA API 対応
-        </span>
-        <span>エージェント同士が自律的に購入・支払いを行う</span>
-      </div>
+      {/* API Hotbed — エージェント直接呼び出し */}
+      <section className="mt-4 section-card p-5">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8]">
+            API Hotbed — エンドポイント
+          </h2>
+          <span className="inline-flex items-center gap-1 rounded-full border border-kaki/20 bg-kaki/5 px-3 py-1 text-[11px] font-semibold text-kaki">
+            AtoA API 対応
+          </span>
+        </div>
+        <p className="mt-2 text-sm text-[#4A4464]">
+          AIエージェントが直接呼び出せます — 人間の介在なしに購入・実行が完結します。
+        </p>
+
+        <div className="mt-4 space-y-3">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8] mb-1.5">
+              エンドポイント
+            </p>
+            <code className="block rounded-lg bg-kuroko px-3 py-2 text-xs font-mono text-accent-green break-all">
+              POST https://guild-ai.vercel.app/api/atoa/{listing.id}
+            </code>
+          </div>
+
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8] mb-1.5">
+              curl サンプル
+            </p>
+            <pre className="rounded-lg bg-kuroko px-3 py-2 text-xs font-mono text-kami overflow-x-auto whitespace-pre-wrap leading-relaxed">
+              {curlSample}
+            </pre>
+          </div>
+
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8] mb-1.5">
+              JSON ペイロード
+            </p>
+            <pre className="rounded-lg bg-kuroko px-3 py-2 text-xs font-mono text-kami overflow-x-auto">
+              {jsonPayload}
+            </pre>
+          </div>
+        </div>
+      </section>
 
     </main>
   );

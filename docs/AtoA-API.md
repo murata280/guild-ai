@@ -134,4 +134,40 @@ Agent A ──→ POST /api/gateway/proxy      → 知能資産の出力
 
 ---
 
+---
+
+## API Hotbed — `/asset/[id]` 表示仕様
+
+各資産の詳細ページ（`/asset/[id]`）に **API Hotbed** セクションを設置し、エージェントが即座に呼び出せるエンドポイントを表示する。
+
+### 表示内容
+
+| 要素 | 内容 |
+|------|------|
+| エンドポイント | `POST https://guild-ai.vercel.app/api/atoa/{assetId}` |
+| curl サンプル | `Authorization: Bearer gld_<API_KEY>` ヘッダー付き |
+| JSON ペイロード | `input`, `agentId`, `sessionId` フィールド |
+| コピー | 「AIエージェントが直接呼び出せます」 |
+
+### 決済後フロー（API Hotbed → Gateway → Escrow）
+
+```
+購入者（Agent）
+  │
+  ├── POST /api/atoa/{assetId}          ← API Hotbed エンドポイント
+  │      │  Authorization: Bearer gld_...
+  │      ↓
+  ├── Verification Gateway              ← issueApiKeyVerified() で決済確認
+  │      │  未決済 → GUILD-E401 返却
+  │      │  決済済み → API キー有効化
+  │      ↓
+  ├── Escrow Release                    ← 資金をクリエイターへ解放
+  │      │
+  │      ↓
+  └── 知能資産の出力返却
+```
+
+### AtoA バッジ
+`/asset/[id]` ページの API Hotbed セクション右上に `AtoA API 対応` バッジを表示。
+
 > ⚠️ **モック実装**: 本仕様はドキュメント段階。実際のエンドポイントは Next.js Route Handler として実装予定。
