@@ -1,56 +1,95 @@
 // GUILD AI — Micro-Copy Dictionary
 // All user-facing system messages in warm, polite Japanese.
 // Two-layer policy: this file is UI-layer only. API docs use English.
+// Ultra-Simple Language (#25): hiragana/katakana main, kanji <= 30%.
 
 export const messages = {
   // ─── Error pages ────────────────────────────────────────────────────────────
   notFound: {
-    heading: "お探しの柿（知能）は、まだ実っていないようです。",
-    body: "URLをご確認のうえ、もう一度お試しください。もしかすると、まだ登記されていないのかもしれません。",
-    ctaMarketplace: "お店を見てみる",
-    ctaHome: "ホームに戻る",
+    heading: "さがしている「とくいわざ」は、まだ できていないみたい。",
+    body: "URLを もう一度 たしかめてみてください。",
+    ctaMarketplace: "みんなの お店へ",
+    ctaHome: "トップに もどる",
   },
   serverError: {
-    heading: "ご不便をおかけしています。少しだけ時間をください。",
-    body: "サーバー側で一時的なエラーが発生しました。しばらくしてからもう一度お試しください。",
-    ctaRetry: "もう一度試す",
-    ctaHome: "ホームへ",
+    heading: "ごめんなさい、ちょっと まちがえました。",
+    body: "もう一度 ためしてみてください。",
+    ctaRetry: "もう一度",
+    ctaHome: "トップへ",
   },
 
   // ─── Transaction outcomes ────────────────────────────────────────────────────
   listingPublished:
-    "無事にお店に並びました。あなたの知能が、これから誰かの役に立ち始めます。",
+    "ぶじに お店に ならびました！だれかの やくに たちますように。",
   purchaseDone:
-    "無事にお取引が完了しました。あなたの知能の柿、大切にお育てください。",
-  auditDone: "鑑定が終わりました。スコアをご確認ください。",
+    "ぶじに お買いものが おわりました！",
+  auditDone: "みおわりました！スコアを みてみよう。",
   rankUpToS:
-    "おめでとうございます！Sランクに昇格しました。魂の登記が完了です。",
+    "すごい！「お墨付き（おすみつき）」が あがりました！",
   atoaJobDone:
-    "AIがお仕事を完了しました。収益がデジタル円残高に加算されます。",
+    "あなたの「とくいわざ」が、だれかを 助けました！",
   transferComplete:
-    "所有権の移転が完了しました。新しいオーナーへの引き渡しが済みました。",
+    "おわたし できました！あたらしい おもちぬしに とどきました。",
+  odachin:
+    "おだちん（デジタル円）が たまりました！",
+  coinDrop:
+    "チャリン！",
 
-  // ─── Contextual help ────────────────────────────────────────────────────────
+  // ─── Contextual help (50% kanji tolerance — HelpHint补足) ──────────────────
   helpDigitalYen:
     "デジタル上の日本円です。1デジタル円 = 1円で、いつでも現金化できます。",
   helpTrustScore:
-    "出品実績・鑑定結果・コミュニティ貢献をもとにAIが算出する信頼指標（0〜1000）です。",
+    "AIが出品実績をもとに計算する しんよう ポイントです（0〜1000）。",
   helpSRank:
-    "制作の証明と人間の意思シグナルが確認された最高ランク。「魂の登記」とも呼ばれます。",
+    "あなたが 作った しょうこが みとめられた、いちばん すごい ランクです。",
   helpEndpoint:
-    "AIエージェントがこの知能を直接呼び出せる窓口のアドレスです。自動化やシステム連携に使います。",
+    "AIが この「とくいわざ」を 直接 よびだす ための アドレスです。",
   helpFloorPrice:
-    "信用スコアをもとにAIが算出した、この知能資産の最低お値段です。",
+    "AIが 計算した、この「とくいわざ」の いちばん やすい お値段です。",
   helpProofOfMake:
-    "制作中の思考や試行回数を記録した「制作の証明」です。作品の誠実さをAIが確認します。",
+    "作るときの おもいや 試行回数を 記録した「あなたが 作った しょうこ」です。",
   helpRankRadar:
-    "考えの深さ・仕事の速さ・安定感の3軸でAIが評価したレーダーチャートです。",
+    "かしこさ・はやさ・あんていの 3つで AIが みた レーダーチャートです。",
   helpRoyalty:
-    "この知能が誰かに再利用されるたびに、あなたへ自動で収益が分配されます。",
+    "だれかに つかってもらうたびに、あなたに おすそわけ が はいります。",
 
   // ─── Loading / progress ─────────────────────────────────────────────────────
-  loadingAssets: "知能資産を読み込んでいます...",
-  processingPayment: "お支払いを処理しています。少々お待ちください。",
+  loadingAssets: "よみこんでいます...",
+  processingPayment: "お会計 しています。すこし まってください。",
+  auditInProgress: "いま、AIが ていねいに みています...",
+
+  // ─── UI labels ──────────────────────────────────────────────────────────────
+  ui: {
+    dashboard: "わたしのページ",
+    marketplace: "みんなの お店",
+    sell: "だす",
+    buy: "買う",
+    next: "つぎへ",
+    done: "おわる",
+    cancel: "やめる",
+    decide: "きめる",
+    publish: "お店に だす",
+    deposit: "おこづかい貯金箱",
+    passbook: "おこづかい帳",
+    trustScore: "しんよう ポイント",
+    proofOfMake: "あなたが 作った しょうこ",
+    thoughtDensity: "かしこさレベル",
+    uptimeDays: "がんばった 日数",
+    royalty: "おすそわけ",
+    accessKey: "あいことば",
+    endpoint: "お仕事の うけつけ",
+    atoaSection: "AIどうしの おしごと",
+    rankS: "すごい！",
+    rankA: "いい かんじ",
+    rankB: "これから",
+    assetSection: "あなたの ぶんしん",
+    listingCount: "お店に だした かず",
+    ownedCount: "もっている ぶんしん",
+    aiVerified: "AIが みとめました",
+    uptime: "がんばった 日数",
+    liveEarnings: "いまの おだちん",
+    monthlyTotal: "今月の おだちん",
+  },
 } as const;
 
 export type MicrocopyKey = keyof typeof messages;
