@@ -14,7 +14,7 @@ import { StepIndicator } from "@/components/StepIndicator";
 import type { Rank, MarketplaceListing } from "@/types";
 
 const SORT_LABELS: { key: SortKey; label: string }[] = [
-  { key: "trust", label: "Trust Score" },
+  { key: "trust", label: "信用スコア" },
   { key: "ccaf",  label: "制作の証明" },
   { key: "price", label: "価格" },
 ];
@@ -66,7 +66,7 @@ function MarketplaceContent() {
 
       <div className="mt-4 flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-kuroko leading-snug">Marketplace</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-kuroko leading-snug">お店（マーケット）</h1>
           <p className="mt-1 text-base text-[#9890A8] leading-relaxed">
             鑑定済み知能資産の一覧。良質な出品ほど高評価・高価格で表示される。
           </p>
@@ -125,14 +125,14 @@ function MarketplaceContent() {
 
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[#9890A8]">
-            最低 Trust Score: <span className="text-kuroko font-bold">{minTrustScore}</span>
+            最低 信用スコア: <span className="text-kuroko font-bold">{minTrustScore}</span>
           </p>
           <input
             type="range"
             min={0} max={900} step={50}
             value={minTrustScore}
             onChange={(e) => setMinTrustScore(Number(e.target.value))}
-            aria-label="最低Trust Scoreフィルタ"
+            aria-label="最低信用スコアフィルタ"
             className="w-32 accent-kaki"
           />
         </div>
@@ -156,7 +156,7 @@ function MarketplaceContent() {
 
             const content = (
               <>
-                {/* Rank badge — fixed top-left */}
+                {/* Rank badge */}
                 <div className="flex items-start justify-between gap-2 mb-3">
                   <RankBadge rank={item.listing.rank} large />
                   {isNew && (
@@ -173,7 +173,7 @@ function MarketplaceContent() {
 
                 <dl className="mt-4 space-y-1.5">
                   <div className="flex justify-between text-sm">
-                    <dt className="text-[#9890A8]">Trust Score</dt>
+                    <dt className="text-[#9890A8]">信用スコア</dt>
                     <dd className="font-semibold tabular-nums text-kuroko">
                       {item.trustScore.score} <span className="text-[#9890A8] font-normal">/ 1000</span>
                     </dd>
@@ -183,13 +183,10 @@ function MarketplaceContent() {
                     <dd className="font-semibold tabular-nums text-kuroko">{item.auditResult.score.toFixed(1)}</dd>
                   </div>
                   <div className="flex justify-between items-baseline pt-2 border-t border-kuroko/10">
-                    <dt className="text-sm text-[#9890A8]">価格</dt>
+                    <dt className="text-sm text-[#9890A8]">お値段</dt>
                     <dd>
                       <span className="text-xl font-bold text-kuroko">
                         ¥{item.listing.floorPrice.toLocaleString("ja-JP")}
-                      </span>
-                      <span className="ml-1 text-sm text-[#9890A8]">
-                        ({item.listing.floorPrice.toLocaleString("ja-JP")} JPYC)
                       </span>
                     </dd>
                   </div>

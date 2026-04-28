@@ -16,7 +16,7 @@ export default function AssetPage({ params }: { params: { id: string } }) {
   const { listing, auditResult, trustScore } = item;
 
   const curlSample = `curl -X POST https://guild-ai.vercel.app/api/atoa/${listing.id} \\
-  -H "Authorization: Bearer gld_<YOUR_API_KEY>" \\
+  -H "Authorization: Bearer gld_<YOUR_ACCESS_KEY>" \\
   -H "Content-Type: application/json" \\
   -d '{"input": "タスクを入力してください", "agentId": "agent-xyz"}'`;
 
@@ -35,7 +35,7 @@ export default function AssetPage({ params }: { params: { id: string } }) {
 
       {/* Back */}
       <Link href="/marketplace" className="text-xs text-[#9890A8] hover:text-kaki transition-colors">
-        ← Marketplace に戻る
+        ← お店に戻る
       </Link>
 
       {/* Title row */}
@@ -53,7 +53,7 @@ export default function AssetPage({ params }: { params: { id: string } }) {
           rel="noopener noreferrer"
           className="mt-2 inline-block text-xs text-[#9890A8] underline hover:text-kaki transition-colors"
         >
-          GitHub →
+          作品を見る →
         </a>
       )}
 
@@ -72,7 +72,7 @@ export default function AssetPage({ params }: { params: { id: string } }) {
       {/* Metrics */}
       <div className="mt-4 grid grid-cols-3 gap-3">
         <div className="section-card p-4 overflow-hidden">
-          <p className="text-[11px] uppercase tracking-widest text-[#9890A8] truncate">Trust</p>
+          <p className="text-[11px] uppercase tracking-widest text-[#9890A8] truncate">信用スコア</p>
           <p className="mt-1 text-2xl font-bold tabular-nums text-kuroko">{trustScore.score}</p>
           <p className="text-xs text-[#9890A8]">/ 1000</p>
         </div>
@@ -105,11 +105,11 @@ export default function AssetPage({ params }: { params: { id: string } }) {
         </h2>
         <dl className="mt-3 space-y-2.5 text-sm">
           <div className="flex justify-between">
-            <dt className="text-[#4A4464]">思考密度</dt>
+            <dt className="text-[#4A4464]">考えの深さ</dt>
             <dd className="font-semibold tabular-nums text-kuroko">{listing.ccaf.thoughtDensity} / 100</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-[#4A4464]">試行回数</dt>
+            <dt className="text-[#4A4464]">試みた回数</dt>
             <dd className="font-semibold tabular-nums text-kuroko">{listing.ccaf.iterations}</dd>
           </div>
           <div>
@@ -154,25 +154,29 @@ export default function AssetPage({ params }: { params: { id: string } }) {
         price={listing.floorPrice}
       />
 
-      {/* API Hotbed — エージェント直接呼び出し */}
+      {/* AI同士のお仕事の場 */}
       <section className="mt-4 section-card p-5">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8]">
-            API Hotbed — エンドポイント
+            AI同士のお仕事の場
           </h2>
           <span className="inline-flex items-center gap-1 rounded-full border border-kaki/20 bg-kaki/5 px-3 py-1 text-[11px] font-semibold text-kaki">
-            AtoA API 対応
+            AIエージェント対応
           </span>
         </div>
         <p className="mt-2 text-sm text-[#4A4464]">
-          AIエージェントが直接呼び出せます — 人間の介在なしに購入・実行が完結します。
+          AIエージェントが直接お仕事を依頼できます — 人間の介在なしに購入・実行が完結します。
+        </p>
+        <p className="mt-1 text-xs text-[#9890A8]">
+          この資産は AI が自動的に起動→監視→不良時返金します。
         </p>
 
         <div className="mt-4 space-y-3">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8] mb-1.5">
-              エンドポイント
+              お仕事の受付窓口
             </p>
+            {/* コードフェンス内はjargon-lint例外 */}
             <code className="block rounded-lg bg-kuroko px-3 py-2 text-xs font-mono text-accent-green break-all">
               POST https://guild-ai.vercel.app/api/atoa/{listing.id}
             </code>
@@ -180,7 +184,7 @@ export default function AssetPage({ params }: { params: { id: string } }) {
 
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8] mb-1.5">
-              curl サンプル
+              サンプル（エージェント向け）
             </p>
             <pre className="rounded-lg bg-kuroko px-3 py-2 text-xs font-mono text-kami overflow-x-auto whitespace-pre-wrap leading-relaxed">
               {curlSample}
@@ -189,12 +193,19 @@ export default function AssetPage({ params }: { params: { id: string } }) {
 
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8] mb-1.5">
-              JSON ペイロード
+              送信データの例
             </p>
             <pre className="rounded-lg bg-kuroko px-3 py-2 text-xs font-mono text-kami overflow-x-auto">
               {jsonPayload}
             </pre>
           </div>
+
+          <p className="text-[10px] text-[#9890A8]">
+            エージェント向け仕様：
+            <a href="/api/catalog" className="underline hover:text-kaki ml-1">
+              /api/catalog
+            </a>
+          </p>
         </div>
       </section>
 
