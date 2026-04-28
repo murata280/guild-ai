@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { createCheckoutSession, confirmPayment } from "@/lib/checkout";
 import { issueApiKeyVerified } from "@/lib/api-gateway";
 import type { PaymentMethod, Currency } from "@/types";
+import { ShareButton } from "@/components/ShareButton";
 
 interface CheckoutSectionProps {
   assetId: string;
@@ -215,7 +216,7 @@ export function CheckoutSection({ assetId, assetTitle: _assetTitle, price, onSuc
       <section className="mt-4 section-card p-5">
         <div className="flex items-center gap-2 mb-3">
           <span className="text-accent-green text-xl" aria-hidden>✓</span>
-          <h2 className="text-base font-bold text-kuroko">購入完了 — 知能資産を取得しました</h2>
+          <h2 className="text-base font-bold text-kuroko">購入完了 — スキル資産を取得しました</h2>
         </div>
         <div className="rounded-xl border border-accent-green/20 bg-accent-green/5 px-4 py-3 space-y-1">
           <p className="text-xs text-[#9890A8]">アクセスキー</p>
@@ -230,8 +231,13 @@ export function CheckoutSection({ assetId, assetTitle: _assetTitle, price, onSuc
         {showSetupChecklist && (
           <SetupChecklist onDone={() => setShowSetupChecklist(false)} />
         )}
+        {/* Share purchase */}
+        <div className="mt-4 pt-4 border-t border-kuroko/10">
+          <p className="text-xs font-semibold uppercase tracking-widest text-[#9890A8] mb-3">購入をシェアする</p>
+          <ShareButton context={{ type: "purchase_done", assetId }} seed={0} compact />
+        </div>
         <div className="mt-4">
-          <a href="/dashboard" className="btn-primary !py-2 !text-sm">管理画面で確認 →</a>
+          <a href="/dashboard" className="btn-primary !py-2 !text-sm">マイページで確認 →</a>
         </div>
       </section>
     );

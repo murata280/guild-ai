@@ -18,6 +18,7 @@ import type { MockRepo } from "@/lib/github-picker";
 import { voiceLogToProofOfMake, generateProductPitch } from "@/lib/proof-of-make";
 import type { CCAF, MarketplaceListing, Currency, Rank } from "@/types";
 import { PackageIcon, SearchIcon } from "@/components/icons";
+import { ShareButton } from "@/components/ShareButton";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -203,6 +204,16 @@ function CompletionCard({ data }: { data: CompletionData }) {
             マイページへ →
           </button>
         </div>
+      </div>
+
+      {/* Share listing */}
+      <div className="section-card p-5">
+        <p className="text-xs font-semibold uppercase tracking-widest text-[#9890A8] mb-3">登録をシェアする</p>
+        <ShareButton
+          context={{ type: "listing_published", title: data.title, rank: data.rank }}
+          url={`https://guild-ai.vercel.app/asset/${data.listingId}`}
+          seed={0}
+        />
       </div>
 
       <button

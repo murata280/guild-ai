@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import type { Rank } from "@/types";
 import { Confetti } from "@/components/Confetti";
 import { messages } from "@/lib/microcopy";
+import { ShareButton } from "@/components/ShareButton";
 
 interface WillSignalTriggerProps {
   currentRank: Rank;
@@ -74,7 +75,16 @@ export function WillSignalTrigger({ currentRank, onPromoted, floorPrice }: WillS
     }, 1200);
   }, [floorPrice, onPromoted]);
 
-  if (currentRank !== "A" || state === "done") return null;
+  if (currentRank !== "A") return null;
+
+  if (state === "done") {
+    return (
+      <div className="mt-4 pt-3 border-t border-kuroko/10">
+        <p className="text-xs font-semibold uppercase tracking-widest text-[#9890A8] mb-2">昇格をシェアする</p>
+        <ShareButton context={{ type: "rank_up_s" }} seed={1} compact />
+      </div>
+    );
+  }
 
   const canPromote = state === "recording" && seconds >= 3;
 
@@ -149,6 +159,7 @@ export function WillSignalTrigger({ currentRank, onPromoted, floorPrice }: WillS
             <p className="mt-3 text-base font-bold text-kaki animate-pulse">Sランクへ昇格中…</p>
           </div>
         )}
+
       </div>
     </>
   );

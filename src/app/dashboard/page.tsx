@@ -16,6 +16,7 @@ import { SlotNumber } from "@/components/SlotNumber";
 import { toggleMute, playSuccessChime } from "@/lib/sound";
 import { UserIcon, BanknoteIcon } from "@/components/icons";
 import { RawDataPanel } from "@/components/RawDataPanel";
+import { ShareButton } from "@/components/ShareButton";
 
 // ─── Rank styling ─────────────────────────────────────────────────────────────
 
@@ -163,6 +164,12 @@ function PassbookCard({ owned }: { owned: OwnershipRecord[] }) {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Share passbook milestone */}
+      <div className="mt-4 pt-4 border-t border-kuroko/10">
+        <p className="text-xs font-semibold uppercase tracking-widest text-[#9890A8] mb-2">今月の成果をシェア</p>
+        <ShareButton context={{ type: "passbook_milestone" }} seed={0} compact />
       </div>
 
       {/* Recent transactions */}
