@@ -11,6 +11,8 @@ import { computeLeverage } from "@/lib/ses-leverage";
 import { StepIndicator } from "@/components/StepIndicator";
 import { NotificationBell } from "@/components/NotificationBell";
 import { getNotifications, getUnreadCount } from "@/lib/notifications";
+import { useLiveEarnings } from "@/lib/live-earnings";
+import { SlotNumber } from "@/components/SlotNumber";
 
 // ─── Rank styling ─────────────────────────────────────────────────────────────
 
@@ -41,6 +43,7 @@ function StatBar({ value, color = "bg-kaki" }: { value: number; color?: string }
 function PassbookCard({ owned }: { owned: OwnershipRecord[] }) {
   const snap = getPassbookSnapshot("demo-user");
   const monthly = getMonthlyEarnings("demo-user");
+  const live = useLiveEarnings("demo-user");
   const assetCount = owned.length || snap.assetCount;
 
   const maxTrust = Math.max(...snap.trustHistory, 1);
@@ -55,12 +58,27 @@ function PassbookCard({ owned }: { owned: OwnershipRecord[] }) {
 
       {/* Monthly earnings hero */}
       <div className="rounded-2xl bg-kuroko px-5 py-4 mb-4">
-        <p className="text-xs text-white/60 mb-1">今月、あなたの知能がAIにお仕事をして稼いだ金額</p>
-        <div className="flex items-baseline gap-2">
-          <span className="text-3xl font-bold text-white tabular-nums">
-            ¥{monthly.jpy.toLocaleString("ja-JP")}
+        <div className="flex items-center gap-2 mb-1">
+          <p className="text-xs text-white/60">今月、あなたの知能がAIにお仕事をして稼いだ金額</p>
+          {/* Live badge */}
+          <span className="inline-flex items-center gap-1 rounded-full bg-accent-green/20 px-2 py-0.5 text-[10px] font-bold text-accent-green">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse" aria-hidden />
+            ライブ
           </span>
+        </div>
+        <div className="flex items-baseline gap-2">
+          <SlotNumber
+            value={live.jpy}
+            prefix="¥"
+            duration={1400}
+            className="text-3xl font-bold text-white tabular-nums"
+          />
           <span className="text-sm text-accent-green font-semibold">先月比 +{monthly.momGrowthPct}%</span>
+          {live.lastDelta > 0 && (
+            <span className="text-xs text-accent-green font-semibold animate-fade-in">
+              +¥{live.lastDelta}
+            </span>
+          )}
         </div>
         <div className="flex gap-4 mt-2 text-xs text-white/70">
           <span>お仕事件数 {monthly.aiJobs}件</span>
