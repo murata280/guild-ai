@@ -63,3 +63,44 @@ export interface AuditResult {
   score: number; // composite score (0-100)
   reasons: string[];
 }
+
+// ─── Marketplace ───────────────────────────────────────────────────────────
+
+export interface MarketplaceListing {
+  listing: Listing;
+  auditResult: AuditResult;
+  trustScore: TrustScoreResult;
+  listedAt: string; // ISO8601
+}
+
+// ─── Ownership / Transfer ──────────────────────────────────────────────────
+
+export interface OwnershipRecord {
+  assetId: string;
+  ownerId: string;
+  acquiredAt: string; // ISO8601
+  deployUrl: string; // Vercel Deploy Button URL
+  assetTitle: string;
+}
+
+// ─── Royalty ───────────────────────────────────────────────────────────────
+
+/** Ancestor chain, oldest creator first, newest (direct parent) last. */
+export interface Creator {
+  creatorId: string;
+  name: string;
+}
+
+export interface RoyaltyDistribution {
+  creatorId: string;
+  name: string;
+  amount: number; // JPY
+  trustScoreBonus: number; // Trust Score points added
+  generation: number; // 1 = direct parent, 2 = grandparent, …
+}
+
+export interface RoyaltyResult {
+  distributions: RoyaltyDistribution[];
+  totalRoyaltyPaid: number;
+  sellerNet: number;
+}
