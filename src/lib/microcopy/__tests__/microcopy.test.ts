@@ -43,4 +43,12 @@ describe("microcopy dictionary", () => {
       expect(allText, `"${term}" should not appear in microcopy`).not.toContain(term);
     }
   });
+
+  it("listingPublished uses concierge tone (登録されました)", () => {
+    expect(messages.listingPublished).toContain("登録されました");
+  });
+
+  it("auditInProgress uses concierge tone (拝見しております)", () => {
+    expect(messages.auditInProgress).toContain("拝見しております");
+  });
 });
