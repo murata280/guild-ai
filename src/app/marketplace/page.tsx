@@ -15,7 +15,7 @@ import type { Rank, MarketplaceListing } from "@/types";
 
 const SORT_LABELS: { key: SortKey; label: string }[] = [
   { key: "trust", label: "Trust Score" },
-  { key: "ccaf",  label: "CCAF" },
+  { key: "ccaf",  label: "制作の証明" },
   { key: "price", label: "Floor Price" },
 ];
 
@@ -197,7 +197,7 @@ function MarketplaceContent() {
                     </dd>
                   </div>
                   <div className="flex justify-between text-xs">
-                    <dt className="text-[#9890A8]">CCAF</dt>
+                    <dt className="text-[#9890A8]">制作の証明</dt>
                     <dd className="font-semibold tabular-nums text-kuroko">
                       {item.auditResult.score.toFixed(1)}
                     </dd>

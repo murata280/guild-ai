@@ -61,7 +61,7 @@ export default function AssetPage({ params }: { params: { id: string } }) {
           <p className="text-xs text-[#9890A8]">/ 1000</p>
         </div>
         <div className="section-card p-4 overflow-hidden">
-          <p className="text-[11px] uppercase tracking-widest text-[#9890A8] truncate">CCAF</p>
+          <p className="text-[11px] uppercase tracking-widest text-[#9890A8] truncate">制作の証明</p>
           <p className="mt-1 text-2xl font-bold tabular-nums text-kuroko">{auditResult.score.toFixed(1)}</p>
           <p className="text-xs text-[#9890A8]">/ 100</p>
         </div>

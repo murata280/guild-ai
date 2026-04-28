@@ -36,7 +36,7 @@ export default function HomePage() {
             スコアが高いほど売れやすくなる
           </h2>
           <p className="mt-2 text-sm text-[#4A4464] leading-relaxed">
-            CCAF の思考密度・Discord 貢献・X 拡散が加重合算され、Floor Price と露出量に直結する。
+            制作の証明（思考密度・こだわり）・Discord 貢献・X 拡散が加重合算され、Floor Price と露出量に直結する。
           </p>
         </article>
         <article className="section-card p-5">
