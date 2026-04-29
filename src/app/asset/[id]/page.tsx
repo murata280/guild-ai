@@ -211,6 +211,27 @@ export default function AssetPage({ params }: { params: { id: string } }) {
         </ul>
       </section>
 
+      {/* Trust-Lock — Security Panel */}
+      <div className="mt-6 section-card p-5">
+        <div className="flex flex-col items-center gap-3 text-center mb-4">
+          <Shimaenaga variant="key" size="md" />
+          <h2 className="text-sm font-bold text-kuroko">権利は安全に保護されています</h2>
+        </div>
+        <ul className="space-y-2">
+          {[
+            "Sandbox 検品済み（モック）",
+            "お預かり中の権限は決済後のみ譲渡",
+            "不正検知時は自動で返金",
+            "鍵は AES-256 と Schnorr 署名（モック）",
+          ].map((lockItem) => (
+            <li key={lockItem} className="flex items-start gap-2 text-sm text-[#4A4464]">
+              <span className="text-accent-green mt-0.5">✓</span>
+              {lockItem}
+            </li>
+          ))}
+        </ul>
+      </div>
+
       {/* Hybrid Checkout — Dual Payment Interface */}
       <CheckoutSection
         assetId={listing.id}
