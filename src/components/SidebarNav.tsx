@@ -3,19 +3,22 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+// 6-item main nav — 保管庫(/marketplace)・通帳(/wallet) は内部参照リンクとして残す
 const SIDEBAR_ITEMS = [
-  { href: "/", label: "ホーム", exact: true },
-  { href: "/showcase", label: "✨ つくったもの", exact: false },
-  { href: "/marketplace", label: "🏦 保管庫", exact: false },
-  { href: "/sell", label: "おしごとに登録", exact: false },
-  { href: "/wallet", label: "💰 おさいふ通帳", exact: false },
+  { href: "/", label: "🏠 ホーム", exact: true },
+  { href: "/bank", label: "🐦 シマエナガ銀行", exact: false },
+  { href: "/jobs", label: "💼 案件ボード", exact: false },
+  { href: "/guild", label: "⚔️ 武器庫", exact: false },
+  { href: "/sell", label: "➕ 登録（出品）", exact: false },
+  { href: "/wallet", label: "💰 通帳・お知らせ", exact: false },
 ];
 
 const BOTTOM_ITEMS = [
   { href: "/", label: "ホーム", exact: true },
-  { href: "/showcase", label: "✨ 作品", exact: false },
-  { href: "/marketplace", label: "🏦 保管庫", exact: false },
-  { href: "/sell", label: "登録", exact: false },
+  { href: "/bank", label: "🐦 銀行", exact: false },
+  { href: "/jobs", label: "💼 案件", exact: false },
+  { href: "/guild", label: "⚔️ 武器庫", exact: false },
+  { href: "/sell", label: "➕ 登録", exact: false },
   { href: "/wallet", label: "💰 通帳", exact: false },
 ];
 
