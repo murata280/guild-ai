@@ -5,89 +5,59 @@ import Link from "next/link";
 import { Shimaenaga } from "@/components/Shimaenaga";
 import { Confetti } from "@/components/Confetti";
 import { RankBadge } from "@/components/RankBadge";
+import { RatingPlate } from "@/components/RatingPlate";
+import { GoldenSeal } from "@/components/GoldenSeal";
 import { PassbookTable } from "@/components/PassbookTable";
+import { Sparkline } from "@/components/charts/Sparkline";
+import { DeployStatusPanel } from "@/components/charts/DeployStatusPanel";
 import { getWeapons } from "@/lib/weapons";
 import { getApplications } from "@/lib/jobs";
 import { getPassbookSnapshot } from "@/lib/passbook";
 import { playPassbookChime, playSuccessChime } from "@/lib/sound";
+import { getPortfolioStats, getSparklineData, getDeployStatus } from "@/lib/terminal-data";
 import type { Weapon, PassbookTransaction } from "@/types";
 
-// ─── Coin rain component ──────────────────────────────────────────────────────
+// ─── Kawaii helpers ──────────────────────────────────────────────────────────
 
 function CoinRain({ active }: { active: boolean }) {
   if (!active) return null;
-  const coins = Array.from({ length: 8 }, (_, i) => i);
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-      {coins.map((i) => (
-        <span
-          key={i}
-          className="absolute text-lg coin-fall"
-          style={{
-            left: `${10 + i * 11}%`,
-            top: "30%",
-            animationDelay: `${i * 0.08}s`,
-          }}
-        >
-          🪙
-        </span>
+      {Array.from({ length: 8 }, (_, i) => (
+        <span key={i} className="absolute text-lg coin-fall" style={{ left: `${10 + i * 11}%`, top: "30%", animationDelay: `${i * 0.08}s` }}>🪙</span>
       ))}
     </div>
   );
 }
 
-// ─── Friendly rank badge display ──────────────────────────────────────────────
-
 function FriendlyRankSummary({ weapons }: { weapons: Weapon[] }) {
   const counts = { S: 0, A: 0, B: 0 };
   weapons.forEach((w) => { counts[w.rank]++; });
   const topRank = counts.S > 0 ? "S" : counts.A > 0 ? "A" : "B";
-
   return (
     <div className="flex flex-wrap gap-3 items-center mt-2">
       <div className="text-sm text-ink-muted">いまのあなたのランク：</div>
-      {weapons.length > 0 ? (
-        <RankBadge rank={topRank} large friendly />
-      ) : (
-        <span className="text-sm text-ink-muted">まだ ぶきがありません</span>
-      )}
-      {(["S", "A", "B"] as const).map((r) =>
-        counts[r] > 0 ? (
-          <span key={r} className="text-xs text-ink-muted">
-            <RankBadge rank={r} friendly /> × {counts[r]}
-          </span>
-        ) : null
-      )}
+      {weapons.length > 0 ? <RankBadge rank={topRank} large friendly /> : <span className="text-sm text-ink-muted">まだ ぶきがありません</span>}
+      {(["S", "A", "B"] as const).map((r) => counts[r] > 0 ? (
+        <span key={r} className="text-xs text-ink-muted"><RankBadge rank={r} friendly /> × {counts[r]}</span>
+      ) : null)}
     </div>
   );
 }
 
-// ─── Weapon card ──────────────────────────────────────────────────────────────
-
 function WeaponCard({ weapon }: { weapon: Weapon }) {
   const [expanded, setExpanded] = useState(false);
-
   return (
     <li className="section-card p-4 border border-gold-soft transition-all hover:border-gold">
       <div className="flex items-start gap-3">
-        <div className="shrink-0 mt-0.5">
-          <RankBadge rank={weapon.rank} friendly />
-        </div>
+        <div className="shrink-0 mt-0.5"><RankBadge rank={weapon.rank} friendly /></div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <h2 className="font-bold text-ink text-base leading-snug truncate">{weapon.title}</h2>
-            {weapon.jobsCompleted.length > 0 && (
-              <span className="shrink-0 rounded-full bg-gold/10 border border-gold/30 px-2 py-0.5 text-[10px] font-bold text-gold">
-                そうびちゅう
-              </span>
-            )}
+            {weapon.jobsCompleted.length > 0 && <span className="shrink-0 rounded-full bg-gold/10 border border-gold/30 px-2 py-0.5 text-[10px] font-bold text-gold">そうびちゅう</span>}
           </div>
           <div className="flex flex-wrap gap-1 mt-1.5">
-            {weapon.tags.map((tag) => (
-              <span key={tag} className="rounded-full bg-gold-light border border-gold-soft px-2 py-0.5 text-[10px] font-semibold text-[#7A5000]">
-                {tag}
-              </span>
-            ))}
+            {weapon.tags.map((tag) => <span key={tag} className="rounded-full bg-gold-light border border-gold-soft px-2 py-0.5 text-[10px] font-semibold text-[#7A5000]">{tag}</span>)}
           </div>
           <div className="mt-2 flex items-center gap-3 text-xs text-ink-muted">
             <span>スコア {weapon.score.toFixed(1)}</span>
@@ -106,8 +76,6 @@ function WeaponCard({ weapon }: { weapon: Weapon }) {
     </li>
   );
 }
-
-// ─── Loop demo ────────────────────────────────────────────────────────────────
 
 const DEMO_STEPS = [
   { label: "📝 ノートをシマエナガ銀行においた", duration: 800 },
@@ -140,52 +108,75 @@ function LoopDemo({ onComplete }: { onComplete: () => void }) {
     }
     timerRef.current = setTimeout(advance, DEMO_STEPS[0].duration);
   }
-
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
 
   return (
     <div className="section-card p-5 border border-gold-soft">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-bold text-ink">ためしに ちえを のこしてみる</h2>
-        <button
-          type="button"
-          onClick={startDemo}
-          disabled={running}
-          className="rounded-2xl bg-gradient-to-r from-gold to-timee-yellow text-[#7A5000] font-bold px-4 py-1.5 text-sm disabled:opacity-50"
-          aria-label="ループ実演を開始"
-        >
+        <button type="button" onClick={startDemo} disabled={running} className="rounded-2xl bg-gradient-to-r from-gold to-timee-yellow text-[#7A5000] font-bold px-4 py-1.5 text-sm disabled:opacity-50" aria-label="ループ実演を開始">
           {running ? "じっこんちゅう…" : "▶ はじめる"}
         </button>
       </div>
       <div className="space-y-2">
         {DEMO_STEPS.map((s, i) => (
-          <div
-            key={s.label}
-            className={`flex items-center gap-2.5 rounded-2xl px-3 py-2 text-sm transition-all duration-300 ${
-              currentStep === i
-                ? "bg-gold-light border border-gold text-[#7A5000] font-semibold scale-[1.01]"
-                : currentStep > i
-                ? "text-ink-muted line-through"
-                : "text-ink"
-            }`}
-          >
-            <span className={`w-5 h-5 rounded-full border text-[10px] flex items-center justify-center shrink-0 ${
-              currentStep > i
-                ? "bg-accent-green border-accent-green text-white"
-                : currentStep === i
-                ? "bg-gold border-gold text-white animate-pulse"
-                : "border-ink-muted text-ink-muted"
-            }`}>
+          <div key={s.label} className={`flex items-center gap-2.5 rounded-2xl px-3 py-2 text-sm transition-all duration-300 ${currentStep === i ? "bg-gold-light border border-gold text-[#7A5000] font-semibold scale-[1.01]" : currentStep > i ? "text-ink-muted line-through" : "text-ink"}`}>
+            <span className={`w-5 h-5 rounded-full border text-[10px] flex items-center justify-center shrink-0 ${currentStep > i ? "bg-accent-green border-accent-green text-white" : currentStep === i ? "bg-gold border-gold text-white animate-pulse" : "border-ink-muted text-ink-muted"}`}>
               {currentStep > i ? "✓" : i + 1}
             </span>
             {s.label}
           </div>
         ))}
       </div>
-      <p className="mt-3 text-xs text-ink-muted text-right">
-        ぜんぶで {(DEMO_STEPS.reduce((s, d) => s + d.duration, 0) / 1000).toFixed(1)} びょう
-      </p>
     </div>
+  );
+}
+
+// ─── Terminal: portfolio row ─────────────────────────────────────────────────
+
+function RecipeRow({ weapon }: { weapon: Weapon }) {
+  const [expanded, setExpanded] = useState(false);
+  const sparkData = getSparklineData(weapon.id);
+  const yieldPct = weapon.rank === "S" ? 18.4 : weapon.rank === "A" ? 12.3 : 7.2;
+  const aprPct = (yieldPct * 1.2).toFixed(1);
+
+  return (
+    <>
+      <tr className="border-b border-[var(--divider,#2A2F38)] text-[11px] font-mono hover:bg-[var(--obsidian-2,#11141A)] transition-colors duration-100 cursor-pointer" onClick={() => setExpanded((v) => !v)}>
+        <td className="px-3 py-2">
+          <div className="flex items-center gap-2">
+            <RatingPlate rank={weapon.rank} size="sm" />
+            {weapon.jobsCompleted.length > 0 && <GoldenSeal size={24} />}
+          </div>
+        </td>
+        <td className="px-3 py-2 text-[var(--text-primary,#E8EBF0)] max-w-[180px]">
+          <span className="truncate block">{weapon.title}</span>
+        </td>
+        <td className="px-3 py-2 text-[var(--text-muted,#98A1B0)] hidden sm:table-cell">
+          {weapon.tags.slice(0, 2).join(", ") || "—"}
+        </td>
+        <td className="px-3 py-2 text-[var(--text-primary,#E8EBF0)] tabular-nums hidden sm:table-cell">
+          {weapon.score.toFixed(1)}
+        </td>
+        <td className="px-3 py-2 text-positive tabular-nums">{yieldPct}%</td>
+        <td className="px-3 py-2 text-[var(--t-gold,#D4AF37)] tabular-nums hidden lg:table-cell">{aprPct}%</td>
+        <td className="px-3 py-2 hidden md:table-cell">
+          <Sparkline data={sparkData.slice(-12)} width={60} height={20} label={`${weapon.title} demand`} />
+        </td>
+        <td className="px-3 py-2 text-[var(--text-muted,#98A1B0)] text-[9px]">
+          {weapon.jobsCompleted.length} runs
+        </td>
+      </tr>
+      {expanded && (
+        <tr className="border-b border-[var(--divider,#2A2F38)]">
+          <td colSpan={8} className="px-3 py-2 bg-[var(--obsidian-2,#11141A)]">
+            <pre className="text-[10px] font-mono text-[var(--text-muted,#98A1B0)] whitespace-pre-wrap max-h-24 overflow-auto">
+              {weapon.noteContent}
+            </pre>
+          </td>
+        </tr>
+      )}
+    </>
   );
 }
 
@@ -196,12 +187,25 @@ export default function GuildPage() {
   const [confetti, setConfetti] = useState(false);
   const [coinRain, setCoinRain] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [theme, setTheme] = useState<string>("terminal");
   const snap = getPassbookSnapshot("demo-user");
+  const stats = getPortfolioStats();
+  const deployStatus = getDeployStatus();
 
   useEffect(() => {
     setMounted(true);
     setWeapons(getWeapons());
+
+    const t = document.documentElement.getAttribute("data-theme") ?? "terminal";
+    setTheme(t);
+    const observer = new MutationObserver(() => {
+      setTheme(document.documentElement.getAttribute("data-theme") ?? "terminal");
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => observer.disconnect();
   }, []);
+
+  const isTerminal = theme === "terminal" || theme === "pro";
 
   function handleLoopComplete() {
     setConfetti(true);
@@ -211,92 +215,177 @@ export default function GuildPage() {
 
   const applications = mounted ? getApplications() : [];
   const totalOdachin = applications.reduce((s, a) => s + a.reward, 0);
-
   const guildTransactions: PassbookTransaction[] = [
     ...snap.recentTransactions,
     ...applications.map((app, i) => ({
       id: `app_tx_${i}`,
       type: "card" as const,
       amount: app.reward,
-      assetTitle: `クエストおだちん`,
+      assetTitle: "クエストおだちん",
       at: app.appliedAt,
     })),
   ].slice(0, 8);
 
+  // ─── Terminal layout ───────────────────────────────────────────────────────
+
+  if (isTerminal) {
+    return (
+      <main className="flex flex-col h-full min-h-0 bg-[var(--obsidian,#0B0D10)] text-[var(--text-primary,#E8EBF0)]">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--divider,#2A2F38)] flex-shrink-0">
+          <div>
+            <h1 className="text-sm font-mono font-bold text-[var(--t-gold,#D4AF37)] uppercase tracking-widest">
+              Portfolio
+            </h1>
+            <p className="text-[10px] font-mono text-[var(--text-muted,#98A1B0)] mt-0.5">
+              資産管理 — Yield / AUM / MoM
+            </p>
+          </div>
+          <Link href="/bank" className="px-3 py-1 text-[10px] font-mono font-bold bg-[var(--t-gold,#D4AF37)] text-[#0B0D10] rounded-[var(--radius-sm,2px)] uppercase tracking-widest hover:opacity-90 transition-opacity duration-100">
+            + SUBMIT RECIPE
+          </Link>
+        </div>
+
+        {/* Stats bar */}
+        {mounted && (
+          <div className="flex items-center gap-0 border-b border-[var(--divider,#2A2F38)] flex-shrink-0 overflow-x-auto">
+            {[
+              { label: "AUM (Est)", value: `¥${(stats.aumJpy / 10000).toFixed(0)}万`, color: "text-[var(--t-gold,#D4AF37)]" },
+              { label: "Yield (Ann)", value: `${stats.yieldPct}%`, color: "text-positive" },
+              { label: "MoM", value: `+${stats.momPct}%`, color: "text-positive" },
+              { label: "Recipe APR", value: `${stats.recipeAprPct}%`, color: "text-[var(--t-gold,#D4AF37)]" },
+              { label: "Recipes", value: `${weapons.length}`, color: "text-[var(--text-primary,#E8EBF0)]" },
+              { label: "Engagements", value: `${applications.length}`, color: "text-positive" },
+              { label: "Total Reward", value: `¥${totalOdachin.toLocaleString("ja-JP")}`, color: "text-positive" },
+            ].map((stat) => (
+              <div key={stat.label} className="flex flex-col items-start px-4 py-2.5 border-r border-[var(--divider,#2A2F38)] last:border-r-0 shrink-0">
+                <span className="text-[9px] font-mono text-[var(--text-muted,#98A1B0)] uppercase tracking-widest">{stat.label}</span>
+                <span className={`text-sm font-mono font-bold tabular-nums ${stat.color}`}>{stat.value}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="flex-1 grid lg:grid-cols-[1fr_280px] gap-0 min-h-0 overflow-hidden">
+          {/* Recipe table */}
+          <div className="flex flex-col min-h-0 overflow-hidden border-r border-[var(--divider,#2A2F38)]">
+            <div className="overflow-auto flex-1">
+              {!mounted ? (
+                <div className="p-5 text-[10px] font-mono text-[var(--text-muted,#98A1B0)]">Loading...</div>
+              ) : weapons.length === 0 ? (
+                <div className="p-5 text-center">
+                  <p className="text-[10px] font-mono text-[var(--text-muted,#98A1B0)]">Recipe未登録</p>
+                  <Link href="/bank" className="inline-block mt-3 px-4 py-1.5 text-[10px] font-mono font-bold bg-[var(--t-gold,#D4AF37)] text-[#0B0D10] rounded-[var(--radius-md,4px)] uppercase tracking-widest">ASSET TERMINAL →</Link>
+                </div>
+              ) : (
+                <table className="w-full border-collapse">
+                  <thead className="sticky top-0 bg-[var(--obsidian,#0B0D10)] z-10">
+                    <tr className="border-b border-[var(--divider,#2A2F38)]">
+                      {["Rank", "Title", "Tags", "Score", "Yield", "APR", "Demand", "Runs"].map((h, i) => (
+                        <th key={h} className={`px-3 py-2 text-left text-[9px] font-mono font-bold text-[var(--text-muted,#98A1B0)] uppercase tracking-widest ${[2, 3].includes(i) ? "hidden sm:table-cell" : ""} ${[5].includes(i) ? "hidden lg:table-cell" : ""} ${[6].includes(i) ? "hidden md:table-cell" : ""}`}>
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {weapons.map((w) => <RecipeRow key={w.id} weapon={w} />)}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            {/* Passbook — trading-terminal style */}
+            <div className="border-t border-[var(--divider,#2A2F38)] flex-shrink-0">
+              <div className="px-3 py-2 flex items-center justify-between border-b border-[var(--divider,#2A2F38)]">
+                <p className="text-[9px] font-mono text-[var(--text-muted,#98A1B0)] uppercase tracking-widest">取引履歴</p>
+                <span className="text-[9px] font-mono text-positive tabular-nums">
+                  Total: ¥{totalOdachin.toLocaleString("ja-JP")}
+                </span>
+              </div>
+              <div className="font-mono text-[10px]">
+                {guildTransactions.slice(0, 5).map((tx) => (
+                  <div key={tx.id} className="flex items-center justify-between px-3 py-1.5 border-b border-[var(--divider,#2A2F38)] last:border-0">
+                    <span className="text-[var(--text-muted,#98A1B0)] truncate flex-1">{tx.assetTitle}</span>
+                    <span className="text-positive tabular-nums shrink-0 ml-3">+¥{tx.amount.toLocaleString("ja-JP")}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right: deploy status */}
+          <div className="hidden lg:flex flex-col gap-0 min-h-0 overflow-hidden">
+            <div className="border-b border-[var(--divider,#2A2F38)] p-4">
+              <p className="text-[9px] font-mono text-[var(--text-muted,#98A1B0)] uppercase tracking-widest mb-3">Deploy Status</p>
+              <DeployStatusPanel status={deployStatus} />
+            </div>
+            <div className="p-4">
+              <p className="text-[9px] font-mono text-[var(--text-muted,#98A1B0)] uppercase tracking-widest mb-2">Yield Trend</p>
+              {weapons.slice(0, 3).map((w) => (
+                <div key={w.id} className="mb-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[9px] font-mono text-[var(--text-muted,#98A1B0)] truncate flex-1">{w.title.slice(0, 18)}</span>
+                    <span className="text-[9px] font-mono text-positive tabular-nums">{w.rank === "S" ? "18.4" : w.rank === "A" ? "12.3" : "7.2"}%</span>
+                  </div>
+                  <Sparkline data={getSparklineData(w.id).slice(-20)} width={220} height={30} label={`${w.title} yield trend`} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // ─── Kawaii layout ────────────────────────────────────────────────────────
+
   return (
     <main className="px-4 sm:px-6 lg:px-8 py-8 max-w-3xl mx-auto">
       <Confetti active={confetti} duration={2500} />
-
-      {/* Header with coin rain */}
       <div className="relative flex items-start justify-between gap-4 mb-6 overflow-visible">
         <CoinRain active={coinRain} />
         <div className="flex items-center gap-3">
-          <Shimaenaga variant="coin" size="md" mode="guardian" />
+          <Shimaenaga variant="coin" size="md" mode="guardian" className="shimaenaga-mascot" />
           <div>
             <h1 className="text-2xl font-bold text-ink">おたから をかくにんする</h1>
             <p className="text-sm text-ink-muted">キミの知恵と じっせきがあつまる場所</p>
           </div>
         </div>
-        <Link href="/bank" className="rounded-2xl bg-gradient-to-r from-gold to-timee-yellow text-[#7A5000] font-bold px-4 py-2 text-sm shrink-0">
-          + ちえをのこす
-        </Link>
+        <Link href="/bank" className="rounded-2xl bg-gradient-to-r from-gold to-timee-yellow text-[#7A5000] font-bold px-4 py-2 text-sm shrink-0">+ ちえをのこす</Link>
       </div>
 
-      {/* Friendly rank display */}
       {mounted && <FriendlyRankSummary weapons={weapons} />}
 
-      {/* Stats */}
       {mounted && (
         <div className="grid grid-cols-3 gap-3 my-5">
-          <div className="section-card p-4 text-center border border-gold-soft">
-            <p className="text-xs text-ink-muted">ぶき</p>
-            <p className="text-2xl font-black text-ink tabular-nums">{weapons.length}</p>
-          </div>
-          <div className="section-card p-4 text-center border border-gold-soft">
-            <p className="text-xs text-ink-muted">クエストクリア</p>
-            <p className="text-2xl font-black text-gold tabular-nums">{applications.length}</p>
-          </div>
-          <div className="section-card p-4 text-center border border-gold-soft">
-            <p className="text-xs text-ink-muted">こんしゅう ふえた金貨</p>
-            <p className="text-lg font-black text-accent-green tabular-nums">
-              ¥{totalOdachin.toLocaleString("ja-JP")}
-            </p>
-          </div>
+          <div className="section-card p-4 text-center border border-gold-soft"><p className="text-xs text-ink-muted">ぶき</p><p className="text-2xl font-black text-ink tabular-nums">{weapons.length}</p></div>
+          <div className="section-card p-4 text-center border border-gold-soft"><p className="text-xs text-ink-muted">クエストクリア</p><p className="text-2xl font-black text-gold tabular-nums">{applications.length}</p></div>
+          <div className="section-card p-4 text-center border border-gold-soft"><p className="text-xs text-ink-muted">こんしゅう ふえた金貨</p><p className="text-lg font-black text-accent-green tabular-nums">¥{totalOdachin.toLocaleString("ja-JP")}</p></div>
         </div>
       )}
 
-      {/* Loop demo */}
       <LoopDemo onComplete={handleLoopComplete} />
 
-      {/* Weapons */}
       <div className="mt-5">
         <h2 className="text-sm font-bold text-ink-muted uppercase tracking-widest mb-3">ぶきいちらん</h2>
         {!mounted ? (
           <div className="section-card p-8 text-center"><p className="text-ink-muted">よみこみちゅう…</p></div>
         ) : weapons.length === 0 ? (
           <div className="section-card p-8 text-center border-2 border-dashed border-gold/30">
-            <Shimaenaga variant="wave" size="md" mode="seal" className="mx-auto" />
+            <Shimaenaga variant="wave" size="md" mode="seal" className="mx-auto shimaenaga-mascot" />
             <p className="mt-3 text-sm text-ink-muted">まだ ぶきがありません。</p>
-            <Link href="/bank" className="rounded-2xl bg-gradient-to-r from-gold to-timee-yellow text-[#7A5000] font-bold px-5 py-2.5 text-sm mt-4 inline-block">
-              シマエナガ銀行へ →
-            </Link>
+            <Link href="/bank" className="rounded-2xl bg-gradient-to-r from-gold to-timee-yellow text-[#7A5000] font-bold px-5 py-2.5 text-sm mt-4 inline-block">シマエナガ銀行へ →</Link>
           </div>
         ) : (
-          <ul className="space-y-3">
-            {weapons.map((w) => <WeaponCard key={w.id} weapon={w} />)}
-          </ul>
+          <ul className="space-y-3">{weapons.map((w) => <WeaponCard key={w.id} weapon={w} />)}</ul>
         )}
       </div>
 
-      {/* Guild passbook */}
       <div className="mt-6">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-bold text-ink-muted uppercase tracking-widest">
-            いまのおたから（ギルド通帳）
-          </h2>
-          <button type="button" onClick={playPassbookChime} className="text-[10px] text-gold hover:underline" aria-label="通帳チャイムをならす">
-            🔔 チャリン
-          </button>
+          <h2 className="text-sm font-bold text-ink-muted uppercase tracking-widest">いまのおたから（ギルド通帳）</h2>
+          <button type="button" onClick={playPassbookChime} className="text-[10px] text-gold hover:underline" aria-label="通帳チャイムをならす">🔔 チャリン</button>
         </div>
         <PassbookTable transactions={guildTransactions} />
       </div>
