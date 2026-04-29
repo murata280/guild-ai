@@ -23,7 +23,62 @@ const RANK_META: Record<Rank, {
   },
 };
 
-export function RankBadge({ rank, large, showLabel = false }: { rank: Rank; large?: boolean; showLabel?: boolean }) {
+// Friendly mode: gold / silver / bronze with kawaii labels
+const FRIENDLY_META: Record<Rank, {
+  label: string;
+  sublabel: string;
+  bg: string;
+  textColor: string;
+  Icon: typeof CrownIcon;
+}> = {
+  S: {
+    label: "金",
+    sublabel: "すごい！",
+    bg: "bg-gradient-to-br from-[#F2DFA0] to-[#D4A437]",
+    textColor: "text-[#7A5000]",
+    Icon: CrownIcon,
+  },
+  A: {
+    label: "銀",
+    sublabel: "いいかんじ",
+    bg: "bg-gradient-to-br from-[#E8E8E8] to-[#ABABAB]",
+    textColor: "text-[#3A3A3A]",
+    Icon: StarIcon,
+  },
+  B: {
+    label: "銅",
+    sublabel: "これから",
+    bg: "bg-gradient-to-br from-[#F0C890] to-[#B87333]",
+    textColor: "text-[#5A2D00]",
+    Icon: LeafIcon,
+  },
+};
+
+interface RankBadgeProps {
+  rank: Rank;
+  large?: boolean;
+  showLabel?: boolean;
+  friendly?: boolean;
+}
+
+export function RankBadge({ rank, large, showLabel = false, friendly = false }: RankBadgeProps) {
+  if (friendly) {
+    const meta = FRIENDLY_META[rank];
+    const { Icon } = meta;
+    return (
+      <span
+        className={`inline-flex flex-col items-center gap-0.5 rounded-2xl border-2 border-white/60 shadow-md font-bold ${large ? "px-5 py-3 text-2xl" : "px-3 py-1.5 text-base"} ${meta.bg} ${meta.textColor}`}
+        aria-label={`${meta.label}バッジ — ${meta.sublabel}`}
+      >
+        <span className="flex items-center gap-1">
+          <Icon size={large ? 18 : 14} aria-hidden />
+          <span>{meta.label}</span>
+        </span>
+        <span className={`font-normal ${large ? "text-sm" : "text-xs"} opacity-80`}>{meta.sublabel}</span>
+      </span>
+    );
+  }
+
   const meta = RANK_META[rank];
   const { Icon } = meta;
   return (
