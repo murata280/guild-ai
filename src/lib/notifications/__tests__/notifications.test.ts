@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getNotifications, getUnreadCount } from "../index";
+import { getNotifications, getUnreadCount, getAmbassadorNotifications, getAllNotifications } from "../index";
 
 describe("getNotifications", () => {
   it("returns exactly 5 notifications", () => {
@@ -32,6 +32,25 @@ describe("getNotifications", () => {
     expect(notifs[0].read).toBe(false);
     expect(notifs[1].read).toBe(false);
     expect(notifs[2].read).toBe(true);
+  });
+});
+
+describe("getAmbassadorNotifications (ambassador category filter)", () => {
+  it("returns ambassador-typed notifications only", () => {
+    const notifs = getAmbassadorNotifications("any-user");
+    expect(notifs.length).toBeGreaterThan(0);
+    for (const n of notifs) {
+      expect(n.type).toBe("ambassador");
+      expect(n.txHash).toMatch(/^0x[0-9a-f]{64}$/);
+      expect(n.referredAssetId).toBeTruthy();
+    }
+  });
+
+  it("getAllNotifications includes both regular and ambassador notifications", () => {
+    const all = getAllNotifications("demo-user");
+    const regular = getNotifications("demo-user");
+    const ambassador = getAmbassadorNotifications("demo-user");
+    expect(all.length).toBe(regular.length + ambassador.length);
   });
 });
 

@@ -265,7 +265,7 @@ export interface AtoaRunResult {
   durationMs: number;
 }
 
-export type NotificationType = "job_income" | "royalty" | "rank_up" | "refund";
+export type NotificationType = "job_income" | "royalty" | "rank_up" | "refund" | "ambassador";
 
 export interface IncomeNotification {
   id: string;                 // notif_...

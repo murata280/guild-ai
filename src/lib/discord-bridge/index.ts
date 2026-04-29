@@ -81,6 +81,7 @@ export interface AmbassadorRewardResult {
   rewardAmount: number;
   share: number;
   awardedAt: string;
+  txHash: string; // mock smart-contract transaction hash
 }
 
 /**
@@ -105,11 +106,19 @@ export function attributeAmbassadorReward(
     });
   }
 
+  // Generate deterministic-looking mock tx hash (64 hex chars)
+  const txSeed = `${ambassadorId}_${saleAmount}_${Date.now()}`;
+  const txHash = "0x" + Array.from({ length: 64 }, (_, i) => {
+    const c = (txSeed.charCodeAt(i % txSeed.length) ^ (i * 31)) & 0xf;
+    return c.toString(16);
+  }).join("");
+
   return {
     ambassadorId,
     saleAmount,
     rewardAmount,
     share,
     awardedAt: new Date().toISOString(),
+    txHash,
   };
 }

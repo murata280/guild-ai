@@ -54,4 +54,29 @@ describe("wallet page", () => {
   it("contains お財布 in the heading", () => {
     expect(src).toContain("お財布");
   });
+
+  it("includes SkillGrowthCard component", () => {
+    expect(src).toContain("SkillGrowthCard");
+  });
+});
+
+describe("AssetReview component", () => {
+  const src = readFileSync(resolve(root, "src/components/AssetReview.tsx"), "utf8");
+
+  it("is a use client component", () => {
+    expect(src).toMatch(/^"use client"/);
+  });
+
+  it("exports AssetReview function", () => {
+    expect(src).toMatch(/export function AssetReview/);
+  });
+
+  it("has star picker with 5-star range", () => {
+    expect(src).toContain("StarPicker");
+    expect(src).toContain("1, 2, 3, 4, 5");
+  });
+
+  it("persists to localStorage with guild_review_ key", () => {
+    expect(src).toContain("guild_review_");
+  });
 });

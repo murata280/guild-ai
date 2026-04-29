@@ -100,4 +100,9 @@ describe("attributeAmbassadorReward", () => {
     expect(result.saleAmount).toBe(5000);
     expect(result.awardedAt).toBeTruthy();
   });
+
+  it("includes a mock smart-contract txHash starting with 0x", () => {
+    const result = attributeAmbassadorReward("amb_tx", 3000);
+    expect(result.txHash).toMatch(/^0x[0-9a-f]{64}$/);
+  });
 });
