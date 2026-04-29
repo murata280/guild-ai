@@ -15,6 +15,8 @@ import { Shimaenaga } from "@/components/Shimaenaga";
 import { buildAssetJsonLd } from "@/lib/structured-data";
 import { computeBundlePricing, computeMonthlyFromFloor } from "@/lib/checkout";
 import { ActivityPulse } from "@/components/ActivityPulse";
+import { BilingualLayout } from "@/components/BilingualLayout";
+import { mintGuildIdForAsset } from "@/lib/guild-id";
 
 const BASE_URL = "https://guild-ai.vercel.app";
 
@@ -48,6 +50,7 @@ export default function AssetPage({ params }: { params: { id: string } }) {
   if (!item) notFound();
 
   const { listing, auditResult, trustScore } = item;
+  const guildId = mintGuildIdForAsset(listing.id);
 
   const curlSample = `curl -X POST https://guild-ai.vercel.app/api/atoa/${listing.id} \\
   -H "Authorization: Bearer gld_<YOUR_ACCESS_KEY>" \\
@@ -64,39 +67,10 @@ export default function AssetPage({ params }: { params: { id: string } }) {
     2
   );
 
-  return (
-    <main className="px-4 sm:px-6 lg:px-8 py-8 max-w-3xl mx-auto">
-
-      {/* JSON-LD Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildAssetJsonLd(item)) }}
-      />
-
-      {/* Back */}
-      <Link href="/marketplace" className="text-xs text-[#9890A8] hover:text-kaki transition-colors">
-        ← お店に戻る
-      </Link>
-
-      {/* Hero thumbnail */}
-      <div className="mt-4 flex justify-center">
-        <div className="w-full max-w-[480px] aspect-[3/2] bg-gradient-to-br from-kami to-kaki/5 rounded-2xl flex items-center justify-center relative overflow-hidden">
-          <BeforeAfterHero assetId={listing.id} rank={listing.rank} size={120} className="rounded-xl" />
-          <div className="absolute top-3 right-3">
-            <RankBadge rank={listing.rank} large />
-          </div>
-        </div>
-      </div>
-
-      {/* Title row */}
-      <div className="mt-4 flex items-start gap-4">
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold leading-tight text-kuroko">{listing.title}</h1>
-          <ActivityPulse assetId={listing.id} className="mt-2" />
-        </div>
-      </div>
-
-      <p className="mt-2 text-sm text-[#4A4464] leading-relaxed">{listing.description}</p>
+  // Bilingual layout: emotional (left/yasashii) content
+  const emotionalContent = (
+    <>
+      <p className="text-sm text-[#4A4464] leading-relaxed">{listing.description}</p>
 
       {listing.githubUrl && (
         <a
@@ -121,76 +95,17 @@ export default function AssetPage({ params }: { params: { id: string } }) {
         </section>
       )}
 
-      {/* Metrics */}
-      <div className="mt-4 grid grid-cols-3 gap-3">
-        <div className="section-card p-4 overflow-hidden">
-          <p className="text-[11px] uppercase tracking-widest text-[#9890A8] truncate flex items-center">
-            信用スコア
-            <HelpHint content={messages.helpTrustScore} />
-          </p>
-          <p className="mt-1 text-2xl font-bold tabular-nums text-kuroko">{trustScore.score}</p>
-          <p className="text-xs text-[#9890A8]">/ 1000</p>
-        </div>
-        <div className="section-card p-4 overflow-hidden">
-          <p className="text-[11px] uppercase tracking-widest text-[#9890A8] truncate flex items-center">
-            こだわり（実績ログ）
-            <HelpHint content={messages.helpProofOfMake} />
-          </p>
-          <p className="mt-1 text-2xl font-bold tabular-nums text-kuroko">{auditResult.score.toFixed(1)}</p>
-          <p className="text-xs text-[#9890A8]">/ 100</p>
-        </div>
-        <div className="section-card p-4 overflow-hidden">
-          <p className="text-[11px] uppercase tracking-widest text-[#9890A8] truncate">稼働</p>
-          <p className="mt-1 text-2xl font-bold tabular-nums text-kuroko">{listing.vercelUptimeDays}</p>
-          <p className="text-xs text-[#9890A8]">日</p>
-        </div>
+      <div className="mt-4">
+        <ActivityPulse assetId={listing.id} />
       </div>
+    </>
+  );
 
-      {/* Two-Way Pricing */}
-      {(() => {
-        const monthly = computeMonthlyFromFloor(listing.floorPrice);
-        const pricing = computeBundlePricing(monthly);
-        return (
-          <div className="mt-4 section-card p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8] mb-3">料金プラン</p>
-            <div className="space-y-1.5 text-sm">
-              <div className="flex justify-between">
-                <span className="text-[#4A4464]">月額</span>
-                <span className="font-semibold tabular-nums text-kuroko">¥{pricing.monthlyJpy.toLocaleString("ja-JP")} / 月</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#4A4464]">買い切り</span>
-                <span className="font-semibold tabular-nums text-kuroko">¥{pricing.oneoffJpy.toLocaleString("ja-JP")}</span>
-              </div>
-              <div className="flex justify-between pt-1.5 border-t border-kuroko/10">
-                <span className="text-[#4A4464]">1リクエスト</span>
-                <span className="font-semibold tabular-nums text-kaki">{pricing.perCallJpyc} デジタル円</span>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* お墨付きパネル */}
-      <TrustPanel
-        assetId={listing.id}
-        rank={listing.rank}
-        trustScore={trustScore.score}
-        vercelUptimeDays={listing.vercelUptimeDays}
-      />
-
-      {/* AI Valuation Radar + Will Signal Trigger */}
-      <ValuationSection
-        rank={listing.rank}
-        floorPrice={listing.floorPrice}
-        thoughtDensity={listing.ccaf.thoughtDensity}
-        iterations={listing.ccaf.iterations}
-        uptimeDays={listing.vercelUptimeDays}
-        justification={auditResult.justification}
-      />
-
+  // Bilingual layout: spec (right/kuwashii) content
+  const specContent = (
+    <>
       {/* CCAF detail */}
-      <section className="mt-4 section-card p-5">
+      <section className="section-card p-5">
         <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8] flex items-center">
           こだわり（実績ログ）
           <HelpHint content={messages.helpProofOfMake} />
@@ -238,6 +153,118 @@ export default function AssetPage({ params }: { params: { id: string } }) {
           ))}
         </ul>
       </section>
+
+      {/* GUILD-ID */}
+      <section className="mt-3 section-card p-4">
+        <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8] mb-2">GUILD-ID</h2>
+        <code className="block rounded-lg bg-kuroko px-3 py-2 text-xs font-mono text-accent-green break-all">
+          {guildId}
+        </code>
+      </section>
+
+      {/* Metrics */}
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        <div className="section-card p-3 overflow-hidden">
+          <p className="text-[10px] uppercase tracking-widest text-[#9890A8] truncate flex items-center">
+            信用スコア
+            <HelpHint content={messages.helpTrustScore} />
+          </p>
+          <p className="mt-1 text-xl font-bold tabular-nums text-kuroko">{trustScore.score}</p>
+          <p className="text-xs text-[#9890A8]">/ 1000</p>
+        </div>
+        <div className="section-card p-3 overflow-hidden">
+          <p className="text-[10px] uppercase tracking-widest text-[#9890A8] truncate flex items-center">
+            こだわり
+            <HelpHint content={messages.helpProofOfMake} />
+          </p>
+          <p className="mt-1 text-xl font-bold tabular-nums text-kuroko">{auditResult.score.toFixed(1)}</p>
+          <p className="text-xs text-[#9890A8]">/ 100</p>
+        </div>
+        <div className="section-card p-3 overflow-hidden">
+          <p className="text-[10px] uppercase tracking-widest text-[#9890A8] truncate">稼働</p>
+          <p className="mt-1 text-xl font-bold tabular-nums text-kuroko">{listing.vercelUptimeDays}</p>
+          <p className="text-xs text-[#9890A8]">日</p>
+        </div>
+      </div>
+    </>
+  );
+
+  return (
+    <main className="px-4 sm:px-6 lg:px-8 py-8 max-w-3xl mx-auto">
+
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildAssetJsonLd(item)) }}
+      />
+
+      {/* Back */}
+      <Link href="/marketplace" className="text-xs text-[#9890A8] hover:text-kaki transition-colors">
+        ← お店に戻る
+      </Link>
+
+      {/* Hero thumbnail */}
+      <div className="mt-4 flex justify-center">
+        <div className="w-full max-w-[480px] aspect-[3/2] bg-gradient-to-br from-kami to-kaki/5 rounded-2xl flex items-center justify-center relative overflow-hidden">
+          <BeforeAfterHero assetId={listing.id} rank={listing.rank} size={120} className="rounded-xl" />
+          <div className="absolute top-3 right-3">
+            <RankBadge rank={listing.rank} large />
+          </div>
+        </div>
+      </div>
+
+      {/* Title row */}
+      <div className="mt-4 flex items-start gap-4">
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold leading-tight text-kuroko">{listing.title}</h1>
+        </div>
+      </div>
+
+      {/* Bilingual two-column layout */}
+      <BilingualLayout emotionalContent={emotionalContent} specContent={specContent} />
+
+      {/* Two-Way Pricing */}
+      {(() => {
+        const monthly = computeMonthlyFromFloor(listing.floorPrice);
+        const pricing = computeBundlePricing(monthly);
+        return (
+          <div className="mt-4 section-card p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8] mb-3">料金プラン</p>
+            <div className="space-y-1.5 text-sm">
+              <div className="flex justify-between">
+                <span className="text-[#4A4464]">月額</span>
+                <span className="font-semibold tabular-nums text-kuroko">¥{pricing.monthlyJpy.toLocaleString("ja-JP")} / 月</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#4A4464]">買い切り</span>
+                <span className="font-semibold tabular-nums text-kuroko">¥{pricing.oneoffJpy.toLocaleString("ja-JP")}</span>
+              </div>
+              <div className="flex justify-between pt-1.5 border-t border-kuroko/10">
+                <span className="text-[#4A4464]">1リクエスト</span>
+                <span className="font-semibold tabular-nums text-kaki">{pricing.perCallJpyc} デジタル円</span>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* お墨付きパネル */}
+      <TrustPanel
+        assetId={listing.id}
+        rank={listing.rank}
+        trustScore={trustScore.score}
+        vercelUptimeDays={listing.vercelUptimeDays}
+      />
+
+      {/* AI Valuation Radar + Will Signal Trigger */}
+      <ValuationSection
+        rank={listing.rank}
+        floorPrice={listing.floorPrice}
+        thoughtDensity={listing.ccaf.thoughtDensity}
+        iterations={listing.ccaf.iterations}
+        uptimeDays={listing.vercelUptimeDays}
+        justification={auditResult.justification}
+      />
 
       {/* Trust-Lock — Security Panel */}
       <div className="mt-6 section-card p-5">
@@ -323,12 +350,13 @@ export default function AssetPage({ params }: { params: { id: string } }) {
         </div>
       </section>
 
-      {/* ★ レビューセクション */}
+      {/* レビューセクション */}
       <AssetReview assetId={listing.id} />
 
       {/* Raw Data タブ — エンジニア向け技術詳細 */}
       <RawDataPanel data={{
         id: listing.id,
+        guildId,
         rank: listing.rank,
         basePrice: listing.basePrice,
         floorPrice: listing.floorPrice,
