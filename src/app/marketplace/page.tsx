@@ -19,6 +19,8 @@ import { FlipCard } from "@/components/FlipCard";
 import { ActivityPulse } from "@/components/ActivityPulse";
 import { generatePersonaCards, type Persona } from "@/lib/persona-cards";
 import { useLazyMount } from "@/hooks/useLazyMount";
+import { generateAllDraftListings, type ProvisionalListing } from "@/lib/draft-listing";
+import { PoolPulse } from "@/components/PoolPulse";
 
 interface LazyMarketplaceCardProps {
   item: MarketplaceListing;
@@ -123,6 +125,48 @@ function LazyMarketplaceCard({ item, isNew, hasDetailPage, persona }: LazyMarket
   );
 }
 
+// Unclaimed draft card
+function UnclaimedCard({ draft }: { draft: ProvisionalListing }) {
+  return (
+    <div className="section-card p-4 relative overflow-hidden">
+      {/* Unclaimed ribbon */}
+      <div
+        role="note"
+        aria-describedby="claim-hint"
+        className="absolute top-2 left-2 bg-[#FFCC00]/30 rounded-full px-2 py-0.5 text-[10px] font-bold text-[#8B6800] border border-[#FFCC00]/50"
+      >
+        未請求
+      </div>
+
+      <div className="aspect-[3/2] bg-gradient-to-br from-[#FFFBEA] to-[#FFF8D6] rounded-xl flex items-center justify-center mb-3 mt-4">
+        <div className="text-center px-3">
+          <p className="text-xs font-semibold text-[#8B6800] line-clamp-2">{draft.title}</p>
+          <RankBadge rank={draft.rank} large />
+        </div>
+      </div>
+
+      <div className="space-y-1 mb-2">
+        {draft.useCases.slice(0, 2).map((uc) => (
+          <p key={uc} className="text-[10px] text-[#4A4464] flex gap-1">
+            <span className="text-[#FFCC00] shrink-0">·</span>
+            <span className="line-clamp-1">{uc}</span>
+          </p>
+        ))}
+      </div>
+
+      <PoolPulse assetId={draft.id} pooledJpy={draft.valuePool} className="mb-2" />
+
+      <Link
+        href={`/sell?claim=${draft.id}`}
+        className="block w-full text-center rounded-lg border border-[#FFCC00]/60 bg-[#FFCC00]/10 px-3 py-2 text-xs font-semibold text-[#8B6800] hover:bg-[#FFCC00]/20 transition-colors"
+        aria-label={`${draft.title}の権利を確認する`}
+      >
+        権利を確認する →
+      </Link>
+    </div>
+  );
+}
+
 const SORT_LABELS: { key: SortKey; label: string }[] = [
   { key: "trust", label: "信用スコア" },
   { key: "ccaf",  label: "こだわり（実績）" },
@@ -130,6 +174,8 @@ const SORT_LABELS: { key: SortKey; label: string }[] = [
 ];
 
 const ALL_RANKS: Rank[] = ["S", "A", "B"];
+
+type ViewTab = "all" | "registered" | "unclaimed";
 
 function MarketplaceContent() {
   const params = useSearchParams();
@@ -140,6 +186,7 @@ function MarketplaceContent() {
   const [customListings, setCustomListings] = useState<MarketplaceListing[]>([]);
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const [persona, setPersona] = useState<Persona>("general");
+  const [viewTab, setViewTab] = useState<ViewTab>("all");
 
   useEffect(() => {
     try {
@@ -164,11 +211,19 @@ function MarketplaceContent() {
     [allListings, sortKey, filterRanks, minTrustScore]
   );
 
+  const draftListings = useMemo(() => generateAllDraftListings(), []);
+
   const toggleRank = (rank: Rank) => {
     setFilterRanks((prev) => prev.includes(rank) ? prev.filter((r) => r !== rank) : [...prev, rank]);
   };
 
   const isMock = (id: string) => MOCK_MARKETPLACE.some((m) => m.listing.id === id);
+
+  const displayedItems = viewTab === "registered"
+    ? items.filter((item) => isMock(item.listing.id))
+    : viewTab === "unclaimed"
+    ? null
+    : items;
 
   return (
     <main className="px-4 sm:px-6 lg:px-8 py-8 max-w-4xl mx-auto">
@@ -177,7 +232,7 @@ function MarketplaceContent() {
 
       <div className="mt-4 flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-kuroko leading-snug flex items-center gap-2"><ShoppingBagIcon size={22} className="text-kaki" />🏦 保管庫（スキルの貯金箱）</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-kuroko leading-snug flex items-center gap-2"><ShoppingBagIcon size={22} className="text-kaki" />保管庫（スキルの貯金箱）</h1>
           <p className="mt-1 text-base text-[#9890A8] leading-relaxed">
             AI評価済みスキル資産の保管庫。良質なたからものほど高評価・高価格で表示されます。
           </p>
@@ -187,102 +242,133 @@ function MarketplaceContent() {
         </Link>
       </div>
 
-      {/* Controls */}
-      <div className="mt-6 section-card p-4 flex flex-wrap gap-5 items-end">
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[#9890A8]">並び順</p>
-          <div className="flex gap-1.5 flex-wrap">
-            {SORT_LABELS.map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => setSortKey(key)}
-                aria-pressed={sortKey === key}
-                className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-all active:scale-[0.97] ${
-                  sortKey === key
-                    ? "border-kaki bg-kaki text-white"
-                    : "border-kuroko/20 text-[#3A3664] hover:border-kaki/40"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[#9890A8]">ランク</p>
-          <div className="flex gap-1.5">
-            {ALL_RANKS.map((rank) => (
-              <button
-                key={rank}
-                onClick={() => toggleRank(rank)}
-                aria-pressed={filterRanks.includes(rank)}
-                aria-label={`ランク${rank}でフィルタ`}
-                className={`rounded-lg border px-3 py-1.5 text-sm font-bold transition-all active:scale-[0.97] ${
-                  filterRanks.includes(rank)
-                    ? rank === "S"
-                      ? "border-kaki bg-kaki text-white"
-                      : rank === "A"
-                      ? "border-zinc-400 bg-zinc-300 text-kuroko"
-                      : "border-amber-800 bg-amber-700 text-white"
-                    : "border-kuroko/20 text-[#9890A8]"
-                }`}
-              >
-                {rank}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[#9890A8]">
-            最低 信用スコア: <span className="text-kuroko font-bold">{minTrustScore}</span>
-          </p>
-          <input
-            type="range"
-            min={0} max={900} step={50}
-            value={minTrustScore}
-            onChange={(e) => setMinTrustScore(Number(e.target.value))}
-            aria-label="最低信用スコアフィルタ"
-            className="w-32 accent-kaki"
-          />
-        </div>
-
-        <fieldset>
-          <legend className="mb-2 text-xs font-semibold uppercase tracking-widest text-[#9890A8]">表示スタイル</legend>
-          <div className="flex gap-1.5">
-            {(["general", "pm", "engineer"] as Persona[]).map((p) => (
-              <button key={p} onClick={() => setPersona(p)} aria-pressed={persona === p}
-                className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-all active:scale-[0.97] ${
-                  persona === p ? "border-kaki bg-kaki text-white" : "border-kuroko/20 text-[#3A3664] hover:border-kaki/40"
-                }`}>
-                {p === "general" ? "一般" : p === "pm" ? "PM" : "エンジニア"}
-              </button>
-            ))}
-          </div>
-        </fieldset>
-
-        <p className="ml-auto text-sm text-[#9890A8] self-end">{items.length} 件</p>
+      {/* View tabs: all / registered / unclaimed */}
+      <div role="tablist" className="flex gap-1 border-b border-kuroko/10 mt-4 mb-0">
+        {(["all", "registered", "unclaimed"] as ViewTab[]).map((tab) => (
+          <button
+            key={tab}
+            role="tab"
+            aria-selected={viewTab === tab}
+            onClick={() => setViewTab(tab)}
+            className={`px-4 py-2 text-sm font-semibold transition-colors ${viewTab === tab ? "border-b-2 border-kaki text-kaki" : "text-[#9890A8] hover:text-kuroko"}`}
+          >
+            {tab === "all" ? "すべて" : tab === "registered" ? "登録済み" : "未請求"}
+          </button>
+        ))}
       </div>
 
-      {/* Asset grid */}
-      {items.length === 0 ? (
-        <div className="mt-12 text-center">
-          <p className="text-base text-[#9890A8]">条件に一致する資産がありません。</p>
-        </div>
-      ) : (
+      {/* Unclaimed hint for screen readers */}
+      <span id="claim-hint" className="sr-only">この作品はまだ権利が主張されていません。</span>
+
+      {viewTab === "unclaimed" ? (
+        /* Unclaimed draft grid */
         <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item) => (
-            <li key={item.listing.id}>
-              <LazyMarketplaceCard
-                item={item}
-                isNew={item.listing.id === highlightId}
-                hasDetailPage={isMock(item.listing.id)}
-                persona={persona}
-              />
+          {draftListings.map((draft) => (
+            <li key={draft.id}>
+              <UnclaimedCard draft={draft} />
             </li>
           ))}
         </ul>
+      ) : (
+        <>
+          {/* Controls */}
+          <div className="mt-4 section-card p-4 flex flex-wrap gap-5 items-end">
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[#9890A8]">並び順</p>
+              <div className="flex gap-1.5 flex-wrap">
+                {SORT_LABELS.map(({ key, label }) => (
+                  <button
+                    key={key}
+                    onClick={() => setSortKey(key)}
+                    aria-pressed={sortKey === key}
+                    className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-all active:scale-[0.97] ${
+                      sortKey === key
+                        ? "border-kaki bg-kaki text-white"
+                        : "border-kuroko/20 text-[#3A3664] hover:border-kaki/40"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[#9890A8]">ランク</p>
+              <div className="flex gap-1.5">
+                {ALL_RANKS.map((rank) => (
+                  <button
+                    key={rank}
+                    onClick={() => toggleRank(rank)}
+                    aria-pressed={filterRanks.includes(rank)}
+                    aria-label={`ランク${rank}でフィルタ`}
+                    className={`rounded-lg border px-3 py-1.5 text-sm font-bold transition-all active:scale-[0.97] ${
+                      filterRanks.includes(rank)
+                        ? rank === "S"
+                          ? "border-kaki bg-kaki text-white"
+                          : rank === "A"
+                          ? "border-zinc-400 bg-zinc-300 text-kuroko"
+                          : "border-amber-800 bg-amber-700 text-white"
+                        : "border-kuroko/20 text-[#9890A8]"
+                    }`}
+                  >
+                    {rank}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[#9890A8]">
+                最低 信用スコア: <span className="text-kuroko font-bold">{minTrustScore}</span>
+              </p>
+              <input
+                type="range"
+                min={0} max={900} step={50}
+                value={minTrustScore}
+                onChange={(e) => setMinTrustScore(Number(e.target.value))}
+                aria-label="最低信用スコアフィルタ"
+                className="w-32 accent-kaki"
+              />
+            </div>
+
+            <fieldset>
+              <legend className="mb-2 text-xs font-semibold uppercase tracking-widest text-[#9890A8]">表示スタイル</legend>
+              <div className="flex gap-1.5">
+                {(["general", "pm", "engineer"] as Persona[]).map((p) => (
+                  <button key={p} onClick={() => setPersona(p)} aria-pressed={persona === p}
+                    className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-all active:scale-[0.97] ${
+                      persona === p ? "border-kaki bg-kaki text-white" : "border-kuroko/20 text-[#3A3664] hover:border-kaki/40"
+                    }`}>
+                    {p === "general" ? "一般" : p === "pm" ? "PM" : "エンジニア"}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+
+            <p className="ml-auto text-sm text-[#9890A8] self-end">{displayedItems?.length ?? draftListings.length} 件</p>
+          </div>
+
+          {/* Asset grid */}
+          {!displayedItems || displayedItems.length === 0 ? (
+            <div className="mt-12 text-center">
+              <p className="text-base text-[#9890A8]">条件に一致する資産がありません。</p>
+            </div>
+          ) : (
+            <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {displayedItems.map((item) => (
+                <li key={item.listing.id}>
+                  <LazyMarketplaceCard
+                    item={item}
+                    isNew={item.listing.id === highlightId}
+                    hasDetailPage={isMock(item.listing.id)}
+                    persona={persona}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
       )}
     </main>
   );
