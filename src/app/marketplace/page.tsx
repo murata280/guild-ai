@@ -10,10 +10,12 @@ import {
   type SortKey,
 } from "@/lib/marketplace";
 import { RankBadge } from "@/components/RankBadge";
+import { StarRating } from "@/components/StarRating";
 import { StepIndicator } from "@/components/StepIndicator";
 import type { Rank, MarketplaceListing } from "@/types";
 import { ShoppingBagIcon } from "@/components/icons";
 import { HumanThumbnail } from "@/components/HumanThumbnail";
+import { mapToEmotionalTags } from "@/lib/emotional-tags";
 
 const SORT_LABELS: { key: SortKey; label: string }[] = [
   { key: "trust", label: "信用スコア" },
@@ -156,11 +158,13 @@ function MarketplaceContent() {
               isNew ? "ring-2 ring-kaki animate-pulse" : ""
             }`;
 
+            const emotionalTags = mapToEmotionalTags(item);
+
             const content = (
               <>
-                {/* Thumbnail + rank badge */}
-                <div className="h-24 bg-kuroko/5 rounded-xl flex items-center justify-center relative mb-3 overflow-hidden">
-                  <HumanThumbnail assetId={item.listing.id} title={item.listing.title} rank={item.listing.rank} size={72} />
+                {/* Thumbnail + rank badge — aspect-[3/2] hero */}
+                <div className="aspect-[3/2] bg-gradient-to-br from-kami to-kaki/5 rounded-xl flex items-center justify-center relative mb-3 overflow-hidden">
+                  <HumanThumbnail assetId={item.listing.id} title={item.listing.title} rank={item.listing.rank} size={80} />
                   <div className="absolute top-2 right-2">
                     <RankBadge rank={item.listing.rank} large />
                   </div>
@@ -169,23 +173,31 @@ function MarketplaceContent() {
                   )}
                 </div>
 
-                <h2 className="text-base font-semibold leading-snug text-kuroko line-clamp-2">
-                  {item.listing.title}
-                </h2>
-                <p className="mt-2 line-clamp-2 text-sm text-[#9890A8] leading-relaxed">
-                  {item.listing.description}
-                </p>
+                {/* Emotional tags */}
+                <div className="flex flex-wrap gap-1 mb-2">
+                  {emotionalTags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full bg-kaki/10 border border-kaki/20 px-2 py-0.5 text-[10px] font-semibold text-kaki"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
 
-                <dl className="mt-4 space-y-1.5">
+                <div className="flex items-start justify-between gap-2">
+                  <h2 className="text-base font-semibold leading-snug text-kuroko line-clamp-2 flex-1">
+                    {item.listing.title}
+                  </h2>
+                  <StarRating rank={item.listing.rank} size="sm" />
+                </div>
+
+                <dl className="mt-3 space-y-1.5">
                   <div className="flex justify-between text-sm">
                     <dt className="text-[#9890A8]">信用スコア</dt>
                     <dd className="font-semibold tabular-nums text-kuroko">
                       {item.trustScore.score} <span className="text-[#9890A8] font-normal">/ 1000</span>
                     </dd>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <dt className="text-[#9890A8]">こだわり（実績）</dt>
-                    <dd className="font-semibold tabular-nums text-kuroko">{item.auditResult.score.toFixed(1)}</dd>
                   </div>
                   <div className="flex justify-between items-baseline pt-2 border-t border-kuroko/10">
                     <dt className="text-sm text-[#9890A8]">お値段</dt>

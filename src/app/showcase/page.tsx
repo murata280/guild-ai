@@ -9,6 +9,7 @@ import { RankBadge } from "@/components/RankBadge";
 import { StepIndicator } from "@/components/StepIndicator";
 import { HumanThumbnail } from "@/components/HumanThumbnail";
 import type { MarketplaceListing } from "@/types";
+import { mapToEmotionalTags } from "@/lib/emotional-tags";
 
 function djb2(s: string): number {
   let h = 5381;
@@ -36,14 +37,16 @@ function ShowcaseCard({
     }
   }
 
+  const emotionalTags = mapToEmotionalTags(item);
+
   return (
     <article
       aria-label={`${item.listing.title} — ${item.listing.rank}ランク`}
       className="section-card overflow-hidden hover:shadow-card-hover transition-shadow"
     >
-      {/* Thumbnail */}
-      <div className="h-36 bg-kuroko/5 flex items-center justify-center relative overflow-hidden">
-        <HumanThumbnail assetId={item.listing.id} title={item.listing.title} rank={item.listing.rank} size={96} />
+      {/* Thumbnail — aspect-[3/2] hero */}
+      <div className="aspect-[3/2] bg-gradient-to-br from-kami to-kaki/5 flex items-center justify-center relative overflow-hidden">
+        <HumanThumbnail assetId={item.listing.id} title={item.listing.title} rank={item.listing.rank} size={80} />
         <div className="absolute top-2 right-2">
           <RankBadge rank={item.listing.rank} />
         </div>
@@ -58,6 +61,18 @@ function ShowcaseCard({
 
       {/* Body */}
       <div className="p-4">
+        {/* Emotional tags */}
+        <div className="flex flex-wrap gap-1 mb-2">
+          {emotionalTags.map((tag) => (
+            <span
+              key={tag}
+              className="rounded-full bg-kaki/10 border border-kaki/20 px-2 py-0.5 text-[10px] font-semibold text-kaki"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+
         <div className="flex items-start justify-between gap-2">
           <h2 className="text-sm font-bold text-kuroko leading-snug line-clamp-2 flex-1">
             {item.listing.title}

@@ -68,12 +68,20 @@ export default function AssetPage({ params }: { params: { id: string } }) {
         ← お店に戻る
       </Link>
 
+      {/* Hero thumbnail */}
+      <div className="mt-4 flex justify-center">
+        <div className="w-full max-w-[480px] aspect-[3/2] bg-gradient-to-br from-kami to-kaki/5 rounded-2xl flex items-center justify-center relative overflow-hidden">
+          <AssetSpirit assetId={listing.id} rank={listing.rank} size={120} className="rounded-xl" />
+          <div className="absolute top-3 right-3">
+            <RankBadge rank={listing.rank} large />
+          </div>
+        </div>
+      </div>
+
       {/* Title row */}
       <div className="mt-4 flex items-start gap-4">
-        <AssetSpirit assetId={listing.id} rank={listing.rank} size={56} className="shrink-0 rounded-xl" />
-        <div className="flex-1 flex items-start justify-between gap-2">
+        <div className="flex-1">
           <h1 className="text-2xl font-bold leading-tight text-kuroko">{listing.title}</h1>
-          <RankBadge rank={listing.rank} />
         </div>
       </div>
 
