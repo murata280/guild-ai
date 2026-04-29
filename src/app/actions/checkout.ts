@@ -5,8 +5,12 @@
 // Without this layer, importing lib/checkout (and its db/client dep) into a
 // client component would bundle Neon for the browser and throw at runtime.
 
+import { eq } from "drizzle-orm";
 import { createCheckoutSession, confirmPayment } from "@/lib/checkout";
 import { issueApiKeyVerified } from "@/lib/api-gateway";
+import { purchase } from "@/lib/ownership";
+import { db } from "@/db/client";
+import { listings } from "@/db/schema";
 import type { PaymentMethod, Currency } from "@/types";
 
 export interface PurchaseInput {
@@ -34,6 +38,19 @@ export async function purchaseAction(input: PurchaseInput): Promise<PurchaseResu
       return { status: "failed", message: "決済に失敗しました。再度お試しください。" };
     }
     const apiKey = await issueApiKeyVerified("demo-buyer", input.assetId, session.id);
+
+    // Record ownership transfer. Failure is logged but does not fail the purchase
+    // — payment and API key are already done; rolling them back isn't possible here.
+    try {
+      const [listing] = await db
+        .select({ title: listings.title })
+        .from(listings)
+        .where(eq(listings.id, input.assetId));
+      await purchase(input.assetId, "demo-buyer", listing?.title ?? input.assetId);
+    } catch (err) {
+      console.error("[purchaseAction] failed to record ownership:", err);
+    }
+
     return {
       status: "settled",
       apiKey: apiKey.key,
