@@ -14,6 +14,15 @@ const config: Config = {
         "accent-green": "#0FA968",    // success / payout highlight
         kami: "#FAFAFA",              // neutral off-white
         "surface-inset": "#F4F4F5",   // sidebar / inset surface
+        // ─── Friendly Intelligence Bank palette ───────────────────
+        snow: "#FFFFFF",
+        "snow-soft": "#FAFAF7",
+        gold: "#D4A437",              // リッチゴールド
+        "gold-soft": "#F2DFA0",
+        "gold-light": "#FFF8DC",
+        "timee-yellow": "#FFCC00",    // タイミーイエロー (既存 ACCENT と同値)
+        ink: "#1A1628",               // = kuroko
+        "ink-muted": "#6F6884",
       },
       fontFamily: {
         sans: ["var(--font-noto-jp)", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Meiryo", "sans-serif"]
