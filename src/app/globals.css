@@ -6,6 +6,56 @@
   :root {
     color-scheme: light;
   }
+
+  /* ── Terminal Theme CSS Variables ─────────────────────────── */
+  [data-theme="terminal"] {
+    color-scheme: dark;
+    --obsidian: #0B0D10;
+    --obsidian-2: #11141A;
+    --slate: #1B2027;
+    --slate-2: #232934;
+    --slate-3: #2E3540;
+    --text-primary: #E8EBF0;
+    --text-muted: #98A1B0;
+    --divider: #2A2F38;
+    --t-gold: #D4AF37;
+    --t-gold-soft: #B58E1A;
+    --t-gold-glow: rgba(212,175,55,0.18);
+    --positive: #4DA968;
+    --negative: #C45757;
+    --radius-md: 4px;
+    --radius-sm: 2px;
+    --radius-lg: 6px;
+    font-feature-settings: "tnum", "cv11";
+  }
+
+  [data-theme="terminal"] body,
+  [data-theme="terminal"] .t-bg {
+    background-color: var(--obsidian);
+    color: var(--text-primary);
+  }
+
+  /* Hide kawaii mascots in terminal theme */
+  [data-theme="terminal"] .shimaenaga-mascot,
+  [data-theme="terminal"] .kawaii-only,
+  [data-theme="pro"] .kawaii-only {
+    display: none !important;
+  }
+
+  /* Show lodge (terminal) header in terminal/pro mode */
+  [data-theme="terminal"] .lodge-terminal-header,
+  [data-theme="pro"] .lodge-terminal-header {
+    display: block !important;
+  }
+
+  /* Terminal section card */
+  [data-theme="terminal"] .section-card {
+    background-color: var(--obsidian-2);
+    border-color: var(--divider);
+    border-radius: var(--radius-md);
+    box-shadow: 0 0 0 1px var(--divider);
+  }
+
   body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -137,6 +187,27 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .job-gold-glow { animation: none; box-shadow: 0 0 0 2px rgba(212,164,55,0.4); }
+}
+
+/* ─── Terminal: gold flash (0.1s) ──────────────────────────── */
+@keyframes gold-flash {
+  0%   { opacity: 0; }
+  30%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+.gold-flash-bar {
+  animation: gold-flash 0.1s ease-out forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gold-flash-bar { animation: none; opacity: 0; }
+}
+
+/* Terminal: all anime capped at 100ms */
+[data-theme="terminal"] *,
+[data-theme="terminal"] *::before,
+[data-theme="terminal"] *::after {
+  animation-duration: 100ms !important;
+  transition-duration: 100ms !important;
 }
 
 /* Asset thumbnail shimmer — loading skeleton for HumanThumbnail */

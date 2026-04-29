@@ -3,8 +3,8 @@ import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import { SidebarNav, BottomNav } from "@/components/SidebarNav";
 import { OnboardingGuide } from "@/components/OnboardingGuide";
-import { Shimaenaga } from "@/components/Shimaenaga";
 import { ShimaenagaGuide } from "@/components/ShimaenagaGuide";
+import { ThemeInitScript, ThemeToggle } from "@/components/ThemeToggle";
 
 const notoSansJP = Noto_Sans_JP({
   subsets: ["latin"],
@@ -38,25 +38,28 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="ja" className={notoSansJP.variable}>
-      <body className="h-screen h-dvh flex bg-kami overflow-hidden text-kuroko font-sans antialiased">
+    <html lang="ja" className={notoSansJP.variable} data-theme="terminal">
+      <head>
+        <ThemeInitScript />
+      </head>
+      <body className="h-screen h-dvh flex bg-kami overflow-hidden text-kuroko font-sans antialiased [data-theme=terminal]:bg-obsidian [data-theme=terminal]:text-t-text">
 
         {/* ── Desktop sidebar ───────────────────────────────── */}
-        <aside className="hidden lg:flex w-52 flex-shrink-0 flex-col border-r border-kuroko/10 bg-surface-inset">
+        <aside className="hidden lg:flex w-52 flex-shrink-0 flex-col border-r border-kuroko/10 bg-surface-inset [data-theme=terminal]:bg-obsidian-2 [data-theme=terminal]:border-divider">
           {/* Logo */}
           <div className="h-14 flex items-center gap-2.5 px-4 border-b border-kuroko/10 flex-shrink-0">
-            <div className="w-8 h-8 rounded-lg bg-kaki flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 bg-[var(--t-gold,#1A6BB5)]">
               <span className="text-white text-xs font-black tracking-wider">G</span>
             </div>
-            <span className="text-sm font-bold text-kuroko">GUILD AI</span>
-            <Shimaenaga variant="wave" size="xs" className="ml-auto" />
+            <span className="text-sm font-bold">GUILD AI</span>
+            <div className="ml-auto">
+              <ThemeToggle />
+            </div>
           </div>
-          {/* Nav links (client component for active state) */}
           <SidebarNav />
-          {/* Footer hint */}
           <div className="px-4 py-4 border-t border-kuroko/10 flex-shrink-0">
-            <p className="text-xs text-[#9890A8] leading-relaxed">
-              良質な知能を出品すると売れる。
+            <p className="text-xs text-[#9890A8] leading-relaxed font-mono">
+              良質な知能を資産に。
             </p>
           </div>
         </aside>
@@ -66,27 +69,27 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           {/* Mobile header */}
           <header className="lg:hidden h-14 flex items-center justify-between px-4 border-b border-kuroko/10 glass-header z-40 flex-shrink-0">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-kaki flex items-center justify-center flex-shrink-0">
+              <div className="w-7 h-7 rounded flex items-center justify-center flex-shrink-0 bg-[var(--t-gold,#1A6BB5)]">
                 <span className="text-white text-[10px] font-black">G</span>
               </div>
-              <span className="text-sm font-bold text-kuroko">GUILD AI</span>
+              <span className="text-sm font-bold">GUILD AI</span>
             </div>
+            <ThemeToggle />
           </header>
 
-          {/* Scrollable page content */}
           <div className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain">
             {children}
           </div>
 
-          {/* Mobile bottom nav */}
           <BottomNav />
         </div>
 
-        {/* Onboarding guide — renders only on first visit */}
         <OnboardingGuide />
 
-        {/* Shimaenaga contextual guide — right-bottom, kawaii theme */}
-        <ShimaenagaGuide />
+        {/* ShimaenagaGuide — kawaii theme only (hidden via CSS in terminal) */}
+        <div className="kawaii-only">
+          <ShimaenagaGuide />
+        </div>
 
       </body>
     </html>

@@ -1,0 +1,43 @@
+# Magic Guild — 設計書
+
+Magic Guild フェーズ（#69）で実装した `/bank`（シマエナガ銀行）・`/jobs`（案件ボード）・`/guild`（武器庫）の設計記録。
+
+詳細設計は以下を参照：
+- `docs/Petal-Logic設計.md`（Magic Guild UI/UX 設計）
+- `docs/Friendly-Bank設計.md`（kawaii テーマ詳細）
+
+---
+
+## Terminal Theme への昇華（#71）
+
+### 背景
+
+Friendly Bank（kawaii テーマ）を一旦デフォルトとして実装したが、ターゲットユーザー（日本のトップエンジニア）の要件分析から「硬派なプロフェッショナル・ツール」への方針転換を決定。
+
+### 変更概要
+
+| 旧（kawaii デフォルト） | 新（terminal デフォルト） |
+|---|---|
+| シマエナガ銀行 | 資産運用ターミナル |
+| 案件ボード（クエスト） | Engagement Terminal |
+| 武器庫 | Portfolio |
+| 登録（出品） | Lodge |
+| 金貨ジャラジャラ・紙吹雪 | Gold Flash Bar（0.1s） |
+| シマエナガ常駐ガイド | Golden Seal（鑑定済み証のみ） |
+| コイン落下・丸い装飾 | 表組み・等幅フォント・CSS変数 |
+
+### テーマ切替
+
+- デフォルト: `terminal`（`data-theme="terminal"` を `<html>` に設定）
+- kawaii テーマは ThemeToggle から選択可能（後方互換維持）
+- `localStorage.guild_theme` に永続化
+
+### 保持するもの（kawaii テーマ）
+
+kawaii テーマでは既存の Friendly Bank UI を完全保持。ThemeToggle で切替可能。
+
+- ShimaenagaGuide（右下固定ガイド）
+- CoinRain・Confetti アニメーション
+- RankBadge（金/銀/銅 friendly モード）
+- useTactile（振動＋チャイム）
+- 平易語コピー（「ぶき」「おたから」「えらんでもらう」等）
