@@ -9,6 +9,7 @@ import { PassbookTable } from "@/components/PassbookTable";
 import { getWeapons } from "@/lib/weapons";
 import { getApplications } from "@/lib/jobs";
 import { getPassbookSnapshot } from "@/lib/passbook";
+import { getPassbookSnapshotAction } from "@/app/actions/passbook";
 import { playPassbookChime, playSuccessChime } from "@/lib/sound";
 import type { Weapon, PassbookTransaction } from "@/types";
 
@@ -165,11 +166,13 @@ export default function GuildPage() {
   const [weapons, setWeapons] = useState<Weapon[]>([]);
   const [confetti, setConfetti] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const snap = getPassbookSnapshot("demo-user");
+  // Mock for initial render; server action overrides with DB-enriched snapshot on mount.
+  const [snap, setSnap] = useState(() => getPassbookSnapshot("demo-user"));
 
   useEffect(() => {
     setMounted(true);
     setWeapons(getWeapons());
+    getPassbookSnapshotAction("demo-user").then(setSnap);
   }, []);
 
   function handleLoopComplete() {

@@ -7,6 +7,7 @@ import { computeContributionRank } from "@/lib/contribution-rank";
 import type { ContributionRank } from "@/lib/contribution-rank";
 import { getAssetHealth } from "@/lib/asset-health";
 import { getPassbookSnapshot, getMonthlyEarnings } from "@/lib/passbook";
+import { getPassbookSnapshotAction } from "@/app/actions/passbook";
 import { computeLeverage } from "@/lib/ses-leverage";
 import { StepIndicator } from "@/components/StepIndicator";
 import { NotificationBell } from "@/components/NotificationBell";
@@ -108,7 +109,12 @@ function SkillGrowthCard({ currentRank }: { currentRank: Rank }) {
 // ─── 今月の通帳カード ─────────────────────────────────────────────────────────
 
 function PassbookCard({ owned }: { owned: OwnershipRecord[] }) {
-  const snap = getPassbookSnapshot("demo-user");
+  // Initial render: deterministic mock (no flash). After mount: replace with
+  // DB-enriched snapshot via server action.
+  const [snap, setSnap] = useState(() => getPassbookSnapshot("demo-user"));
+  useEffect(() => {
+    getPassbookSnapshotAction("demo-user").then(setSnap);
+  }, []);
   const monthly = getMonthlyEarnings("demo-user");
   const live = useLiveEarnings("demo-user");
   const prevBumpRef = useRef(0);
