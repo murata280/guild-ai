@@ -437,3 +437,18 @@ HumanThumbnail（use client）
 |---|---|---|
 | `morph` | `src/lib/morph/index.ts` | assignMorphTag + startViewTransition |
 | `guild-id` | `src/lib/guild-id/index.ts` | GUILD:XXXX-XXXX-XXXX 名前空間 + URI パーサー |
+
+## Refinement v8: Genesis Architecture
+
+クローリング → 仮 CCAF 生成 → 未請求展示 → 権利主張 → 遡及解禁 の5フェーズパイプライン。詳細は `docs/Genesis-Architecture設計.md` 参照。
+
+### 追加モジュール
+
+| モジュール | パス |
+|---|---|
+| `crawler` | `src/lib/crawler/index.ts` |
+| `draft-listing` | `src/lib/draft-listing/index.ts` |
+| `ownership-verify` | `src/lib/ownership-verify/index.ts` |
+| `value-pool` | `src/lib/value-pool/index.ts` |
+| `ClaimFlow` | `src/components/ClaimFlow.tsx` |
+| `PoolPulse` | `src/components/PoolPulse.tsx` |
