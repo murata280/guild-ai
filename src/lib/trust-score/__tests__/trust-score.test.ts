@@ -89,6 +89,26 @@ describe("computeFloorPrice (rank overload)", () => {
   });
 });
 
+describe("computeTrustScore — EtoE peer ratings & comments", () => {
+  it("peer ratings of all-5 boost score above legacy baseline", () => {
+    const legacy = computeTrustScore({ qualityHistory: 70, discordContribution: 50, xAmplification: 40 });
+    const etoe   = computeTrustScore({ qualityHistory: 70, discordContribution: 50, xAmplification: 40, peerRatings: [5, 5, 5, 5, 5] });
+    expect(etoe.score).toBeGreaterThan(legacy.score);
+  });
+
+  it("peer comments of 10 contribute log-scaled points", () => {
+    const noComments  = computeTrustScore({ qualityHistory: 60, discordContribution: 40, xAmplification: 30, peerRatings: [], peerComments: 0 });
+    const withComments = computeTrustScore({ qualityHistory: 60, discordContribution: 40, xAmplification: 30, peerRatings: [], peerComments: 10 });
+    expect(withComments.score).toBeGreaterThan(noComments.score);
+  });
+
+  it("legacy formula still works when peerRatings/Comments omitted", () => {
+    const r = computeTrustScore({ qualityHistory: 100, discordContribution: 0, xAmplification: 0 });
+    expect(r.raw).toBe(50);
+    expect(r.score).toBe(500);
+  });
+});
+
 describe("computeFloorPrice (legacy trust-score overload)", () => {
   it("returns at least 80% of suggested price when trust is 0", () => {
     const floor = computeFloorPrice(5000, 0);

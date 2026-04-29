@@ -36,12 +36,16 @@ export interface Listing {
 
 /**
  * TrustScoreInput — inputs for Trust Score calculation.
- * Weighted: 0.5 * qualityHistory + 0.3 * discordContribution + 0.2 * xAmplification
+ * Base weights: 0.5 * qualityHistory + 0.3 * discordContribution + 0.2 * xAmplification
+ * EtoE-enhanced (when peerRatings/peerComments provided):
+ *   0.4q + 0.2d + 0.15x + 0.15 * peerRatingsAvg + 0.10 * peerCommentsLog
  */
 export interface TrustScoreInput {
-  qualityHistory: number; // 0-100
+  qualityHistory: number;      // 0-100
   discordContribution: number; // 0-100
-  xAmplification: number; // 0-100
+  xAmplification: number;      // 0-100
+  peerRatings?: number[];      // 5-star ratings from peers (EtoE) — optional
+  peerComments?: number;       // count of peer text comments (EtoE) — optional
 }
 
 export interface TrustScoreResult {

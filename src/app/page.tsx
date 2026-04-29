@@ -7,8 +7,8 @@ import { PackageIcon, SearchIcon, ShoppingBagIcon, BanknoteIcon } from "@/compon
 const STEPS = [
   {
     Icon: PackageIcon,
-    label: "登録する",
-    desc: "あなたのコードを資産化",
+    label: "たからもの登録",
+    desc: "GitHubを選ぶだけ、AIが自動提案",
     color: "text-kaki",
     bg: "bg-kaki/10 border-kaki/20",
   },
@@ -21,15 +21,15 @@ const STEPS = [
   },
   {
     Icon: ShoppingBagIcon,
-    label: "マーケットへ",
-    desc: "世界中に公開される",
+    label: "マーケットに並ぶ",
+    desc: "世界中に自動で公開",
     color: "text-accent-green",
     bg: "bg-accent-green/10 border-accent-green/20",
   },
   {
     Icon: BanknoteIcon,
-    label: "自動で入金",
-    desc: "使われた瞬間に収益",
+    label: "買われたら自動でお金が入る",
+    desc: "寝ている間も分身が稼ぐ",
     color: "text-kaki",
     bg: "bg-kaki/5 border-kaki/20",
   },
@@ -50,10 +50,13 @@ export default function HomePage() {
           <span className="text-kaki">AIが買いに来る。</span>
         </h1>
 
-        {/* Butler-tone explainer — 3秒で伝わる補助コピー */}
+        {/* Butler-tone explainer */}
         <p className="mt-4 max-w-xl text-sm sm:text-base text-[#4A4464] leading-relaxed">
-          あなたのスキルやコードを「資産」として登録すると、世界中の人やAIが利用料を払って使ってくれます。
+          あなたのスキルやコードを「たからもの」として登録すると、世界中の人やAIが利用料を払って使ってくれます。
           寝ている間も、あなたの分身が稼ぎ続ける場所です。
+        </p>
+        <p className="mt-2 text-sm text-kaki font-semibold">
+          自慢が、そのまま"たからもの"になる場所です。
         </p>
 
         {/* 4-step flow cards */}
@@ -80,8 +83,8 @@ export default function HomePage() {
           <Link href="/marketplace" className="btn-primary" aria-label="マーケットを見る">
             マーケットを見る →
           </Link>
-          <Link href="/sell" className="btn-secondary" aria-label="スキルを資産として登録する">
-            資産を登録する
+          <Link href="/sell" className="btn-secondary" aria-label="たからもの登録する">
+            たからもの登録する
           </Link>
           <Link
             href="/sell"
@@ -152,14 +155,14 @@ export default function HomePage() {
         aria-label="スキルを登録して収益化する"
       >
         <div>
-          <h2 className="font-bold text-kuroko">今すぐスキルを資産として登録する</h2>
+          <h2 className="font-bold text-kuroko">今すぐ「たからもの登録」する</h2>
           <p className="mt-1 text-sm text-[#4A4464] leading-relaxed">
-            良質なスキルが、自動的に売れる市場へ。
+            GitHubを選ぶだけ、AIが売れるロジックを自動提案。
           </p>
         </div>
         <div className="flex gap-3 flex-shrink-0 flex-wrap">
-          <Link href="/sell" className="btn-primary" aria-label="スキルを資産として登録する">
-            資産を登録する →
+          <Link href="/sell" className="btn-primary" aria-label="たからもの登録する">
+            たからもの登録する →
           </Link>
           <Link href="/marketplace" className="btn-secondary" aria-label="マーケットを見る">
             マーケットを見る

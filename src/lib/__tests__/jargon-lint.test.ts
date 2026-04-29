@@ -48,8 +48,10 @@ const FORBIDDEN: Array<{ term: string; reason: string }> = [
   { term: "JPYC",           reason: "→ デジタル円 または ¥ に置換" },
   { term: "ステーブルコイン", reason: "→ デジタル円 に置換" },
   { term: "Stablecoin",     reason: "→ デジタル円 に置換" },
-  { term: "API Hotbed",     reason: "→ AI連携窓口 に置換" },
-  { term: "APIエンドポイント", reason: "→ 利用窓口（API）に置換" },
+  { term: "API Hotbed",     reason: "→ おしごと窓口 に置換（Refinement v2）" },
+  { term: "APIエンドポイント", reason: "→ おしごと窓口 に置換（Refinement v2）" },
+  { term: "AI連携窓口",      reason: "→ おしごと窓口 に統一（Refinement v2）" },
+  { term: "利用窓口（API）", reason: "→ おしごと窓口 に統一（Refinement v2）" },
   { term: "CCAF",           reason: "→ こだわり（実績ログ）に置換" },
   { term: "お仕事",          reason: "→ おしごと（ひらがな）に置換（Final Vision §4）" },
 ];

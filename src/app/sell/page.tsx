@@ -179,7 +179,7 @@ function CompletionCard({ data }: { data: CompletionData }) {
 
         {/* Reception desk */}
         <div className="section-card p-4">
-          <p className="text-xs text-[#9890A8] font-semibold mb-2">利用窓口（API）</p>
+          <p className="text-xs text-[#9890A8] font-semibold mb-2">おしごと窓口</p>
           <p className="font-mono text-xs text-kaki truncate">{data.apiEndpoint.slice(0, 40)}…</p>
           <button
             type="button"

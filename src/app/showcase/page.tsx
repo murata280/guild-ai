@@ -178,8 +178,8 @@ export default function ShowcasePage() {
             みんなのたからものを見る。気に入ったら、分身として投資できます。
           </p>
         </div>
-        <Link href="/sell" className="btn-primary shrink-0" aria-label="あなたのたからものを登録する">
-          ✨ たからものを登録する
+        <Link href="/sell" className="btn-primary shrink-0" aria-label="たからもの登録する">
+          ✨ たからもの登録する
         </Link>
       </div>
 
@@ -208,8 +208,8 @@ export default function ShowcasePage() {
         <p className="text-base font-bold text-kuroko">あなたのたからものをお店にならべる準備はできていますか？</p>
         <p className="mt-1 text-sm text-[#9890A8]">スキルは、一生のたからもの。</p>
         <div className="mt-4 flex justify-center gap-3 flex-wrap">
-          <Link href="/sell" className="btn-primary" aria-label="分身として登録する">
-            分身として登録する →
+          <Link href="/sell" className="btn-primary" aria-label="たからもの登録する">
+            たからもの登録する →
           </Link>
           <Link href="/marketplace" className="btn-secondary" aria-label="マーケットを見る">
             マーケットを見る

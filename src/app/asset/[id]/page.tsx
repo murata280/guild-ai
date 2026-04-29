@@ -197,11 +197,11 @@ export default function AssetPage({ params }: { params: { id: string } }) {
         price={listing.floorPrice}
       />
 
-      {/* AI同士のお仕事の場 */}
+      {/* おしごと窓口 */}
       <section className="mt-4 section-card p-5">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8]">
-            <LinkIcon size={13} className="mr-1 opacity-60 inline-block" />AI連携窓口
+            <LinkIcon size={13} className="mr-1 opacity-60 inline-block" />おしごと窓口
           </h2>
           <span className="inline-flex items-center gap-1 rounded-full border border-kaki/20 bg-kaki/5 px-3 py-1 text-[11px] font-semibold text-kaki">
             AI連携（Agent-to-Agent）対応
@@ -217,7 +217,7 @@ export default function AssetPage({ params }: { params: { id: string } }) {
         <div className="mt-4 space-y-3">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8] mb-1.5 flex items-center">
-              利用窓口（API）
+              おしごと窓口（接続先）
               <HelpHint content={messages.helpEndpoint} />
             </p>
             {/* コードフェンス内はjargon-lint例外 */}

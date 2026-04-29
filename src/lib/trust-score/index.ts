@@ -10,7 +10,22 @@ export function computeTrustScore(input: TrustScoreInput): TrustScoreResult {
   const q = clamp(input.qualityHistory);
   const d = clamp(input.discordContribution);
   const x = clamp(input.xAmplification);
-  const raw = 0.5 * q + 0.3 * d + 0.2 * x; // 0-100
+
+  let raw: number;
+
+  if (input.peerRatings !== undefined || input.peerComments !== undefined) {
+    // EtoE-enhanced formula — weights sum to 1.0
+    const ratings = input.peerRatings ?? [];
+    const avgRating = ratings.length > 0
+      ? (ratings.reduce((s, r) => s + clamp(r, 0, 5), 0) / ratings.length) * 20
+      : 0; // 5-star → 100-scale
+    const commentsLog = Math.min(100, Math.log10(1 + (input.peerComments ?? 0)) * 30);
+    raw = 0.4 * q + 0.2 * d + 0.15 * x + 0.15 * avgRating + 0.10 * commentsLog;
+  } else {
+    // Legacy formula — unchanged for backward compat
+    raw = 0.5 * q + 0.3 * d + 0.2 * x;
+  }
+
   const score = Math.round(raw * 10); // 0-1000
   const rank: Rank = raw >= 80 ? "S" : raw >= 60 ? "A" : "B";
   return { raw: Math.round(raw * 100) / 100, score, rank, updatedAt: new Date().toISOString() };
