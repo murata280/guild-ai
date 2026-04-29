@@ -452,3 +452,37 @@ HumanThumbnail（use client）
 | `value-pool` | `src/lib/value-pool/index.ts` |
 | `ClaimFlow` | `src/components/ClaimFlow.tsx` |
 | `PoolPulse` | `src/components/PoolPulse.tsx` |
+
+---
+
+## Refinement v9: Anti-Scraping & Pro Mode
+
+知能資産をスクレイピングから保護し、プロクリエイター向け高密度 UI を提供するレイヤー。
+
+### 防衛ライン
+
+1. **robots.txt** — GPTBot/Google-Extended/ClaudeBot 等 10 ボットを全 URL からブロック
+2. **X-Robots-Tag** — API エンドポイントに `noindex, nofollow`、資産詳細に `noarchive, max-snippet:140`
+3. **CCAF Shield** — 公開 API は思考密度・イテレーション数をバケット値で返す。フルスペックは `gld_` キー必須
+4. **CallerType 課金** — `big-ai` 呼び出しに 1.3x プレミアムを自動適用
+
+### Human-Verified パイプライン
+
+権利主張 → スコア判定 → バッジ付与（gold / human-claimed / ai-generated）→ 価格乗数適用（1.5x / 1.2x / 0.7x）
+
+### Pro Mode
+
+ウォレットページに `ProToggle`（role="switch"）と `ProSummaryRow`（5指標グリッド）を追加。
+`guild_pro_mode` localStorage キーで設定を永続化。
+
+### 追加モジュール
+
+| モジュール | パス |
+|---|---|
+| `shield` | `src/lib/shield/index.ts` |
+| `api-licensing` | `src/lib/api-licensing/index.ts` |
+| `human-verified` | `src/lib/human-verified/index.ts` |
+| `discovery` | `src/lib/discovery/index.ts` |
+| `HumanVerifiedBadge` | `src/components/HumanVerifiedBadge.tsx` |
+| `ProToggle` | `src/components/ProToggle.tsx` |
+| `ProSummaryRow` | `src/components/ProSummaryRow.tsx` |
