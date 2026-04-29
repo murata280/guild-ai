@@ -2,7 +2,7 @@
 
 type Variant = "trust" | "key" | "coin" | "wave";
 type Size = "xs" | "sm" | "md" | "lg";
-type Mode = "avatar" | "seal" | "guardian";
+type Mode = "avatar" | "seal" | "guardian" | "watch";
 
 const SIZE_PX: Record<Size, number> = { xs: 24, sm: 40, md: 64, lg: 96 };
 
@@ -159,6 +159,7 @@ export function Shimaenaga({ variant = "wave", size = "md", className, mode }: S
     avatar: "（アバターモード）",
     seal: "（認証スタンプ）",
     guardian: "（ガーディアン守り神）",
+    watch: "（じーっとみてる）",
   };
 
   const ariaLabel = mode
@@ -233,6 +234,7 @@ export function Shimaenaga({ variant = "wave", size = "md", className, mode }: S
 
   // Avatar mode: includes blink animation with reduced-motion guard
   const isAvatar = mode === "avatar";
+  const isWatch = mode === "watch";
 
   return (
     <svg
@@ -316,16 +318,22 @@ export function Shimaenaga({ variant = "wave", size = "md", className, mode }: S
         strokeWidth={1 * s}
       />
 
-      {/* Left eye — blink-animated in avatar mode */}
+      {/* Left eye — blink in avatar, watch-sweep in watch */}
       <g className={isAvatar ? "shima-eye-blink" : undefined}>
         <circle cx={cx - 5 * s} cy={12 * s} r={2.5 * s} fill={EYE_COLOR} />
-        <circle cx={cx - 5 * s + 0.8 * s} cy={12 * s - 0.8 * s} r={0.8 * s} fill="white" />
+        <circle
+          cx={cx - 5 * s + 0.8 * s} cy={12 * s - 0.8 * s} r={0.8 * s} fill="white"
+          className={isWatch ? "shima-watch-pupil" : undefined}
+        />
       </g>
 
-      {/* Right eye — blink-animated in avatar mode */}
+      {/* Right eye — blink in avatar, watch-sweep in watch */}
       <g className={isAvatar ? "shima-eye-blink" : undefined}>
         <circle cx={cx + 5 * s} cy={12 * s} r={2.5 * s} fill={EYE_COLOR} />
-        <circle cx={cx + 5 * s + 0.8 * s} cy={12 * s - 0.8 * s} r={0.8 * s} fill="white" />
+        <circle
+          cx={cx + 5 * s + 0.8 * s} cy={12 * s - 0.8 * s} r={0.8 * s} fill="white"
+          className={isWatch ? "shima-watch-pupil" : undefined}
+        />
       </g>
 
       {/* Beak */}
