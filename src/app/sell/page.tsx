@@ -12,7 +12,7 @@ import { RankRadar } from "@/components/RankRadar";
 import { WillSignalTrigger } from "@/components/WillSignalTrigger";
 import { StepIndicator } from "@/components/StepIndicator";
 import { formatJPY, isGithubUrl } from "@/utils/format";
-import { generateRemixDescription, extractFromReadme } from "@/lib/listing-generator";
+import { generateRemixDescription, extractFromReadme, extractSalesParts } from "@/lib/listing-generator";
 import { listRepos, fetchReadme } from "@/lib/github-picker";
 import type { MockRepo } from "@/lib/github-picker";
 import { voiceLogToProofOfMake, generateProductPitch } from "@/lib/proof-of-make";
@@ -154,7 +154,7 @@ function CompletionCard({ data }: { data: CompletionData }) {
       {/* Success header */}
       <div className="rounded-2xl bg-accent-green/10 border border-accent-green/30 p-5 text-center">
         <div className="text-4xl mb-2">🎉</div>
-        <h2 className="text-xl font-bold text-kuroko">お店に並べました！</h2>
+        <h2 className="text-xl font-bold text-kuroko">あなたの たからもの として登録されました</h2>
         <p className="mt-1 text-sm text-[#9890A8]">
           ランク <RankBadge rank={data.rank} /> ·
           お値段 <span className="font-bold text-kuroko">¥{data.floorPrice.toLocaleString("ja-JP")}</span>
@@ -193,15 +193,15 @@ function CompletionCard({ data }: { data: CompletionData }) {
 
         {/* Management */}
         <div className="section-card p-4 flex flex-col">
-          <p className="text-xs text-[#9890A8] font-semibold mb-2">マイページ</p>
-          <p className="text-sm text-kuroko leading-relaxed flex-1">保有資産の管理・確認ができます</p>
+          <p className="text-xs text-[#9890A8] font-semibold mb-2">💰 お財布</p>
+          <p className="text-sm text-kuroko leading-relaxed flex-1">収益と信用スコアを確認できます</p>
           <button
             type="button"
-            onClick={() => router.push("/dashboard")}
-            aria-label="マイページへ移動"
+            onClick={() => router.push("/wallet")}
+            aria-label="お財布へ移動"
             className="btn-primary w-full !py-1.5 !text-xs mt-2"
           >
-            マイページへ →
+            💰 お財布へ →
           </button>
         </div>
       </div>
@@ -279,10 +279,12 @@ function AiPath({
 
     const readmeText = fetchReadme(selectedRepo);
     const extract = extractFromReadme(readmeText);
+    const salesParts = extractSalesParts(readmeText);
     const newId = `listing_${Date.now()}`;
     const ccaf: CCAF = { intentSignals: ["author-statement"], thoughtDensity: 75, iterations: 10, authorId: "demo-user", createdAt: new Date().toISOString() };
     const auditResult = audit({ ccaf, vercelUptimeDays: 30 });
-    const floor = computeFloorPrice(extract.suggestedPrice, trust.score);
+    const blendedPrice = Math.round((extract.suggestedPrice + salesParts.priceSuggestion) / 2);
+    const floor = computeFloorPrice(blendedPrice, trust.score);
 
     const ml: MarketplaceListing = autoList(
       { id: newId, ownerId: "demo-user", title: extract.title, description: extract.description, ccaf, vercelUptimeDays: 30, basePrice: extract.suggestedPrice, githubUrl: selectedRepo.url },
@@ -394,12 +396,30 @@ function AiPath({
             </span>
           </div>
 
+          {/* Selling points preview */}
+          {(() => {
+            const readme = fetchReadme(selectedRepo);
+            const sp = extractSalesParts(readme);
+            return sp.sellingPoints.length > 0 ? (
+              <div className="rounded-xl border border-kaki/20 bg-kaki/5 p-3">
+                <p className="text-xs font-semibold text-kaki mb-2">✨ AIが抽出した「売れる部品」</p>
+                <ul className="space-y-1">
+                  {sp.sellingPoints.map((pt) => (
+                    <li key={pt} className="flex gap-2 text-xs text-[#3A3664]">
+                      <span className="text-accent-green shrink-0">✓</span>{pt}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null;
+          })()}
+
           <button
             type="button" onClick={handleAutoRun}
-            aria-label="AIが全自動でお店に並べる"
+            aria-label="AIにおまかせ — お店にならべる"
             className="btn-primary w-full !py-4 !text-base"
           >
-            ✨ AIが全自動でお店に並べる
+            ✨ AIにおまかせ — お店にならべる
           </button>
 
           <button type="button" onClick={() => setSelectedRepo(null)} className="text-sm text-[#9890A8] underline w-full text-center">
@@ -739,8 +759,8 @@ function TextPath({
         </div>
       </div>
 
-      <button type="submit" aria-label="スキルを資産として登録する" className="btn-primary w-full !py-4 !text-base">
-        AIが評価して資産として登録する
+      <button type="submit" aria-label="お店にならべる" className="btn-primary w-full !py-4 !text-base">
+        ✨ お店にならべる →
       </button>
     </form>
   );
@@ -812,21 +832,31 @@ function SellContent() {
       <StepIndicator current="register" />
 
       {/* Header */}
-      <div className="mt-4 flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-kuroko leading-snug flex items-center gap-2"><PackageIcon size={22} className="text-kaki" />スキルを資産として登録する</h1>
-          <p className="mt-1 text-sm text-[#9890A8]">3分以内にマーケットへ掲載できます</p>
-        </div>
-        <button
-          type="button"
-          onClick={handleDoItForMe}
-          aria-label="全自動でAIにお任せ"
-          className="shrink-0 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-all active:scale-[0.98] hover:opacity-90"
-          style={{ background: "linear-gradient(135deg, #1A6BB5 0%, #0FA968 100%)" }}
-        >
-          ✨ 全自動でAIにお任せ
-        </button>
+      <div className="mt-4">
+        <span className="text-xs font-semibold uppercase tracking-widest text-kaki">おしごとに登録</span>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight text-kuroko leading-snug flex items-center gap-2">
+          <PackageIcon size={22} className="text-kaki" />おしごとに登録する
+        </h1>
+        <p className="mt-1 text-sm text-[#9890A8]">たからものを30秒でお店にならべる</p>
       </div>
+
+      {/* Omakase banner */}
+      <button
+        type="button"
+        onClick={handleDoItForMe}
+        aria-label="AIにおまかせ — 全自動でお店にならべる"
+        className="mt-4 w-full rounded-2xl p-5 text-left transition-all active:scale-[0.99] hover:opacity-95 shadow-lg"
+        style={{ background: "linear-gradient(135deg, #1A6BB5 0%, #0FA968 100%)" }}
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-3xl">✨</span>
+          <div>
+            <p className="text-base font-black text-white">AIにおまかせ</p>
+            <p className="text-sm text-white/80 mt-0.5">GitHub連携 → 鑑定 → お店にならべる まで全自動。30秒で完了。</p>
+          </div>
+          <span className="ml-auto text-white/90 text-xl">→</span>
+        </div>
+      </button>
 
       {remixFrom && (
         <div className="mt-3 inline-flex items-center gap-2 rounded-lg border border-kaki/30 bg-kaki/10 px-3 py-2">
