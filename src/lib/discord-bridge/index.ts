@@ -72,3 +72,44 @@ export class DiscordBridge {
 
 // Default singleton for app usage
 export const discordBridge = new DiscordBridge();
+
+// ─── Ambassador Meritocracy ───────────────────────────────────────────────────
+
+export interface AmbassadorRewardResult {
+  ambassadorId: string;
+  saleAmount: number;
+  rewardAmount: number;
+  share: number;
+  awardedAt: string;
+}
+
+/**
+ * Calculate and record the ambassador referral reward for a completed sale.
+ * Default share is 5% of the sale amount.
+ */
+export function attributeAmbassadorReward(
+  ambassadorId: string,
+  saleAmount: number,
+  share = 0.05,
+): AmbassadorRewardResult {
+  const rewardAmount = Math.round(saleAmount * share);
+
+  // Push contribution points to the bridge proportional to reward
+  const contributionPoints = Math.min(10, Math.round(rewardAmount / 100));
+  if (contributionPoints > 0) {
+    discordBridge.ingest({
+      userId: ambassadorId,
+      kind: "share",
+      listingId: `ambassador_sale_${ambassadorId}`,
+      occurredAt: new Date().toISOString(),
+    });
+  }
+
+  return {
+    ambassadorId,
+    saleAmount,
+    rewardAmount,
+    share,
+    awardedAt: new Date().toISOString(),
+  };
+}
