@@ -10,7 +10,7 @@ import { messages } from "@/lib/microcopy";
 import { SearchIcon, LinkIcon } from "@/components/icons";
 import { RawDataPanel } from "@/components/RawDataPanel";
 import { AssetReview } from "@/components/AssetReview";
-import { AssetEmblem } from "@/components/AssetEmblem";
+import { BeforeAfterHero } from "@/components/BeforeAfterHero";
 import { Shimaenaga } from "@/components/Shimaenaga";
 import { buildAssetJsonLd } from "@/lib/structured-data";
 import { computeBundlePricing, computeMonthlyFromFloor } from "@/lib/checkout";
@@ -81,7 +81,7 @@ export default function AssetPage({ params }: { params: { id: string } }) {
       {/* Hero thumbnail */}
       <div className="mt-4 flex justify-center">
         <div className="w-full max-w-[480px] aspect-[3/2] bg-gradient-to-br from-kami to-kaki/5 rounded-2xl flex items-center justify-center relative overflow-hidden">
-          <AssetEmblem assetId={listing.id} size={120} className="rounded-xl" />
+          <BeforeAfterHero assetId={listing.id} rank={listing.rank} size={120} className="rounded-xl" />
           <div className="absolute top-3 right-3">
             <RankBadge rank={listing.rank} large />
           </div>

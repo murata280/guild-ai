@@ -31,8 +31,12 @@ describe("AssetSpirit component", () => {
   });
 });
 
-describe("HumanThumbnail 2-layer system", () => {
+describe("HumanThumbnail 3-layer system (post-sublimation)", () => {
   const src = readFileSync(resolve(root, "src/components/HumanThumbnail.tsx"), "utf8");
+
+  it("imports BeforeAfterHero as secondary layer", () => {
+    expect(src).toContain("BeforeAfterHero");
+  });
 
   it("imports AssetEmblem as fallback layer", () => {
     expect(src).toContain("AssetEmblem");
