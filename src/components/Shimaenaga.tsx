@@ -2,6 +2,7 @@
 
 type Variant = "trust" | "key" | "coin" | "wave";
 type Size = "xs" | "sm" | "md" | "lg";
+type Mode = "avatar" | "seal" | "guardian";
 
 const SIZE_PX: Record<Size, number> = { xs: 24, sm: 40, md: 64, lg: 96 };
 
@@ -9,6 +10,7 @@ interface ShimaenagaProps {
   variant?: Variant;
   size?: Size;
   className?: string;
+  mode?: Mode;
 }
 
 const ACCENT = "#FFCC00";
@@ -98,20 +100,70 @@ function CoinAccessory({ scale }: { scale: number }) {
 
 function WaveAccessory({ scale }: { scale: number }) {
   // Raised wing with wave gesture
+  void scale;
   return null; // The wave is handled in the wing transform
 }
 
-export function Shimaenaga({ variant = "wave", size = "md", className }: ShimaenagaProps) {
+// Shield shape behind the bird for guardian mode
+function GuardianShield({ scale, cx, cy }: { scale: number; cx: number; cy: number }) {
+  // Shield: a path positioned behind/below the bird center
+  const sw = 22 * scale;
+  const sh = 28 * scale;
+  const sx = cx - sw / 2;
+  const sy = cy - 4 * scale;
+  return (
+    <path
+      d={`M ${sx} ${sy} L ${sx + sw} ${sy} L ${sx + sw} ${sy + sh * 0.65} Q ${sx + sw} ${sy + sh} ${cx} ${sy + sh} Q ${sx} ${sy + sh} ${sx} ${sy + sh * 0.65} Z`}
+      fill="#1A6BB5"
+      fillOpacity="0.18"
+      stroke="#1A6BB5"
+      strokeWidth={1.2 * scale}
+      strokeOpacity="0.5"
+    />
+  );
+}
+
+// Stamp/seal serration ring
+function SealRing({ scale, cx, cy, r }: { scale: number; cx: number; cy: number; r: number }) {
+  const teeth = 24;
+  const points = Array.from({ length: teeth * 2 }, (_, i) => {
+    const angle = (i / (teeth * 2)) * Math.PI * 2 - Math.PI / 2;
+    const radius = i % 2 === 0 ? r + 3 * scale : r;
+    return `${cx + Math.cos(angle) * radius},${cy + Math.sin(angle) * radius}`;
+  });
+  return (
+    <polygon
+      points={points.join(" ")}
+      fill="none"
+      stroke="#1A6BB5"
+      strokeWidth={1 * scale}
+      strokeOpacity="0.6"
+    />
+  );
+}
+
+export function Shimaenaga({ variant = "wave", size = "md", className, mode }: ShimaenagaProps) {
   const px = SIZE_PX[size];
   const scale = px / 64; // Base design at 64px
   const s = scale;
 
+  // Combined label map for variant + mode
   const LABEL_MAP: Record<Variant, string> = {
     trust: "メモを持つシマエナガ",
     key: "鍵を持つシマエナガ",
     coin: "コインを持つシマエナガ",
     wave: "手を振るシマエナガ",
   };
+
+  const MODE_LABEL_SUFFIX: Record<Mode, string> = {
+    avatar: "（アバターモード）",
+    seal: "（認証スタンプ）",
+    guardian: "（ガーディアン守り神）",
+  };
+
+  const ariaLabel = mode
+    ? LABEL_MAP[variant] + MODE_LABEL_SUFFIX[mode]
+    : LABEL_MAP[variant];
 
   // Bird body center at (32, 30) in 64px space
   const cx = 32 * s;
@@ -124,38 +176,120 @@ export function Shimaenaga({ variant = "wave", size = "md", className }: Shimaen
   const rightWingY = 28 * s;
   const waveRightWingY = variant === "wave" ? 18 * s : rightWingY;
 
+  // Guardian mode: wings spread dramatically outward
+  const isGuardian = mode === "guardian";
+  const guardianLeftWingX = isGuardian ? 2 * s : leftWingX;
+  const guardianLeftWingY = isGuardian ? 20 * s : leftWingY;
+  const guardianRightWingX = isGuardian ? 52 * s : rightWingX + 8 * s;
+  const guardianRightWingY = isGuardian ? 20 * s : waveRightWingY;
+
+  // Seal mode: render as circular emblem
+  if (mode === "seal") {
+    const sealRadius = 28 * s;
+    const sealCx = 32 * s;
+    const sealCy = 32 * s;
+    return (
+      <svg
+        width={px}
+        height={px}
+        viewBox={`0 0 ${64 * s} ${64 * s}`}
+        role="img"
+        aria-label={ariaLabel}
+        className={className}
+        style={{ overflow: "visible" }}
+      >
+        {/* Outer circle */}
+        <circle cx={sealCx} cy={sealCy} r={sealRadius} fill="#EEF5FF" stroke="#1A6BB5" strokeWidth={1.5 * s} strokeOpacity="0.5" />
+        {/* Serration ring */}
+        <SealRing scale={s} cx={sealCx} cy={sealCy} r={sealRadius} />
+        {/* Inner bird emblem — scaled down to fit circle */}
+        <g transform={`translate(${sealCx - 10 * s}, ${sealCy - 14 * s}) scale(0.62)`}>
+          {/* Body */}
+          <ellipse cx={16 * s} cy={18 * s} rx={14 * s} ry={17 * s} fill={BODY_WHITE} stroke={OUTLINE} strokeWidth={1 * s} />
+          {/* Head */}
+          <circle cx={16 * s} cy={5 * s} r={9 * s} fill={BODY_WHITE} stroke={OUTLINE} strokeWidth={1 * s} />
+          {/* Eyes */}
+          <circle cx={11 * s} cy={3 * s} r={1.8 * s} fill={EYE_COLOR} />
+          <circle cx={21 * s} cy={3 * s} r={1.8 * s} fill={EYE_COLOR} />
+          {/* Beak */}
+          <path d={`M ${14 * s} ${7.5 * s} L ${16 * s} ${10 * s} L ${18 * s} ${7.5 * s} Z`} fill={BEAK_COLOR} />
+        </g>
+        {/* "GUILD CERTIFIED" text arc at bottom */}
+        <text
+          x={sealCx}
+          y={sealCy + sealRadius - 3 * s}
+          textAnchor="middle"
+          fontSize={4.5 * s}
+          fontWeight="700"
+          letterSpacing={0.8 * s}
+          fill="#1A6BB5"
+          fillOpacity="0.75"
+        >
+          GUILD CERTIFIED
+        </text>
+      </svg>
+    );
+  }
+
+  // Avatar mode: includes blink animation with reduced-motion guard
+  const isAvatar = mode === "avatar";
+
   return (
     <svg
       width={px}
       height={px}
       viewBox={`0 0 ${64 * s} ${64 * s}`}
       role="img"
-      aria-label={LABEL_MAP[variant]}
+      aria-label={ariaLabel}
       className={className}
       style={{ overflow: "visible" }}
     >
+      {isAvatar && (
+        <style>{`
+          @keyframes shimaenaga-blink {
+            0%, 90%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0.1); }
+          }
+          @media (prefers-reduced-motion: no-preference) {
+            .shima-eye-blink {
+              transform-box: fill-box;
+              transform-origin: center;
+              animation: shimaenaga-blink 4s ease-in-out infinite;
+            }
+          }
+        `}</style>
+      )}
+
+      {/* Guardian shield (behind bird body) */}
+      {isGuardian && <GuardianShield scale={s} cx={cx} cy={cy} />}
+
       {/* Left wing */}
       <ellipse
-        cx={leftWingX}
-        cy={leftWingY}
+        cx={isGuardian ? guardianLeftWingX : leftWingX}
+        cy={isGuardian ? guardianLeftWingY : leftWingY}
         rx={8 * s}
         ry={10 * s}
         fill={BODY_WHITE}
         stroke={OUTLINE}
         strokeWidth={0.8 * s}
-        transform={`rotate(-20, ${leftWingX}, ${leftWingY})`}
+        transform={isGuardian
+          ? `rotate(-50, ${guardianLeftWingX}, ${guardianLeftWingY})`
+          : `rotate(-20, ${leftWingX}, ${leftWingY})`
+        }
       />
 
-      {/* Right wing — raised if wave variant */}
+      {/* Right wing — raised if wave variant or guardian */}
       <ellipse
-        cx={rightWingX + 8 * s}
-        cy={waveRightWingY}
+        cx={guardianRightWingX}
+        cy={guardianRightWingY}
         rx={8 * s}
         ry={10 * s}
         fill={BODY_WHITE}
         stroke={OUTLINE}
         strokeWidth={0.8 * s}
-        transform={variant === "wave"
+        transform={isGuardian
+          ? `rotate(50, ${guardianRightWingX}, ${guardianRightWingY})`
+          : variant === "wave"
           ? `rotate(-50, ${rightWingX + 8 * s}, ${waveRightWingY})`
           : `rotate(20, ${rightWingX + 8 * s}, ${rightWingY})`
         }
@@ -182,13 +316,17 @@ export function Shimaenaga({ variant = "wave", size = "md", className }: Shimaen
         strokeWidth={1 * s}
       />
 
-      {/* Left eye */}
-      <circle cx={cx - 5 * s} cy={12 * s} r={2.5 * s} fill={EYE_COLOR} />
-      <circle cx={cx - 5 * s + 0.8 * s} cy={12 * s - 0.8 * s} r={0.8 * s} fill="white" />
+      {/* Left eye — blink-animated in avatar mode */}
+      <g className={isAvatar ? "shima-eye-blink" : undefined}>
+        <circle cx={cx - 5 * s} cy={12 * s} r={2.5 * s} fill={EYE_COLOR} />
+        <circle cx={cx - 5 * s + 0.8 * s} cy={12 * s - 0.8 * s} r={0.8 * s} fill="white" />
+      </g>
 
-      {/* Right eye */}
-      <circle cx={cx + 5 * s} cy={12 * s} r={2.5 * s} fill={EYE_COLOR} />
-      <circle cx={cx + 5 * s + 0.8 * s} cy={12 * s - 0.8 * s} r={0.8 * s} fill="white" />
+      {/* Right eye — blink-animated in avatar mode */}
+      <g className={isAvatar ? "shima-eye-blink" : undefined}>
+        <circle cx={cx + 5 * s} cy={12 * s} r={2.5 * s} fill={EYE_COLOR} />
+        <circle cx={cx + 5 * s + 0.8 * s} cy={12 * s - 0.8 * s} r={0.8 * s} fill="white" />
+      </g>
 
       {/* Beak */}
       <path
