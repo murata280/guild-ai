@@ -337,3 +337,55 @@ HumanThumbnail（use client）
 - `asset-emblem/__tests__/asset-emblem.test.ts`: 14 件
 - `asset-photos/__tests__/asset-photos.test.ts`: 12 件（AssetEmblem / HumanThumbnail コンポーネント含む）
 - `__tests__/visual-hierarchy.test.ts`: 19 件（API・CSS・ページ統合）
+
+---
+
+## Refinement v5: Singularity Standard UI
+
+### 概要
+
+感情とデータの二層UIシステム。ユーザー体験の感情的側面（情緒タグ・シマエナガ・Flip-Motion）と技術的側面（JSON-LD・Activity Pulse・Two-Way Pricing・Trust-Lock）を統合した第5世代 UI。
+
+### 追加コンポーネント
+
+| コンポーネント | パス | 説明 |
+|--------------|------|------|
+| Shimaenaga | `src/components/Shimaenaga.tsx` | マスコット（wave/trust/key/coin × xs/sm/md/lg） |
+| FlipCard | `src/components/FlipCard.tsx` | 表/裏の二層カード（PC:hover、Mobile:tap） |
+| ActivityPulse | `src/components/ActivityPulse.tsx` | SVGハートビート + リクエスト頻度表示 |
+
+### 追加ライブラリ
+
+| モジュール | パス | 説明 |
+|-----------|------|------|
+| emotional-tags | `src/lib/emotional-tags/index.ts` | ランク別情緒タグ辞書 |
+| structured-data | `src/lib/structured-data/index.ts` | JSON-LD / Schema.org ビルダー |
+| computeBundlePricing | `src/lib/checkout/index.ts` | Two-Way Pricing 計算関数 |
+
+### UI 変更
+
+| ページ | 変更内容 |
+|--------|---------|
+| `/marketplace` | aspect-[3/2] ヒーロー・情緒タグ・FlipCard・ActivityPulse（裏面） |
+| `/showcase` | aspect-[3/2] ヒーロー・情緒タグ・FlipCard |
+| `/asset/[id]` | ヒーロー拡大・JSON-LD・Trust-Lock・Two-Way Pricing・ActivityPulse |
+| `/sell` | CompletionCard に Shimaenaga coin・Two-Way Pricing 派生値 |
+| `/wallet` | ActivityPulse（保有資産の鼓動） |
+| `layout.tsx` | サイドバーに Shimaenaga wave |
+| `not-found.tsx` | Shimaenaga wave 追加 |
+
+### テスト: 11 件追加（計 330 件）
+
+- `emotional-tags/__tests__/emotional-tags.test.ts`: 4 件
+- `structured-data/__tests__/structured-data.test.ts`: 3 件
+- `checkout/__tests__/bundle-pricing.test.ts`: 3 件（computeBundlePricing + computeMonthlyFromFloor）
+- `lib/__tests__/activity-pulse.test.ts`: 1 件
+
+### 設計原則
+
+1. **感情ファースト** — 技術仕様は裏側に隠す。表側は情緒タグ・ヒーロー画像・直感的価格のみ
+2. **決定論的パーソナライズ** — 情緒タグ・Activity Pulse は assetId の djb2 ハッシュで決定。SSR でもハイドレーション不一致なし
+3. **段階的開示** — Flip-Motion でエンジニア向け技術詳細を「めくって見る」体験
+4. **アクセシビリティ** — reduced-motion・aria-live・aria-pressed で全操作に対応
+5. **SEO** — JSON-LD (Product + SoftwareApplication) + OGP を各資産ページに自動注入
+
