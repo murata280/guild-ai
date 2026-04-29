@@ -33,6 +33,13 @@ describe("Shimaenaga placement — product cards", () => {
   });
 });
 
+describe("ProToggle — no mascot", () => {
+  it("ProToggle does NOT contain Shimaenaga", () => {
+    const src = readFileSync(resolve(root, "src/components/ProToggle.tsx"), "utf8");
+    expect(src).not.toContain("<Shimaenaga");
+  });
+});
+
 describe("Shimaenaga mode ARIA labels", () => {
   const shimSrc = readFileSync(resolve(root, "src/components/Shimaenaga.tsx"), "utf8");
 
