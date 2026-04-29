@@ -101,3 +101,25 @@
 | `src/components/RawDataPanel.tsx` | Raw Data クライアントアコーディオン |
 | `src/components/RankBadge.tsx` | CrownIcon/StarIcon/LeafIcon 使用 |
 | `docs/用語集.md` | 語彙マッピングのSSOT |
+
+---
+
+## 7. Final Vision 補正（語彙アップデート）
+
+Sweet Spot で定義した語彙を Final Vision（Showcase × Marketplace 完全統合）でさらに統一した。
+
+| Sweet Spot 表記 | Final Vision 補正後 | 理由 |
+|-----------------|-------------------|------|
+| スキル資産 | 分身 / たからもの | より情緒的・記憶に残る |
+| 登録する | お店にならべる | 動詞の統一 |
+| マイページ | 💰 お財布 | /wallet ページ名 |
+| 資産を登録する | おしごとに登録する | ナビ統一 |
+| お仕事（漢字） | おしごと（ひらがな） | jargon-lint で漢字禁止 |
+| 採用（AtoAジョブ） | おしごと | 語彙統一 |
+
+### jargon-lint 禁止語の変遷
+
+| 禁止語 | 追加バージョン | 理由 |
+|--------|-------------|------|
+| JPYC / ステーブルコイン | #22 | 法的リスク |
+| お仕事（漢字） | Final Vision | → おしごと（ひらがな）統一 |
