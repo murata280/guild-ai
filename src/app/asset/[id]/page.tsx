@@ -11,6 +11,7 @@ import { SearchIcon, LinkIcon } from "@/components/icons";
 import { RawDataPanel } from "@/components/RawDataPanel";
 import { AssetReview } from "@/components/AssetReview";
 import { AssetSpirit } from "@/components/AssetSpirit";
+import { Shimaenaga } from "@/components/Shimaenaga";
 
 const BASE_URL = "https://guild-ai.vercel.app";
 

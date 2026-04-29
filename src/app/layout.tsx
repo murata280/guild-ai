@@ -3,6 +3,7 @@ import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import { SidebarNav, BottomNav } from "@/components/SidebarNav";
 import { OnboardingGuide } from "@/components/OnboardingGuide";
+import { Shimaenaga } from "@/components/Shimaenaga";
 
 const notoSansJP = Noto_Sans_JP({
   subsets: ["latin"],
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <span className="text-white text-xs font-black tracking-wider">G</span>
             </div>
             <span className="text-sm font-bold text-kuroko">GUILD AI</span>
+            <Shimaenaga variant="wave" size="xs" className="ml-auto" />
           </div>
           {/* Nav links (client component for active state) */}
           <SidebarNav />

@@ -21,6 +21,7 @@ import { PackageIcon, SearchIcon } from "@/components/icons";
 import { ShareButton } from "@/components/ShareButton";
 import { AssetEmblem } from "@/components/AssetEmblem";
 import { setPhoto } from "@/lib/asset-photos";
+import { Shimaenaga } from "@/components/Shimaenaga";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -168,7 +169,10 @@ function CompletionCard({ data }: { data: CompletionData }) {
     <div className="mt-6 space-y-4">
       {/* Success header */}
       <div className="rounded-2xl bg-accent-green/10 border border-accent-green/30 p-5 text-center">
-        <div className="text-4xl mb-2">🎉</div>
+        <div className="flex justify-center mb-2 gap-3 items-center">
+          <div className="text-4xl">🎉</div>
+          <Shimaenaga variant="coin" size="sm" />
+        </div>
         <h2 className="text-xl font-bold text-kuroko">あなたの たからもの として登録されました</h2>
         <p className="mt-1 text-sm text-[#9890A8]">
           ランク <RankBadge rank={data.rank} /> ·
