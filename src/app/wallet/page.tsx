@@ -13,7 +13,8 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { getNotifications, getUnreadCount } from "@/lib/notifications";
 import { useLiveEarnings } from "@/lib/live-earnings";
 import { SlotNumber } from "@/components/SlotNumber";
-import { toggleMute, playSuccessChime } from "@/lib/sound";
+import { toggleMute, playSuccessChime, playPassbookChime } from "@/lib/sound";
+import { PassbookTable } from "@/components/PassbookTable";
 import { UserIcon, BanknoteIcon } from "@/components/icons";
 import { RawDataPanel } from "@/components/RawDataPanel";
 import { ShareButton } from "@/components/ShareButton";
@@ -119,10 +120,6 @@ function PassbookCard({ owned }: { owned: OwnershipRecord[] }) {
   }, [live.bumpCount]);
 
   const maxTrust = Math.max(...snap.trustHistory, 1);
-  const TX_TYPE_LABELS: Record<string, string> = {
-    card: "スキル利用収益",
-    jpyc: "還元（リワード）受領",
-  };
 
   return (
     <div className="mt-5 section-card p-5">
@@ -231,23 +228,20 @@ function PassbookCard({ owned }: { owned: OwnershipRecord[] }) {
         <ShareButton context={{ type: "passbook_milestone" }} seed={0} compact />
       </div>
 
-      {/* Recent transactions */}
+      {/* Recent transactions — passbook style */}
       <div className="mt-4 pt-4 border-t border-kuroko/10">
-        <p className="text-xs font-semibold text-[#9890A8] mb-3">最近の取引履歴</p>
-        <ul className="space-y-2">
-          {snap.recentTransactions.map((tx) => (
-            <li key={tx.id} className="flex items-center gap-3 text-sm">
-              <span className="text-lg" aria-hidden>{tx.type === "card" ? "💳" : "💰"}</span>
-              <span className="flex-1 text-kuroko truncate">{TX_TYPE_LABELS[tx.type] ?? tx.assetTitle}</span>
-              <span className="text-[#9890A8] text-xs tabular-nums shrink-0">
-                {new Date(tx.at).toLocaleDateString("ja-JP", { month: "numeric", day: "numeric" })}
-              </span>
-              <span className="font-semibold text-kuroko tabular-nums shrink-0">
-                ¥{tx.amount.toLocaleString("ja-JP")}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs font-semibold text-[#9890A8]">おさいふ通帳</p>
+          <button
+            type="button"
+            onClick={playPassbookChime}
+            aria-label="通帳チャイムを鳴らす"
+            className="text-[10px] text-kaki font-semibold hover:underline"
+          >
+            🔔 チャイム
+          </button>
+        </div>
+        <PassbookTable transactions={snap.recentTransactions} />
       </div>
     </div>
   );

@@ -76,5 +76,25 @@ export function toggleMute(): boolean {
   return muted;
 }
 
+/**
+ * playPassbookChime — gentle bank-passbook entry sound.
+ * Lower, mellower than the success chime: A4 main tone + A3 bass.
+ * Must be called from a user-gesture handler.
+ */
+export function playPassbookChime(): void {
+  if (muted) return;
+  const ac = getContext();
+  if (!ac) return;
+  try {
+    if (ac.state === "suspended") ac.resume().catch(() => undefined);
+    playPartial(ac, 440, 0.10, 0, 0.8);     // A4 — main note
+    playPartial(ac, 220, 0.06, 0.02, 0.6);  // A3 — warm bass
+    playPartial(ac, 880, 0.04, 0.05, 0.4);  // A5 — soft shimmer
+  } catch {
+    // Silent fail
+  }
+}
+
 /** Deterministic helper: returns the note frequencies used (for tests) */
 export const CHIME_FREQUENCIES = [700, 350, 1400] as const;
+export const PASSBOOK_CHIME_FREQUENCIES = [440, 220, 880] as const;

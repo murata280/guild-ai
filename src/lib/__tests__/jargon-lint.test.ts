@@ -54,6 +54,7 @@ const FORBIDDEN: Array<{ term: string; reason: string }> = [
   { term: "利用窓口（API）", reason: "→ おしごと窓口 に統一（Refinement v2）" },
   { term: "CCAF",           reason: "→ こだわり（実績ログ）に置換" },
   { term: "お仕事",          reason: "→ おしごと（ひらがな）に置換（Final Vision §4）" },
+  { term: "取引所",          reason: "→ 保管庫 に置換（Petal Logic §Guardian）" },
 ];
 
 describe("jargon-lint: forbidden terms in app UI pages", () => {

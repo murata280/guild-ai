@@ -43,7 +43,7 @@ function ShowcaseCard({
     >
       {/* Thumbnail */}
       <div className="h-36 bg-kuroko/5 flex items-center justify-center relative overflow-hidden">
-        <HumanThumbnail assetId={item.listing.id} title={item.listing.title} size={96} />
+        <HumanThumbnail assetId={item.listing.id} title={item.listing.title} rank={item.listing.rank} size={96} />
         <div className="absolute top-2 right-2">
           <RankBadge rank={item.listing.rank} />
         </div>
@@ -182,8 +182,8 @@ export default function ShowcasePage() {
           <Link href="/sell" className="btn-primary" aria-label="たからもの登録する">
             たからもの登録する →
           </Link>
-          <Link href="/marketplace" className="btn-secondary" aria-label="マーケットを見る">
-            マーケットを見る
+          <Link href="/marketplace" className="btn-secondary" aria-label="保管庫を見る">
+            保管庫を見る
           </Link>
         </div>
       </div>

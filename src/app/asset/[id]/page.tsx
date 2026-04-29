@@ -10,7 +10,7 @@ import { messages } from "@/lib/microcopy";
 import { SearchIcon, LinkIcon } from "@/components/icons";
 import { RawDataPanel } from "@/components/RawDataPanel";
 import { AssetReview } from "@/components/AssetReview";
-import { AssetEmblem } from "@/components/AssetEmblem";
+import { AssetSpirit } from "@/components/AssetSpirit";
 
 const BASE_URL = "https://guild-ai.vercel.app";
 
@@ -70,7 +70,7 @@ export default function AssetPage({ params }: { params: { id: string } }) {
 
       {/* Title row */}
       <div className="mt-4 flex items-start gap-4">
-        <AssetEmblem assetId={listing.id} size={56} className="shrink-0 rounded-xl" />
+        <AssetSpirit assetId={listing.id} rank={listing.rank} size={56} className="shrink-0 rounded-xl" />
         <div className="flex-1 flex items-start justify-between gap-2">
           <h1 className="text-2xl font-bold leading-tight text-kuroko">{listing.title}</h1>
           <RankBadge rank={listing.rank} />

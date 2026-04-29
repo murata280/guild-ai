@@ -6,17 +6,17 @@ import { usePathname } from "next/navigation";
 const SIDEBAR_ITEMS = [
   { href: "/", label: "ホーム", exact: true },
   { href: "/showcase", label: "✨ つくったもの", exact: false },
-  { href: "/marketplace", label: "マーケット", exact: false },
+  { href: "/marketplace", label: "🏦 保管庫", exact: false },
   { href: "/sell", label: "おしごとに登録", exact: false },
-  { href: "/wallet", label: "💰 お財布", exact: false },
+  { href: "/wallet", label: "💰 おさいふ通帳", exact: false },
 ];
 
 const BOTTOM_ITEMS = [
   { href: "/", label: "ホーム", exact: true },
   { href: "/showcase", label: "✨ 作品", exact: false },
-  { href: "/marketplace", label: "マーケット", exact: false },
+  { href: "/marketplace", label: "🏦 保管庫", exact: false },
   { href: "/sell", label: "登録", exact: false },
-  { href: "/wallet", label: "💰 財布", exact: false },
+  { href: "/wallet", label: "💰 通帳", exact: false },
 ];
 
 function isActive(pathname: string, href: string, exact: boolean) {

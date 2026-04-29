@@ -68,9 +68,9 @@ function MarketplaceContent() {
 
       <div className="mt-4 flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-kuroko leading-snug flex items-center gap-2"><ShoppingBagIcon size={22} className="text-kaki" />マーケット</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-kuroko leading-snug flex items-center gap-2"><ShoppingBagIcon size={22} className="text-kaki" />🏦 保管庫（スキルの貯金箱）</h1>
           <p className="mt-1 text-base text-[#9890A8] leading-relaxed">
-            AI評価済みスキル資産の一覧。良質な資産ほど高評価・高価格で表示されます。
+            AI評価済みスキル資産の保管庫。良質なたからものほど高評価・高価格で表示されます。
           </p>
         </div>
         <Link href="/sell" className="btn-primary shrink-0" aria-label="スキルを資産として登録する">
@@ -160,7 +160,7 @@ function MarketplaceContent() {
               <>
                 {/* Thumbnail + rank badge */}
                 <div className="h-24 bg-kuroko/5 rounded-xl flex items-center justify-center relative mb-3 overflow-hidden">
-                  <HumanThumbnail assetId={item.listing.id} title={item.listing.title} size={72} />
+                  <HumanThumbnail assetId={item.listing.id} title={item.listing.title} rank={item.listing.rank} size={72} />
                   <div className="absolute top-2 right-2">
                     <RankBadge rank={item.listing.rank} large />
                   </div>
