@@ -45,10 +45,12 @@ describe("generateShareText", () => {
     }
   });
 
-  it("listing_published templates invoke curiosity (contain '?' or 'ですか')", () => {
-    for (const tpl of SHARE_TEMPLATES.listing_published) {
-      const hasHook = tpl.includes("？") || tpl.includes("?") || tpl.includes("ですか") || tpl.includes("できる");
-      expect(hasHook, "listing_published should have a hook").toBe(true);
+  it("all templates end with the provocative closing question", () => {
+    const closing = "自分の価値を、自分の手に。";
+    for (const [type, templates] of Object.entries(SHARE_TEMPLATES)) {
+      for (const tpl of templates) {
+        expect(tpl, `${type} template should contain closing question`).toContain(closing);
+      }
     }
   });
 

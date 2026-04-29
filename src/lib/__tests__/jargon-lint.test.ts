@@ -48,9 +48,10 @@ const FORBIDDEN: Array<{ term: string; reason: string }> = [
   { term: "JPYC",           reason: "→ デジタル円 または ¥ に置換" },
   { term: "ステーブルコイン", reason: "→ デジタル円 に置換" },
   { term: "Stablecoin",     reason: "→ デジタル円 に置換" },
-  { term: "API Hotbed",     reason: "→ AI同士のお仕事の場 に置換" },
-  { term: "APIエンドポイント", reason: "→ お仕事の受付窓口 に置換" },
-  { term: "CCAF",           reason: "→ 制作の証明 に置換" },
+  { term: "API Hotbed",     reason: "→ AI連携窓口 に置換" },
+  { term: "APIエンドポイント", reason: "→ 利用窓口（API）に置換" },
+  { term: "CCAF",           reason: "→ こだわり（実績ログ）に置換" },
+  { term: "お仕事",          reason: "→ おしごと（ひらがな）に置換（Final Vision §4）" },
 ];
 
 describe("jargon-lint: forbidden terms in app UI pages", () => {
