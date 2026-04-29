@@ -32,3 +32,31 @@ describe("Shimaenaga placement — product cards", () => {
     expect(src).not.toContain("<Shimaenaga");
   });
 });
+
+describe("Shimaenaga mode ARIA labels", () => {
+  const shimSrc = readFileSync(resolve(root, "src/components/Shimaenaga.tsx"), "utf8");
+
+  it("guardian mode aria-label contains ガーディアン or 守り神 or guard", () => {
+    expect(shimSrc).toMatch(/ガーディアン|守り神|guard/i);
+  });
+
+  it("seal mode aria-label contains 認証 or stamp or seal", () => {
+    expect(shimSrc).toMatch(/認証スタンプ|stamp|seal/i);
+  });
+
+  it("guardian mode has shield rendering", () => {
+    expect(shimSrc).toContain("GuardianShield");
+  });
+
+  it("seal mode has GUILD CERTIFIED text", () => {
+    expect(shimSrc).toContain("GUILD CERTIFIED");
+  });
+
+  it("avatar mode has blink animation", () => {
+    expect(shimSrc).toContain("shima-eye-blink");
+  });
+
+  it("prefers-reduced-motion is respected in avatar blink", () => {
+    expect(shimSrc).toContain("prefers-reduced-motion");
+  });
+});
