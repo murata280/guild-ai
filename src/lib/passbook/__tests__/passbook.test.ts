@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getPassbookSnapshot } from "../index";
+import { getPassbookSnapshot, getMonthlyEarnings } from "../index";
 
 describe("getPassbookSnapshot", () => {
   it("returns deterministic snapshot for same userId", () => {
@@ -31,5 +31,34 @@ describe("getPassbookSnapshot", () => {
       expect(tx.amount).toBeGreaterThan(0);
       expect(["card", "jpyc"]).toContain(tx.type);
     });
+  });
+});
+
+describe("getMonthlyEarnings", () => {
+  it("returns positive jpy in reasonable range", () => {
+    const e = getMonthlyEarnings("demo-user");
+    expect(e.jpy).toBeGreaterThanOrEqual(8000);
+    expect(e.jpy).toBeLessThanOrEqual(21000);
+  });
+
+  it("breakdown amounts sum to total jpy", () => {
+    const e = getMonthlyEarnings("demo-user");
+    const sum = e.breakdown.reduce((acc, b) => acc + b.amount, 0);
+    expect(sum).toBe(e.jpy);
+  });
+
+  it("returns 3 breakdown items with labels", () => {
+    const e = getMonthlyEarnings("demo-user");
+    expect(e.breakdown).toHaveLength(3);
+    for (const b of e.breakdown) {
+      expect(typeof b.label).toBe("string");
+      expect(b.amount).toBeGreaterThan(0);
+    }
+  });
+
+  it("is deterministic", () => {
+    const a = getMonthlyEarnings("bob");
+    const b = getMonthlyEarnings("bob");
+    expect(a.jpy).toBe(b.jpy);
   });
 });

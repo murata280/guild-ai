@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import { SidebarNav, BottomNav } from "@/components/SidebarNav";
+import { OnboardingGuide } from "@/components/OnboardingGuide";
+import { Shimaenaga } from "@/components/Shimaenaga";
 
 const notoSansJP = Noto_Sans_JP({
   subsets: ["latin"],
@@ -10,9 +12,27 @@ const notoSansJP = Noto_Sans_JP({
   weight: ["400", "500", "700", "900"],
 });
 
+const BASE_URL = "https://guild-ai.vercel.app";
+
 export const metadata = {
-  title: "GUILD AI — 知能資産の登記と信用の循環経済圏",
-  description: "知能を労働ではなく登記する。信用は減衰せず循環する。"
+  metadataBase: new URL(BASE_URL),
+  title: "GUILD AI — スキルを資産に。AIが買いに来る。",
+  description: "あなたのスキルやコードを資産として登録すると、世界中の人やAIが利用料を払って使ってくれます。寝ている間も、あなたの分身が稼ぎ続ける場所。",
+  openGraph: {
+    title: "GUILD AI — スキルを資産に。AIが買いに来る。",
+    description: "スキルを登録したら、AIが勝手に値段をつけた。思考の深さと試行回数が、そのまま評価に反映される。",
+    url: BASE_URL,
+    siteName: "GUILD AI",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "GUILD AI" }],
+    locale: "ja_JP",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "GUILD AI — スキルを資産に。AIが買いに来る。",
+    description: "スキルを登録したら、AIが勝手に値段をつけた。思考の深さと試行回数が、そのまま評価に反映される。",
+    images: ["/og.png"],
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -28,6 +48,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <span className="text-white text-xs font-black tracking-wider">G</span>
             </div>
             <span className="text-sm font-bold text-kuroko">GUILD AI</span>
+            <Shimaenaga variant="wave" size="xs" className="ml-auto" />
           </div>
           {/* Nav links (client component for active state) */}
           <SidebarNav />
@@ -59,6 +80,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           {/* Mobile bottom nav */}
           <BottomNav />
         </div>
+
+        {/* Onboarding guide — renders only on first visit */}
+        <OnboardingGuide />
 
       </body>
     </html>

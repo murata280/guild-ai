@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { DiscordBridge, DISCORD_WEIGHTS, DAILY_CAP } from "../index";
+import { DiscordBridge, DISCORD_WEIGHTS, DAILY_CAP, attributeAmbassadorReward } from "../index";
 
 describe("DiscordBridge", () => {
   let bridge: DiscordBridge;
@@ -78,5 +78,31 @@ describe("DiscordBridge", () => {
       }
     }
     expect(bridge.contributionFor("u5")).toBe(100);
+  });
+});
+
+describe("attributeAmbassadorReward", () => {
+  it("calculates 5% reward by default", () => {
+    const result = attributeAmbassadorReward("ambassador_1", 10000);
+    expect(result.rewardAmount).toBe(500);
+    expect(result.share).toBe(0.05);
+  });
+
+  it("respects custom share parameter", () => {
+    const result = attributeAmbassadorReward("ambassador_2", 10000, 0.10);
+    expect(result.rewardAmount).toBe(1000);
+    expect(result.share).toBe(0.10);
+  });
+
+  it("returns correct ambassador metadata", () => {
+    const result = attributeAmbassadorReward("amb_x", 5000);
+    expect(result.ambassadorId).toBe("amb_x");
+    expect(result.saleAmount).toBe(5000);
+    expect(result.awardedAt).toBeTruthy();
+  });
+
+  it("includes a mock smart-contract txHash starting with 0x", () => {
+    const result = attributeAmbassadorReward("amb_tx", 3000);
+    expect(result.txHash).toMatch(/^0x[0-9a-f]{64}$/);
   });
 });

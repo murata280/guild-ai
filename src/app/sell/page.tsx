@@ -12,11 +12,18 @@ import { RankRadar } from "@/components/RankRadar";
 import { WillSignalTrigger } from "@/components/WillSignalTrigger";
 import { StepIndicator } from "@/components/StepIndicator";
 import { formatJPY, isGithubUrl } from "@/utils/format";
-import { generateRemixDescription, extractFromReadme } from "@/lib/listing-generator";
+import { generateRemixDescription, extractFromReadme, extractSalesParts } from "@/lib/listing-generator";
 import { listRepos, fetchReadme } from "@/lib/github-picker";
 import type { MockRepo } from "@/lib/github-picker";
-import { voiceLogToProofOfMake } from "@/lib/proof-of-make";
+import { voiceLogToProofOfMake, generateProductPitch } from "@/lib/proof-of-make";
 import type { CCAF, MarketplaceListing, Currency, Rank } from "@/types";
+import { PackageIcon, SearchIcon } from "@/components/icons";
+import { ShareButton } from "@/components/ShareButton";
+import { AssetEmblem } from "@/components/AssetEmblem";
+import { setPhoto } from "@/lib/asset-photos";
+import { Shimaenaga } from "@/components/Shimaenaga";
+import { computeBundlePricing } from "@/lib/checkout";
+import { ClaimFlow } from "@/components/ClaimFlow";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -43,10 +50,10 @@ const trust = computeTrustScore({ qualityHistory: 70, discordContribution: 55, x
 
 // ─── 3-minute timer ────────────────────────────────────────────────────────────
 
+const LIMIT = 180;
+
 function TimerBar({ startAt }: { startAt: number }) {
   const [elapsed, setElapsed] = useState(0);
-  const LIMIT = 180;
-
   useEffect(() => {
     const t = setInterval(() => setElapsed(Math.floor((Date.now() - startAt) / 1000)), 500);
     return () => clearInterval(t);
@@ -59,9 +66,9 @@ function TimerBar({ startAt }: { startAt: number }) {
   return (
     <div className="mt-3 space-y-1">
       <div className="flex justify-between text-xs text-[#9890A8]">
-        <span>Fast-Path 3分保証</span>
+        <span>3分以内に完了</span>
         <span className={isOver ? "text-red-500 font-semibold" : ""}>
-          {isOver ? "時間超過" : `残り ${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, "0")}`}
+          {isOver ? "目安の3分を超えました" : `残り ${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, "0")}`}
         </span>
       </div>
       <div className="h-1 rounded-full bg-kuroko/10">
@@ -77,12 +84,12 @@ function TimerBar({ startAt }: { startAt: number }) {
 // ─── Progress steps overlay ────────────────────────────────────────────────────
 
 const AUTO_STEPS = [
-  "README を取得中…",
-  "セールスポイントを抽出中…",
-  "最適価格を算出中…",
-  "AI 鑑定中…",
-  "Marketplace に出品中…",
-  "デプロイ URL を発行中…",
+  "作品の情報を読み込み中…",
+  "おすすめポイントを抽出中…",
+  "最適なお値段を算出中…",
+  "AIが中身をチェック中…",
+  "マーケットに登録中…",
+  "公開URLを発行中…",
 ];
 
 function AutoProgress({
@@ -97,16 +104,25 @@ function AutoProgress({
   return (
     <div
       className={overlay
-        ? "fixed inset-0 z-50 bg-white/90 flex flex-col items-center justify-center gap-3 px-8"
+        ? "fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 px-8"
         : "mt-4 space-y-2"
       }
+      style={overlay ? {
+        background: "radial-gradient(ellipse at center, rgba(26,107,181,0.08) 0%, rgba(15,169,104,0.06) 100%)",
+        backdropFilter: "blur(2px)",
+        backgroundColor: "rgba(255,255,255,0.93)",
+      } : undefined}
     >
       {overlay && (
-        <div className="text-4xl mb-2 animate-spin">✨</div>
+        <div className="flex gap-4 mb-2 text-3xl">
+          <span className="animate-bounce" style={{ animationDelay: "0ms" }}>✨</span>
+          <span className="animate-bounce" style={{ animationDelay: "200ms" }}>📐</span>
+          <span className="animate-bounce" style={{ animationDelay: "400ms" }}>🔬</span>
+        </div>
       )}
       {overlay && (
         <p className="text-base font-bold text-kuroko mb-4 text-center">
-          あなたは何もしなくてOK。AIがすべて代行します
+          AIが中身を丁寧にチェックしています...
         </p>
       )}
       {steps.map((step, i) => (
@@ -130,7 +146,20 @@ function AutoProgress({
 
 function CompletionCard({ data }: { data: CompletionData }) {
   const [copied, setCopied] = useState<"deploy" | "api" | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const router = useRouter();
+
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target?.result as string;
+      setPhoto(data.listingId, dataUrl);
+      setPhotoPreview(dataUrl);
+    };
+    reader.readAsDataURL(file);
+  }
 
   const copy = (text: string, key: "deploy" | "api") => {
     navigator.clipboard.writeText(text).catch(() => {});
@@ -142,67 +171,112 @@ function CompletionCard({ data }: { data: CompletionData }) {
     <div className="mt-6 space-y-4">
       {/* Success header */}
       <div className="rounded-2xl bg-accent-green/10 border border-accent-green/30 p-5 text-center">
-        <div className="text-4xl mb-2">🎉</div>
-        <h2 className="text-xl font-bold text-kuroko">登記完了！デプロイURLが発行されました</h2>
+        <div className="flex justify-center mb-2 gap-3 items-center">
+          <div className="text-4xl">🎉</div>
+          <Shimaenaga variant="coin" size="sm" />
+        </div>
+        <h2 className="text-xl font-bold text-kuroko">あなたの たからもの として登録されました</h2>
         <p className="mt-1 text-sm text-[#9890A8]">
           ランク <RankBadge rank={data.rank} /> ·
-          Floor Price <span className="font-bold text-kuroko">¥{data.floorPrice.toLocaleString("ja-JP")}</span>
+          お値段 <span className="font-bold text-kuroko">¥{data.floorPrice.toLocaleString("ja-JP")}</span>
         </p>
+      </div>
+
+      {/* Photo upload (optional) */}
+      <div className="section-card p-4 flex items-center gap-4">
+        <div className="shrink-0">
+          {photoPreview ? (
+            <img src={photoPreview} alt="プレビュー" width={56} height={56} className="rounded-xl object-cover" />
+          ) : (
+            <AssetEmblem assetId={data.listingId} size={56} className="rounded-xl" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-kuroko">写真でも見せる（任意）</p>
+          <p className="text-xs text-[#9890A8] mt-0.5">顔写真や作品画像を追加できます</p>
+          <label className="mt-2 inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-kuroko/20 px-3 py-1.5 text-xs font-medium text-[#3A3664] hover:border-kaki/40 transition-colors">
+            📷 画像を選ぶ
+            <input type="file" accept="image/*" className="sr-only" onChange={handlePhotoChange} aria-label="写真をアップロード" />
+          </label>
+        </div>
       </div>
 
       {/* 3 parallel links */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {/* Deploy URL */}
+        {/* Public URL */}
         <div className="section-card p-4">
-          <p className="text-xs text-[#9890A8] font-semibold mb-2">デプロイ URL</p>
+          <p className="text-xs text-[#9890A8] font-semibold mb-2">公開URL</p>
           <p className="font-mono text-xs text-kaki truncate">{data.deployUrl.slice(0, 40)}…</p>
           <button
             type="button"
             onClick={() => copy(data.deployUrl, "deploy")}
-            aria-label="デプロイURLをコピー"
+            aria-label="公開URLをコピー"
             className="btn-secondary w-full !py-1.5 !text-xs mt-2"
           >
             {copied === "deploy" ? "✓ コピー済み" : "URLをコピー"}
           </button>
         </div>
 
-        {/* API Endpoint */}
+        {/* Reception desk */}
         <div className="section-card p-4">
-          <p className="text-xs text-[#9890A8] font-semibold mb-2">API エンドポイント</p>
+          <p className="text-xs text-[#9890A8] font-semibold mb-2">おしごと窓口</p>
           <p className="font-mono text-xs text-kaki truncate">{data.apiEndpoint.slice(0, 40)}…</p>
           <button
             type="button"
             onClick={() => copy(data.apiEndpoint, "api")}
-            aria-label="APIエンドポイントをコピー"
+            aria-label="受付窓口URLをコピー"
             className="btn-secondary w-full !py-1.5 !text-xs mt-2"
           >
-            {copied === "api" ? "✓ コピー済み" : "エンドポイントをコピー"}
+            {copied === "api" ? "✓ コピー済み" : "コピーする"}
           </button>
         </div>
 
-        {/* Dashboard link */}
+        {/* Management */}
         <div className="section-card p-4 flex flex-col">
-          <p className="text-xs text-[#9890A8] font-semibold mb-2">Dashboard</p>
-          <p className="text-sm text-kuroko leading-relaxed flex-1">資産を管理・デプロイできます</p>
+          <p className="text-xs text-[#9890A8] font-semibold mb-2">💰 お財布</p>
+          <p className="text-sm text-kuroko leading-relaxed flex-1">収益と信用スコアを確認できます</p>
           <button
             type="button"
-            onClick={() => router.push("/dashboard")}
-            aria-label="Dashboardへ移動"
+            onClick={() => router.push("/wallet")}
+            aria-label="お財布へ移動"
             className="btn-primary w-full !py-1.5 !text-xs mt-2"
           >
-            Dashboardへ →
+            💰 お財布へ →
           </button>
         </div>
+      </div>
+
+      {/* Share listing */}
+      <div className="section-card p-5">
+        <p className="text-xs font-semibold uppercase tracking-widest text-[#9890A8] mb-3">登録をシェアする</p>
+        <ShareButton
+          context={{ type: "listing_published", title: data.title, rank: data.rank }}
+          url={`https://guild-ai.vercel.app/asset/${data.listingId}`}
+          seed={0}
+        />
       </div>
 
       <button
         type="button"
         onClick={() => router.push(`/marketplace?highlight=${data.listingId}`)}
-        aria-label="Marketplaceで確認"
+        aria-label="お店で確認"
         className="btn-secondary w-full"
       >
-        Marketplace で確認 →
+        お店で確認 →
       </button>
+    </div>
+  );
+}
+
+// ─── Repo icon badge ───────────────────────────────────────────────────────────
+
+const ICON_BG_COLORS = ["bg-kaki", "bg-accent-green", "bg-[#9B6BB5]", "bg-[#E8621C]", "bg-[#2D7FBF]"];
+
+function RepoIconBadge({ name, idx }: { name: string; idx: number }) {
+  const color = ICON_BG_COLORS[(name.charCodeAt(0) + idx) % ICON_BG_COLORS.length];
+  return (
+    <div className={`w-10 h-10 rounded-full ${color} flex items-center justify-center text-white font-bold text-base shrink-0`}>
+      {name.charAt(0).toUpperCase()}
     </div>
   );
 }
@@ -211,17 +285,15 @@ function CompletionCard({ data }: { data: CompletionData }) {
 
 function AiPath({
   onComplete,
-  onReset,
+  onReset: _onReset,
 }: {
   onComplete: (data: CompletionData) => void;
   onReset: () => void;
 }) {
-  const router = useRouter();
   const [username, setUsername] = useState("");
   const [connected, setConnected] = useState(false);
   const [repos, setRepos] = useState<MockRepo[]>([]);
   const [selectedRepo, setSelectedRepo] = useState<MockRepo | null>(null);
-  const [autoFillChip, setAutoFillChip] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processStep, setProcessStep] = useState(0);
 
@@ -233,27 +305,26 @@ function AiPath({
 
   const handleSelectRepo = (repo: MockRepo) => {
     setSelectedRepo(repo);
-    setAutoFillChip(true);
   };
 
   const handleAutoRun = useCallback(async () => {
     if (!selectedRepo) return;
     setIsProcessing(true);
 
-    const steps = AUTO_STEPS;
-    for (let i = 0; i < steps.length; i++) {
+    for (let i = 0; i < AUTO_STEPS.length; i++) {
       setProcessStep(i);
       await new Promise((r) => setTimeout(r, 800 + Math.random() * 400));
     }
-    setProcessStep(steps.length);
+    setProcessStep(AUTO_STEPS.length);
 
-    // Build listing from README
     const readmeText = fetchReadme(selectedRepo);
     const extract = extractFromReadme(readmeText);
+    const salesParts = extractSalesParts(readmeText);
     const newId = `listing_${Date.now()}`;
     const ccaf: CCAF = { intentSignals: ["author-statement"], thoughtDensity: 75, iterations: 10, authorId: "demo-user", createdAt: new Date().toISOString() };
     const auditResult = audit({ ccaf, vercelUptimeDays: 30 });
-    const floor = computeFloorPrice(extract.suggestedPrice, trust.score);
+    const blendedPrice = Math.round((extract.suggestedPrice + salesParts.priceSuggestion) / 2);
+    const floor = computeFloorPrice(blendedPrice, trust.score);
 
     const ml: MarketplaceListing = autoList(
       { id: newId, ownerId: "demo-user", title: extract.title, description: extract.description, ccaf, vercelUptimeDays: 30, basePrice: extract.suggestedPrice, githubUrl: selectedRepo.url },
@@ -276,13 +347,14 @@ function AiPath({
     });
   }, [selectedRepo, onComplete]);
 
+  if (isProcessing && processStep < AUTO_STEPS.length) {
+    return <AutoProgress steps={AUTO_STEPS} currentStep={processStep} />;
+  }
+
   return (
     <div className="space-y-4">
-      {isProcessing && processStep < AUTO_STEPS.length && (
-        <AutoProgress steps={AUTO_STEPS} currentStep={processStep} overlay={false} />
-      )}
-
-      {!isProcessing && !connected && (
+      {/* Step 1: GitHub connect */}
+      {!connected && (
         <div className="flex flex-col items-center text-center space-y-4 py-4">
           <div className="w-14 h-14 rounded-2xl bg-kaki/10 flex items-center justify-center">
             <svg viewBox="0 0 24 24" className="w-8 h-8 text-kaki fill-current" aria-hidden>
@@ -291,7 +363,7 @@ function AiPath({
           </div>
           <div>
             <h2 className="text-lg font-bold text-kuroko">GitHubアカウントを連携</h2>
-            <p className="mt-1 text-sm text-[#9890A8]">リポジトリを選ぶだけ。URLコピペ不要。</p>
+            <p className="mt-1 text-sm text-[#9890A8]">あなたの作品を選ぶだけ。URLコピペ不要。</p>
           </div>
           <div className="w-full max-w-xs space-y-2">
             <input
@@ -313,25 +385,38 @@ function AiPath({
         </div>
       )}
 
-      {!isProcessing && connected && !selectedRepo && (
+      {/* Step 2: 作品を選ぶ (icon+title grid) */}
+      {connected && !selectedRepo && (
         <div className="space-y-3">
           <div className="flex items-center gap-2 rounded-xl border border-accent-green/30 bg-accent-green/5 px-4 py-2.5">
             <span className="text-accent-green font-bold">✓</span>
             <span className="text-sm font-medium text-kuroko">{username} — 連携完了</span>
           </div>
-          <p className="text-sm font-semibold text-[#3A3664]">リポジトリを選択</p>
+          <p className="text-sm font-semibold text-[#3A3664]">あなたの作品を選ぶ</p>
+
           <ul className="grid gap-2 sm:grid-cols-2">
-            {repos.map((repo) => (
-              <li key={repo.id}>
+            {repos.map((repo, idx) => (
+              <li key={repo.id} className="relative">
+                {repo.recommended && (
+                  <div className="absolute -top-1 -right-1 z-10 rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
+                    おすすめ！
+                  </div>
+                )}
                 <button
                   type="button" onClick={() => handleSelectRepo(repo)}
-                  aria-label={`${repo.fullName}を選択`}
-                  className="w-full text-left rounded-xl border p-4 min-h-[56px] border-kuroko/10 bg-white hover:border-kaki/30 transition-all active:scale-[0.98]"
+                  aria-label={`${repo.name}を選択`}
+                  className={`w-full text-left rounded-xl border p-3 min-h-[56px] transition-all active:scale-[0.98] ${
+                    repo.recommended
+                      ? "border-amber-300 bg-amber-50 hover:border-amber-400"
+                      : "border-kuroko/10 bg-white hover:border-kaki/30"
+                  }`}
                 >
-                  <p className="text-sm font-semibold text-kuroko">{repo.fullName}</p>
-                  <p className="mt-1 text-xs text-[#9890A8] line-clamp-1">{repo.description}</p>
-                  <div className="mt-1 flex gap-2 text-xs text-[#9890A8]">
-                    <span>{repo.language}</span><span>★ {repo.stars}</span>
+                  <div className="flex items-center gap-3">
+                    <RepoIconBadge name={repo.name} idx={idx} />
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-kuroko truncate">{repo.name}</p>
+                      <p className="mt-0.5 text-xs text-[#9890A8] line-clamp-1">{repo.description}</p>
+                    </div>
                   </div>
                 </button>
               </li>
@@ -340,26 +425,45 @@ function AiPath({
         </div>
       )}
 
-      {!isProcessing && selectedRepo && (
+      {/* Step 3: Auto run */}
+      {selectedRepo && (
         <div className="space-y-3">
-          <div className="flex items-center gap-2 rounded-xl border border-kaki/30 bg-kaki/5 px-4 py-2.5">
-            <span className="text-kaki font-bold">✓</span>
-            <span className="text-sm font-medium text-kuroko">{selectedRepo.fullName}</span>
-            {autoFillChip && (
-              <span className="ml-auto text-xs bg-accent-green/10 text-accent-green rounded-full px-2 py-0.5 font-semibold">READMEから自動入力されました</span>
-            )}
+          <div className="flex items-center gap-3 rounded-xl border border-kaki/30 bg-kaki/5 px-4 py-2.5">
+            <RepoIconBadge name={selectedRepo.name} idx={0} />
+            <span className="text-sm font-medium text-kuroko">{selectedRepo.name}</span>
+            <span className="ml-auto text-xs bg-accent-green/10 text-accent-green rounded-full px-2 py-0.5 font-semibold">
+              作品の情報を自動で取得しました
+            </span>
           </div>
+
+          {/* Selling points preview */}
+          {(() => {
+            const readme = fetchReadme(selectedRepo);
+            const sp = extractSalesParts(readme);
+            return sp.sellingPoints.length > 0 ? (
+              <div className="rounded-xl border border-kaki/20 bg-kaki/5 p-3">
+                <p className="text-xs font-semibold text-kaki mb-2">✨ AIが抽出した「売れる部品」</p>
+                <ul className="space-y-1">
+                  {sp.sellingPoints.map((pt) => (
+                    <li key={pt} className="flex gap-2 text-xs text-[#3A3664]">
+                      <span className="text-accent-green shrink-0">✓</span>{pt}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null;
+          })()}
 
           <button
             type="button" onClick={handleAutoRun}
-            aria-label="AIが全自動で出品する"
+            aria-label="AIにおまかせ — お店にならべる"
             className="btn-primary w-full !py-4 !text-base"
           >
-            ✨ AIが全自動で出品する
+            ✨ AIにおまかせ — お店にならべる
           </button>
 
-          <button type="button" onClick={() => { setSelectedRepo(null); }} className="text-sm text-[#9890A8] underline w-full text-center">
-            別のリポジトリを選ぶ
+          <button type="button" onClick={() => setSelectedRepo(null)} className="text-sm text-[#9890A8] underline w-full text-center">
+            別の作品を選ぶ
           </button>
         </div>
       )}
@@ -369,20 +473,16 @@ function AiPath({
 
 // ─── Path 2: 音声で登記 ────────────────────────────────────────────────────────
 
-function VoicePath({
-  onComplete,
-}: {
-  onComplete: (data: CompletionData) => void;
-}) {
+function VoicePath({ onComplete }: { onComplete: (data: CompletionData) => void }) {
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [hasSpeechApi, setHasSpeechApi] = useState(false);
-  const [step, setStep] = useState<"record" | "processing" | "confirm">("record");
+  const [step, setStep] = useState<"record" | "pitch" | "processing">("record");
   const [processStep, setProcessStep] = useState(0);
-  const [proofNote, setProofNote] = useState("");
+  const [pitch, setPitch] = useState<{ description: string; manual: string[] } | null>(null);
   const recogRef = useRef<unknown>(null);
 
-  const VOICE_STEPS = ["音声を解析中…", "AI 鑑定中…", "出品中…", "デプロイ URL 発行中…"];
+  const VOICE_STEPS = ["読み込み中…", "動作チェック中…", "採点中…", "公開URLを発行中…"];
 
   useEffect(() => {
     setHasSpeechApi(
@@ -416,9 +516,14 @@ function VoicePath({
     setIsRecording(true);
   }, [isRecording, hasSpeechApi]);
 
+  const handleGeneratePitch = useCallback(() => {
+    const result = generateProductPitch(transcript || "この作品に全力を注ぎました");
+    setPitch(result);
+    setStep("pitch");
+  }, [transcript]);
+
   const handleProcess = useCallback(async () => {
     const proof = voiceLogToProofOfMake(transcript || "制作へのこだわりと思いを込めました");
-    setProofNote(proof.refinedDescription);
     setStep("processing");
 
     for (let i = 0; i < VOICE_STEPS.length; i++) {
@@ -431,10 +536,11 @@ function VoicePath({
     const ccaf: CCAF = { intentSignals: proof.intentSignals, thoughtDensity: 72, iterations: 14, authorId: "demo-user", createdAt: new Date().toISOString() };
     const auditResult = audit({ ccaf, vercelUptimeDays: 30 });
     const floor = computeFloorPrice(5000, trust.score);
-    const title = `音声登記 — ${new Date().toLocaleDateString("ja-JP")}`;
+    const title = pitch?.description.slice(0, 30) + "…" || `音声登録 — ${new Date().toLocaleDateString("ja-JP")}`;
+    const description = pitch?.description || proof.refinedDescription;
 
     const ml: MarketplaceListing = autoList(
-      { id: newId, ownerId: "demo-user", title, description: proof.refinedDescription, ccaf, vercelUptimeDays: 30, basePrice: 5000, proofOfMakeNote: transcript },
+      { id: newId, ownerId: "demo-user", title, description, ccaf, vercelUptimeDays: 30, basePrice: 5000, proofOfMakeNote: transcript },
       { qualityHistory: 70, discordContribution: 55, xAmplification: 40 },
       new Date().toISOString()
     );
@@ -448,51 +554,78 @@ function VoicePath({
       deployUrl: `https://vercel.com/new/clone?repository-url=https://github.com/demo/voice-asset`,
       apiEndpoint: `https://guild-ai.vercel.app/api/atoa/${newId}`,
     });
-  }, [transcript, onComplete]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [transcript, pitch, onComplete]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (step === "processing") {
+    return <AutoProgress steps={VOICE_STEPS} currentStep={processStep} />;
+  }
+
+  if (step === "pitch" && pitch) {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-xl border border-kaki/30 bg-kaki/5 p-4">
+          <p className="text-xs font-semibold text-kaki mb-2">✨ AIが作成した商品説明文</p>
+          <p className="text-sm text-kuroko leading-relaxed">{pitch.description}</p>
+        </div>
+        <div className="rounded-xl border border-accent-green/20 bg-accent-green/5 p-4">
+          <p className="text-xs font-semibold text-accent-green mb-2">📋 マニュアル（自動作成）</p>
+          <ul className="space-y-1">
+            {pitch.manual.map((item, i) => (
+              <li key={i} className="flex gap-2 text-sm text-[#3A3664]">
+                <span className="text-accent-green shrink-0">{i + 1}.</span>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <button type="button" onClick={handleProcess} className="btn-primary w-full !py-3 !text-base">
+          この内容でお店に並べる →
+        </button>
+        <button type="button" onClick={() => setStep("record")} className="text-sm text-[#9890A8] underline w-full text-center">
+          録音し直す
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      {step === "record" && (
-        <div className="flex flex-col items-center space-y-4 py-4">
-          <div className="text-center">
-            <h2 className="text-lg font-bold text-kuroko">この作品のこだわりは？</h2>
-            <p className="mt-1 text-sm text-[#9890A8]">声で話すだけで制作秘話として登記されます</p>
-          </div>
+    <div className="flex flex-col items-center space-y-4 py-4">
+      <div className="text-center">
+        <h2 className="text-lg font-bold text-kuroko">この作品の自慢を教えてください</h2>
+        <p className="mt-1 text-sm text-[#9890A8]">声で話すだけでAIがプロレベルの紹介文を作ります</p>
+      </div>
 
-          <button
-            type="button" onClick={toggleRecording}
-            aria-label={isRecording ? "録音停止" : "録音開始"}
-            className={`w-24 h-24 rounded-full flex items-center justify-center text-4xl transition-all active:scale-95 shadow-lg ${isRecording ? "bg-red-500 animate-pulse shadow-red-200" : "bg-kaki hover:opacity-90 shadow-kaki/20"}`}
-          >
-            {isRecording ? "⏹" : "🎙️"}
-          </button>
+      <button
+        type="button" onClick={toggleRecording}
+        aria-label={isRecording ? "録音停止" : "録音開始"}
+        className={`w-24 h-24 rounded-full flex items-center justify-center text-4xl transition-all active:scale-95 shadow-lg ${isRecording ? "bg-red-500 animate-pulse shadow-red-200" : "bg-kaki hover:opacity-90 shadow-kaki/20"}`}
+      >
+        {isRecording ? "⏹" : "🎙️"}
+      </button>
 
-          <p className="text-sm text-[#9890A8]">{isRecording ? "録音中… タップで停止" : hasSpeechApi ? "タップして録音開始" : "ブラウザが音声入力非対応です"}</p>
+      <p className="text-sm text-[#9890A8]">{isRecording ? "録音中… タップで停止" : hasSpeechApi ? "タップして録音開始" : "ブラウザが音声入力非対応です"}</p>
 
-          <textarea
-            rows={4} value={transcript}
-            onChange={(e) => setTranscript(e.target.value)}
-            placeholder="制作秘話・こだわりをここに入力（音声入力の結果も編集できます）"
-            aria-label="制作秘話"
-            className="input-base resize-none w-full"
-          />
+      <textarea
+        rows={4} value={transcript}
+        onChange={(e) => setTranscript(e.target.value)}
+        placeholder="作品へのこだわりをここに入力（音声入力の結果も編集できます）"
+        aria-label="作品の自慢"
+        className="input-base resize-none w-full"
+      />
 
-          {transcript.length > 0 && (
-            <button type="button" onClick={handleProcess} className="btn-primary w-full !py-3 !text-base">
-              AIが整形 → 鑑定 → 出品する
-            </button>
-          )}
-        </div>
-      )}
-
-      {step === "processing" && (
-        <AutoProgress steps={VOICE_STEPS} currentStep={processStep} />
+      {transcript.length > 0 && (
+        <button type="button" onClick={handleGeneratePitch} className="btn-primary w-full !py-3 !text-base">
+          AIが紹介文とマニュアルを作成する →
+        </button>
       )}
     </div>
   );
 }
 
-// ─── Path 3: テキストで登記 ────────────────────────────────────────────────────
+// ─── Path 3: テキストで入力 ────────────────────────────────────────────────────
+
+const CURRENCY_LABELS: Record<Currency, string> = { JPY: "日本円", JPYC: "デジタル円" };
+const MARKET_REFERENCE_PRICE = 3000;
 
 function TextPath({
   onComplete,
@@ -503,7 +636,7 @@ function TextPath({
   remixId: string | null;
   remixFrom: string | null;
 }) {
-  const [title, setTitle] = useState(remixFrom ? `${remixFrom} — Remix` : "");
+  const [title, setTitle] = useState(remixFrom ? `${remixFrom} — 派生版` : "");
   const [githubUrl, setGithubUrl] = useState("");
   const [description, setDescription] = useState(remixFrom ? generateRemixDescription(remixFrom) : "");
   const [proofOfMakeNote, setProofOfMakeNote] = useState("");
@@ -516,9 +649,12 @@ function TextPath({
   const auditResult = useMemo(() => audit({ ccaf, vercelUptimeDays }), [ccaf, vercelUptimeDays]);
   const floor = useMemo(() => promotedPrice ?? computeFloorPrice(basePrice, trust.score), [basePrice, promotedPrice]);
 
+  // isGithubUrl only used as soft validation hint
+  void isGithubUrl;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const finalTitle = title.trim() || "新しい知能資産";
+    const finalTitle = title.trim() || "新しいスキル資産";
     const newId = `listing_${Date.now()}`;
 
     const ml: MarketplaceListing = autoList(
@@ -548,7 +684,7 @@ function TextPath({
         <label className="flex flex-col gap-1 text-sm text-[#3A3664]">
           タイトル
           <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
-            placeholder="知能資産のタイトル" aria-label="タイトル" className="input-base" />
+            placeholder="あなたの作品のタイトル" aria-label="タイトル" className="input-base" />
         </label>
         <label className="flex flex-col gap-1 text-sm text-[#3A3664]">
           GitHub URL（任意）
@@ -558,25 +694,25 @@ function TextPath({
         <label className="flex flex-col gap-1 text-sm text-[#3A3664]">
           説明文
           <textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)}
-            placeholder="この知能資産が解決する課題と特徴" aria-label="説明文" className="input-base resize-none" />
+            placeholder="この作品が解決する課題と特徴" aria-label="説明文" className="input-base resize-none" />
         </label>
       </div>
 
-      {/* CCAF */}
+      {/* 制作の証明 */}
       <div className="section-card p-5 space-y-3">
-        <h2 className="text-base font-bold text-kuroko">制作の証明</h2>
+        <h2 className="text-base font-bold text-kuroko">こだわり（実績ログ）</h2>
         <div className="grid grid-cols-2 gap-3">
           <label className="flex flex-col gap-1 text-sm text-[#3A3664]">
-            思考密度 (0–100)
+            考えの深さ (0–100)
             <input type="number" value={ccaf.thoughtDensity} min={0} max={100}
               onChange={(e) => setCcaf({ ...ccaf, thoughtDensity: Number(e.target.value) })}
-              aria-label="思考密度" className="input-base" />
+              aria-label="考えの深さ" className="input-base" />
           </label>
           <label className="flex flex-col gap-1 text-sm text-[#3A3664]">
-            試行回数
+            試みた回数
             <input type="number" value={ccaf.iterations} min={0}
               onChange={(e) => setCcaf({ ...ccaf, iterations: Number(e.target.value) })}
-              aria-label="試行回数" className="input-base" />
+              aria-label="試みた回数" className="input-base" />
           </label>
           <label className="col-span-2 flex flex-col gap-1 text-sm text-[#3A3664]">
             稼働日数
@@ -587,11 +723,16 @@ function TextPath({
         </div>
       </div>
 
-      {/* AI鑑定プレビュー + Radar */}
+      {/* 知能の品質ランク + Radar */}
       <div className="section-card p-5">
-        <h2 className="text-base font-bold text-kuroko mb-4">AI 鑑定プレビュー</h2>
+        <h2 className="text-base font-bold text-kuroko mb-4 flex items-center gap-1.5"><SearchIcon size={16} className="text-kaki" />クオリティ・スコア</h2>
         <div className="flex flex-col items-center sm:flex-row gap-6">
-          <RankRadar thoughtDensity={ccaf.thoughtDensity} iterations={ccaf.iterations} uptimeDays={vercelUptimeDays} />
+          <div className="relative">
+            {/* Magical audit animation overlay */}
+            <div className="absolute inset-0 rounded-full pointer-events-none"
+              style={{ background: "radial-gradient(circle, rgba(26,107,181,0.06) 0%, transparent 70%)", animation: "pulse 3s ease-in-out infinite" }} />
+            <RankRadar thoughtDensity={ccaf.thoughtDensity} iterations={ccaf.iterations} uptimeDays={vercelUptimeDays} />
+          </div>
           <div className="flex-1 space-y-3">
             <div className="flex items-center gap-3">
               <RankBadge rank={auditResult.rank} large />
@@ -619,38 +760,69 @@ function TextPath({
         </div>
       </div>
 
-      {/* Pricing */}
+      {/* 価格設定 — slider */}
       <div className="section-card p-5 space-y-3">
-        <h2 className="text-base font-bold text-kuroko">価格設定</h2>
-        <label className="flex flex-col gap-1 text-sm text-[#3A3664]">
-          ベース価格（¥）
-          <input type="number" value={basePrice} min={0}
+        <h2 className="text-base font-bold text-kuroko">値段を決める</h2>
+        <p className="text-sm text-[#9890A8]">
+          類似のスキルは <span className="font-semibold text-kuroko">¥{MARKET_REFERENCE_PRICE.toLocaleString()}</span> で取引されています
+        </p>
+        <div className="flex items-center gap-4">
+          <input
+            type="range"
+            min={500} max={10000} step={100}
+            value={basePrice}
             onChange={(e) => setBasePrice(Number(e.target.value))}
-            aria-label="ベース価格" className="input-base" />
-        </label>
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-[#9890A8]">Floor Price</span>
-          <div>
-            <span className="text-2xl font-bold text-kuroko">{formatJPY(floor)}</span>
-            <span className="ml-2 text-sm text-[#9890A8]">({floor.toLocaleString("ja-JP")} JPYC)</span>
-          </div>
+            aria-label="お値段スライダー"
+            className="flex-1 accent-kaki"
+          />
+          <span className="text-2xl font-bold text-kuroko tabular-nums w-28 text-right">
+            {formatJPY(floor)}
+          </span>
         </div>
+        <div className="flex justify-between text-xs text-[#9890A8]">
+          <span>¥500</span><span>¥10,000</span>
+        </div>
+        <p className="text-xs text-[#9890A8]">
+          ※ 最低価格の目安です。信用スコアにより自動調整されます。
+        </p>
+        {/* Two-Way Pricing derived values */}
+        {(() => {
+          const monthly = Math.round(floor / 12);
+          const pricing = computeBundlePricing(monthly);
+          return (
+            <div className="rounded-xl bg-kaki/5 border border-kaki/10 p-3 space-y-1.5">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-[#9890A8]">自動計算される料金プラン</p>
+              <div className="flex justify-between text-xs">
+                <span className="text-[#4A4464]">月額（目安）</span>
+                <span className="font-semibold tabular-nums text-kuroko">¥{pricing.monthlyJpy.toLocaleString("ja-JP")} / 月</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-[#4A4464]">買い切り（目安）</span>
+                <span className="font-semibold tabular-nums text-kuroko">¥{pricing.oneoffJpy.toLocaleString("ja-JP")}</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-[#4A4464]">リクエスト単価</span>
+                <span className="font-semibold tabular-nums text-kaki">{pricing.perCallJpyc} デジタル円</span>
+              </div>
+            </div>
+          );
+        })()}
         <div>
-          <p className="text-sm font-semibold text-[#3A3664] mb-2">報酬の受け取り通貨</p>
+          <p className="text-sm font-semibold text-[#3A3664] mb-2">売上の受け取り方</p>
           <div className="flex gap-4">
             {(["JPY", "JPYC"] as Currency[]).map((c) => (
               <label key={c} className="flex items-center gap-2 cursor-pointer">
                 <input type="radio" name="payoutCurrency" value={c} checked={payoutCurrency === c}
-                  onChange={() => setPayoutCurrency(c)} className="accent-kaki" aria-label={`${c}で受け取る`} />
-                <span className="text-base font-medium text-kuroko">{c}</span>
+                  onChange={() => setPayoutCurrency(c)} className="accent-kaki" aria-label={`${CURRENCY_LABELS[c]}で受け取る`} />
+                <span className="text-base font-medium text-kuroko">{CURRENCY_LABELS[c]}</span>
               </label>
             ))}
           </div>
         </div>
       </div>
 
-      <button type="submit" aria-label="Marketplaceへ出品する" className="btn-primary w-full !py-4 !text-base">
-        AIが鑑定して Marketplace へ出品する
+      <button type="submit" aria-label="お店にならべる" className="btn-primary w-full !py-4 !text-base">
+        ✨ お店にならべる →
       </button>
     </form>
   );
@@ -662,6 +834,7 @@ function SellContent() {
   const params = useSearchParams();
   const remixId = params.get("remix");
   const remixFrom = params.get("from");
+  const claimId = params.get("claim");
 
   const [activePath, setActivePath] = useState<RegistrationPath>("ai");
   const [completion, setCompletion] = useState<CompletionData | null>(null);
@@ -672,12 +845,11 @@ function SellContent() {
 
   const handleDoItForMe = useCallback(async () => {
     setDoItForMeActive(true);
-    const steps = AUTO_STEPS;
-    for (let i = 0; i < steps.length; i++) {
+    for (let i = 0; i < AUTO_STEPS.length; i++) {
       setDoItForMeStep(i);
       await new Promise((r) => setTimeout(r, 900));
     }
-    setDoItForMeStep(steps.length);
+    setDoItForMeStep(AUTO_STEPS.length);
 
     const newId = `listing_${Date.now()}`;
     const ccaf: CCAF = { intentSignals: ["author-statement", "auto-generated"], thoughtDensity: 78, iterations: 12, authorId: "demo-user", createdAt: new Date().toISOString() };
@@ -685,7 +857,7 @@ function SellContent() {
     const floor = computeFloorPrice(7000, trust.score);
 
     const ml: MarketplaceListing = autoList(
-      { id: newId, ownerId: "demo-user", title: "AI自動登記 — 知能資産", description: "AIが全自動で生成した知能資産。高品質なコードとドキュメントを自動最適化。", ccaf, vercelUptimeDays: 30, basePrice: 7000 },
+      { id: newId, ownerId: "demo-user", title: "AI全自動 — スキル資産", description: "AIが全自動で生成したスキル資産。高品質なコードとマニュアルを自動最適化。", ccaf, vercelUptimeDays: 30, basePrice: 7000 },
       { qualityHistory: 70, discordContribution: 55, xAmplification: 40 },
       new Date().toISOString()
     );
@@ -696,21 +868,27 @@ function SellContent() {
 
     setDoItForMeActive(false);
     setCompletion({
-      listingId: newId, title: "AI自動登記 — 知能資産",
+      listingId: newId, title: "AI全自動 — スキル資産",
       rank: auditResult.rank, floorPrice: floor,
       deployUrl: `https://vercel.com/new/clone?repository-url=https://github.com/demo/ai-asset`,
       apiEndpoint: `https://guild-ai.vercel.app/api/atoa/${newId}`,
     });
   }, []);
 
+  // router used in DoItForMe button via handleDoItForMe path — suppress unused warning
+  void router;
+
   const PATH_TABS: Array<{ id: RegistrationPath; label: string; time: string; desc: string }> = [
-    { id: "ai",    label: "AIにお任せ",   time: "1分", desc: "GitHub連携→自動出品" },
-    { id: "voice", label: "音声で登記",    time: "2分", desc: "話すだけでOK" },
-    { id: "text",  label: "テキストで登記", time: "3分", desc: "詳細を自分で入力" },
+    { id: "ai",    label: "AIにお任せ",   time: "1分", desc: "作品を選ぶだけ" },
+    { id: "voice", label: "声で登録",      time: "2分", desc: "話すだけでOK" },
+    { id: "text",  label: "手動で入力",    time: "3分", desc: "詳細を自分で入力" },
   ];
 
   return (
     <main className="px-4 sm:px-6 lg:px-8 py-8 max-w-3xl mx-auto">
+
+      {/* Claim flow — shown when ?claim= param is present */}
+      {claimId && <ClaimFlow assetId={claimId} />}
 
       {/* Do It For Me overlay */}
       {doItForMeActive && (
@@ -720,25 +898,35 @@ function SellContent() {
       <StepIndicator current="register" />
 
       {/* Header */}
-      <div className="mt-4 flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-kuroko leading-snug">知能を出品する</h1>
-          <p className="mt-1 text-sm text-[#9890A8]">3分以内に登記→デプロイURL発行まで Fast-Path 完了</p>
-        </div>
-        <button
-          type="button"
-          onClick={handleDoItForMe}
-          aria-label="全自動でAIにお任せ"
-          className="shrink-0 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-all active:scale-[0.98] hover:opacity-90"
-          style={{ background: "linear-gradient(135deg, #1A6BB5 0%, #0FA968 100%)" }}
-        >
-          ✨ 全自動でAIにお任せ
-        </button>
+      <div className="mt-4">
+        <span className="text-xs font-semibold uppercase tracking-widest text-kaki">おしごとに登録</span>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight text-kuroko leading-snug flex items-center gap-2">
+          <PackageIcon size={22} className="text-kaki" />おしごとに登録する
+        </h1>
+        <p className="mt-1 text-sm text-[#9890A8]">たからものを30秒でお店にならべる</p>
       </div>
+
+      {/* Omakase banner */}
+      <button
+        type="button"
+        onClick={handleDoItForMe}
+        aria-label="AIにおまかせ — 全自動でお店にならべる"
+        className="mt-4 w-full rounded-2xl p-5 text-left transition-all active:scale-[0.99] hover:opacity-95 shadow-lg"
+        style={{ background: "linear-gradient(135deg, #1A6BB5 0%, #0FA968 100%)" }}
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-3xl">✨</span>
+          <div>
+            <p className="text-base font-black text-white">AIにおまかせ</p>
+            <p className="text-sm text-white/80 mt-0.5">GitHub連携 → 鑑定 → お店にならべる まで全自動。30秒で完了。</p>
+          </div>
+          <span className="ml-auto text-white/90 text-xl">→</span>
+        </div>
+      </button>
 
       {remixFrom && (
         <div className="mt-3 inline-flex items-center gap-2 rounded-lg border border-kaki/30 bg-kaki/10 px-3 py-2">
-          <span className="text-sm text-kaki font-medium">Remix元:</span>
+          <span className="text-sm text-kaki font-medium">組み合わせ元:</span>
           <span className="text-sm text-kuroko font-semibold truncate max-w-[240px]">{remixFrom}</span>
         </div>
       )}
@@ -776,10 +964,7 @@ function SellContent() {
           <div className="mt-5">
             {activePath === "ai" && (
               <div className="section-card p-5">
-                <AiPath
-                  onComplete={setCompletion}
-                  onReset={() => setActivePath("ai")}
-                />
+                <AiPath onComplete={setCompletion} onReset={() => setActivePath("ai")} />
               </div>
             )}
             {activePath === "voice" && (

@@ -2,6 +2,9 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import type { Rank } from "@/types";
+import { Confetti } from "@/components/Confetti";
+import { messages } from "@/lib/microcopy";
+import { ShareButton } from "@/components/ShareButton";
 
 interface WillSignalTriggerProps {
   currentRank: Rank;
@@ -17,6 +20,7 @@ export function WillSignalTrigger({ currentRank, onPromoted, floorPrice }: WillS
   const [seconds, setSeconds] = useState(0);
   const [showToast, setShowToast] = useState(false);
   const [hasSpeechApi, setHasSpeechApi] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const recogRef = useRef<unknown>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -62,18 +66,31 @@ export function WillSignalTrigger({ currentRank, onPromoted, floorPrice }: WillS
     setTimeout(() => {
       setState("done");
       setShowToast(true);
+      setShowConfetti(true);
+      // Haptic feedback on supported devices
+      navigator.vibrate?.([20, 40, 20]);
       const newPrice = Math.round(floorPrice * 1.5);
       onPromoted?.(newPrice);
-      setTimeout(() => setShowToast(false), 4000);
+      setTimeout(() => { setShowToast(false); setShowConfetti(false); }, 4000);
     }, 1200);
   }, [floorPrice, onPromoted]);
 
-  if (currentRank !== "A" || state === "done") return null;
+  if (currentRank !== "A") return null;
+
+  if (state === "done") {
+    return (
+      <div className="mt-4 pt-3 border-t border-kuroko/10">
+        <p className="text-xs font-semibold uppercase tracking-widest text-[#9890A8] mb-2">昇格をシェアする</p>
+        <ShareButton context={{ type: "rank_up_s" }} seed={1} compact />
+      </div>
+    );
+  }
 
   const canPromote = state === "recording" && seconds >= 3;
 
   return (
     <>
+      <Confetti active={showConfetti} duration={1400} />
       {/* Toast */}
       {showToast && (
         <div
@@ -81,7 +98,7 @@ export function WillSignalTrigger({ currentRank, onPromoted, floorPrice }: WillS
           aria-live="polite"
           className="fixed top-6 left-1/2 -translate-x-1/2 z-50 rounded-2xl bg-kuroko px-6 py-3 text-white font-bold shadow-2xl animate-bounce"
         >
-          🎉 Sランクへ昇格しました！ (+50% 価格)
+          🎉 {messages.rankUpToS}
         </div>
       )}
 
@@ -142,6 +159,7 @@ export function WillSignalTrigger({ currentRank, onPromoted, floorPrice }: WillS
             <p className="mt-3 text-base font-bold text-kaki animate-pulse">Sランクへ昇格中…</p>
           </div>
         )}
+
       </div>
     </>
   );

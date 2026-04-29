@@ -23,6 +23,27 @@ function rowToSession(row: CheckoutRow): CheckoutSession {
   };
 }
 
+// ─── Two-Way Pricing ──────────────────────────────────────────────────────────
+// Pure pricing helpers (from upstream). No DB; used by sell/listing UIs to suggest tiers.
+
+export interface BundlePricing {
+  monthlyJpy: number;
+  oneoffJpy: number;      // monthly × 12
+  perCallJpyc: number;   // monthly ÷ 2000, min 0.1
+}
+
+export function computeBundlePricing(monthlyJpy: number): BundlePricing {
+  return {
+    monthlyJpy,
+    oneoffJpy: monthlyJpy * 12,
+    perCallJpyc: Math.max(0.1, Math.round((monthlyJpy / 2000) * 10) / 10),
+  };
+}
+
+export function computeMonthlyFromFloor(floorPrice: number): number {
+  return Math.round(floorPrice / 12);
+}
+
 export interface CreateCheckoutParams {
   assetId: string;
   buyerId: string;

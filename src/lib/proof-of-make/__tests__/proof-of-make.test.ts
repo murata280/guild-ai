@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { voiceLogToProofOfMake } from "../index";
+import { voiceLogToProofOfMake, generateProductPitch } from "../index";
 
 describe("voiceLogToProofOfMake", () => {
   it("extracts intent signals from keywords", () => {
@@ -25,5 +25,30 @@ describe("voiceLogToProofOfMake", () => {
     const longText = "あ".repeat(300);
     const result = voiceLogToProofOfMake(longText);
     expect(result.refinedDescription).toContain("…");
+  });
+});
+
+describe("generateProductPitch", () => {
+  it("returns description of at most 200 characters", () => {
+    const { description } = generateProductPitch("素晴らしい作品です");
+    expect(description.length).toBeLessThanOrEqual(200);
+    expect(description.length).toBeGreaterThan(10);
+  });
+
+  it("returns exactly 5 manual items", () => {
+    const { manual } = generateProductPitch("テスト");
+    expect(manual).toHaveLength(5);
+  });
+
+  it("is deterministic — same transcript gives same result", () => {
+    const a = generateProductPitch("同じ入力");
+    const b = generateProductPitch("同じ入力");
+    expect(a.description).toBe(b.description);
+    expect(a.manual).toEqual(b.manual);
+  });
+
+  it("description does not contain forbidden jargon", () => {
+    const { description } = generateProductPitch("とても良い作品");
+    expect(description).not.toContain("CCAF");
   });
 });

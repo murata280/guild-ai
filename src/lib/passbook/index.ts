@@ -53,3 +53,35 @@ export function getPassbookSnapshot(userId: string): PassbookSnapshot {
     trustHistory,
   };
 }
+
+export interface MonthlyEarnings {
+  jpy: number;
+  aiJobs: number;
+  assetCount: number;
+  momGrowthPct: number;
+  breakdown: Array<{ label: string; amount: number }>;
+}
+
+export function getMonthlyEarnings(userId: string): MonthlyEarnings {
+  const seed = djb2(userId + "_monthly");
+  const jpy = 8000 + (seed % 12001);
+  const aiJobs = 20 + (seed % 50);
+  const assetCount = 1 + (seed % 8);
+  const momGrowthPct = 10 + (seed % 35);
+
+  const aiJobAmount = Math.round(jpy * 0.7);
+  const royaltyAmount = Math.round(jpy * 0.2);
+  const bonusAmount = jpy - aiJobAmount - royaltyAmount;
+
+  return {
+    jpy,
+    aiJobs,
+    assetCount,
+    momGrowthPct,
+    breakdown: [
+      { label: "お仕事の入金", amount: aiJobAmount },
+      { label: "ロイヤリティ受領", amount: royaltyAmount },
+      { label: "公開ボーナス", amount: bonusAmount },
+    ],
+  };
+}

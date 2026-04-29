@@ -36,12 +36,16 @@ export interface Listing {
 
 /**
  * TrustScoreInput — inputs for Trust Score calculation.
- * Weighted: 0.5 * qualityHistory + 0.3 * discordContribution + 0.2 * xAmplification
+ * Base weights: 0.5 * qualityHistory + 0.3 * discordContribution + 0.2 * xAmplification
+ * EtoE-enhanced (when peerRatings/peerComments provided):
+ *   0.4q + 0.2d + 0.15x + 0.15 * peerRatingsAvg + 0.10 * peerCommentsLog
  */
 export interface TrustScoreInput {
-  qualityHistory: number; // 0-100
+  qualityHistory: number;      // 0-100
   discordContribution: number; // 0-100
-  xAmplification: number; // 0-100
+  xAmplification: number;      // 0-100
+  peerRatings?: number[];      // 5-star ratings from peers (EtoE) — optional
+  peerComments?: number;       // count of peer text comments (EtoE) — optional
 }
 
 export interface TrustScoreResult {
@@ -191,6 +195,117 @@ export interface PassbookSnapshot {
   rankBreakdown: { S: number; A: number; B: number };
   recentTransactions: PassbookTransaction[];
   trustHistory: number[]; // 7 data points (oldest → newest)
+}
+
+// ─── AtoA Autonomous Execution Engine ────────────────────────────────────────
+
+export interface AgentCatalogEntry {
+  id: string;
+  title: string;
+  description: string;
+  rank: Rank;
+  floorPrice: number;
+  endpoint: string;           // POST /api/atoa/{id}
+  tags: string[];
+  trustScore: number;         // 0-1000
+}
+
+export interface MatchRequest {
+  task: string;
+  budget?: number;            // JPY upper limit
+  tags?: string[];
+}
+
+export interface MatchResult {
+  agent: AgentCatalogEntry;
+  confidence: number;         // 0-1
+  reason: string;
+}
+
+export interface AtoaEscrowSession {
+  id: string;                 // esw_...
+  agentId: string;
+  callerId: string;
+  amount: number;
+  status: "held" | "released" | "refunded";
+  createdAt: number;
+  releasedAt?: number;
+}
+
+export interface MicropaymentRecord {
+  id: string;                 // pay_...
+  escrowId: string;
+  agentId: string;
+  perCallAmount: number;
+  callCount: number;
+  totalBilled: number;
+  status: "pending" | "settled";
+}
+
+export interface AgentInstance {
+  instanceId: string;         // inst_...
+  agentId: string;
+  startedAt: number;
+  status: "running" | "healthy" | "degraded" | "stopped";
+}
+
+export interface HealthCheckResult {
+  instanceId: string;
+  ok: boolean;
+  latencyMs: number;
+  checkedAt: number;
+}
+
+export interface AtoaRunResult {
+  success: boolean;
+  instanceId: string;
+  output: string;
+  refundIssued: boolean;
+  refundReason?: string;
+  durationMs: number;
+}
+
+export type NotificationType = "job_income" | "royalty" | "rank_up" | "refund" | "ambassador";
+
+export interface IncomeNotification {
+  id: string;                 // notif_...
+  type: NotificationType;
+  title: string;
+  message: string;
+  amount?: number;
+  read: boolean;
+  createdAt: string;
+}
+
+// ─── Magic Guild — Weapon & Job ───────────────────────────────────────────────
+
+export interface Weapon {
+  id: string;
+  title: string;
+  noteContent: string;
+  rank: Rank;
+  score: number;
+  tags: string[];
+  mintedAt: string; // ISO8601
+  jobsCompleted: string[]; // job IDs
+}
+
+export interface Job {
+  id: string;
+  title: string;
+  description: string;
+  requiredRank: Rank;
+  requiredTags: string[];
+  reward: number; // JPY
+  category: string;
+  status: "open" | "applied" | "completed";
+}
+
+export interface JobApplication {
+  jobId: string;
+  weaponId: string;
+  appliedAt: string;
+  reward: number;
 }
 
 // ─── SES Leverage ─────────────────────────────────────────────────────────────

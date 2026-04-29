@@ -1,68 +1,147 @@
 import Link from "next/link";
 import TrustScore from "@/components/trust-score/TrustScore";
+import { PackageIcon, SearchIcon, ShoppingBagIcon, BanknoteIcon } from "@/components/icons";
+
+// ─── 4-step flow ───────────────────────────────────────────────────────────────
+
+const STEPS = [
+  {
+    Icon: PackageIcon,
+    label: "たからもの登録",
+    desc: "GitHubを選ぶだけ、AIが自動提案",
+    color: "text-kaki",
+    bg: "bg-kaki/10 border-kaki/20",
+  },
+  {
+    Icon: SearchIcon,
+    label: "AIが評価する",
+    desc: "品質を自動で判定",
+    color: "text-[#9B6BB5]",
+    bg: "bg-[#9B6BB5]/10 border-[#9B6BB5]/20",
+  },
+  {
+    Icon: ShoppingBagIcon,
+    label: "マーケットに並ぶ",
+    desc: "世界中に自動で公開",
+    color: "text-accent-green",
+    bg: "bg-accent-green/10 border-accent-green/20",
+  },
+  {
+    Icon: BanknoteIcon,
+    label: "買われたら自動でお金が入る",
+    desc: "寝ている間も分身が稼ぐ",
+    color: "text-kaki",
+    bg: "bg-kaki/5 border-kaki/20",
+  },
+] as const;
 
 export default function HomePage() {
   return (
-    <main className="px-4 sm:px-6 lg:px-8 py-12 max-w-4xl mx-auto">
+    <main className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
 
-      {/* ── Hero ──────────────────────────────────────────── */}
-      <section className="py-8 sm:py-12">
+      {/* ── Hero + 4-step (first viewport) ───────────────── */}
+      <section className="min-h-[80vh] flex flex-col justify-center py-10 sm:py-14">
         <span className="inline-block rounded-full border border-kaki/40 bg-kaki/10 px-3 py-1 text-xs font-semibold text-kaki">
           GUILD AI
         </span>
+
         <h1 className="mt-4 text-4xl sm:text-5xl font-bold leading-tight tracking-tight text-kuroko">
           思想を登記すれば、<br />
           <span className="text-kaki">AIが買いに来る。</span>
         </h1>
-        <p className="mt-5 max-w-xl text-base text-[#4A4464] leading-relaxed">
-          Trust Score が高いほど露出と Floor Price が上がる。<br />
-          良質な知能資産を出品すると、市場が自動で評価する。
+
+        {/* Butler-tone explainer */}
+        <p className="mt-4 max-w-xl text-sm sm:text-base text-[#4A4464] leading-relaxed">
+          あなたのスキルやコードを「たからもの」として登録すると、世界中の人やAIが利用料を払って使ってくれます。
+          寝ている間も、あなたの分身が稼ぎ続ける場所です。
         </p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/marketplace" className="btn-primary">
-            Marketplace を見る →
+        <p className="mt-2 text-sm text-kaki font-semibold">
+          自慢が、そのまま"たからもの"になる場所です。
+        </p>
+
+        {/* 4-step flow cards */}
+        <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3" aria-label="サービスの流れ">
+          {STEPS.map(({ Icon, label, desc, color, bg }, i) => (
+            <div
+              key={label}
+              className={`section-card border ${bg} p-4 flex flex-col items-center text-center gap-2`}
+            >
+              <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center`}>
+                <Icon size={20} className={color} />
+              </div>
+              <div>
+                <p className="text-xs text-[#9890A8] font-semibold">Step {i + 1}</p>
+                <p className="text-sm font-bold text-kuroko leading-snug">{label}</p>
+                <p className="mt-0.5 text-xs text-[#9890A8] leading-snug">{desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA row */}
+        <div className="mt-8 flex flex-wrap gap-3 items-center">
+          <Link href="/marketplace" className="btn-primary" aria-label="マーケットを見る">
+            マーケットを見る →
           </Link>
-          <Link href="/sell" className="btn-secondary">
-            今すぐ出品する
+          <Link href="/sell" className="btn-secondary" aria-label="たからもの登録する">
+            たからもの登録する
+          </Link>
+          <Link
+            href="/sell"
+            className="text-sm text-[#9890A8] underline hover:text-kaki transition-colors"
+            aria-label="使い方をもっと見る"
+          >
+            使い方をもっと見る
           </Link>
         </div>
       </section>
 
-      {/* ── Value props ───────────────────────────────────── */}
-      <section className="mt-4 grid gap-4 sm:grid-cols-3">
-        <article className="section-card p-5">
-          <p className="text-xs font-semibold uppercase tracking-widest text-kaki">Trust Score</p>
-          <h2 className="mt-2 text-base font-bold text-kuroko leading-snug">
-            スコアが高いほど売れやすくなる
-          </h2>
-          <p className="mt-2 text-sm text-[#4A4464] leading-relaxed">
-            制作の証明（思考密度・こだわり）・Discord 貢献・X 拡散が加重合算され、Floor Price と露出量に直結する。
-          </p>
-        </article>
-        <article className="section-card p-5">
-          <p className="text-xs font-semibold uppercase tracking-widest text-kaki">AI Auditor</p>
-          <h2 className="mt-2 text-base font-bold text-kuroko leading-snug">
-            S ランクは最大 +50% プレミアム
-          </h2>
-          <p className="mt-2 text-sm text-[#4A4464] leading-relaxed">
-            AI 鑑定士が意図の密度と稼働実績を審査。魂の登記を通過した S ランク資産は自動的に高値で表示される。
-          </p>
-        </article>
-        <article className="section-card p-5">
-          <p className="text-xs font-semibold uppercase tracking-widest text-kaki">Royalty</p>
-          <h2 className="mt-2 text-base font-bold text-kuroko leading-snug">
-            出品するほど収益が積み上がる
-          </h2>
-          <p className="mt-2 text-sm text-[#4A4464] leading-relaxed">
-            二次販売のたびに祖先クリエイターへロイヤリティが自動還元。信用スコアも連動して伸び続ける。
-          </p>
-        </article>
+      {/* ── Why you can trust us ──────────────────────────── */}
+      <section className="pb-10 sm:pb-14" aria-labelledby="trust-heading">
+        <h2
+          id="trust-heading"
+          className="text-xs font-semibold uppercase tracking-widest text-[#9890A8] mb-4"
+        >
+          なぜ信頼できるのか
+        </h2>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <article className="section-card p-5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-kaki">信用スコア</p>
+            <h3 className="mt-2 text-base font-bold text-kuroko leading-snug">
+              スコアが高いほど売れやすくなる
+            </h3>
+            <p className="mt-2 text-sm text-[#4A4464] leading-relaxed">
+              こだわり（実績ログ）・コミュニティ貢献・拡散実績が加重合算され、価格と露出量に直結します。
+            </p>
+          </article>
+          <article className="section-card p-5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-kaki">AI評価</p>
+            <h3 className="mt-2 text-base font-bold text-kuroko leading-snug">
+              お墨付きランクは最大 +50% 高値
+            </h3>
+            <p className="mt-2 text-sm text-[#4A4464] leading-relaxed">
+              AIが意図の深さと稼働実績を審査します。お墨付き（Sランク）資産は自動的に高値で表示されます。
+            </p>
+          </article>
+          <article className="section-card p-5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-kaki">還元（リワード）</p>
+            <h3 className="mt-2 text-base font-bold text-kuroko leading-snug">
+              登録するほど収益が積み上がる
+            </h3>
+            <p className="mt-2 text-sm text-[#4A4464] leading-relaxed">
+              二次利用のたびに、作者へ自動で還元が分配されます。信用スコアも連動して伸び続けます。
+            </p>
+          </article>
+        </div>
       </section>
 
       {/* ── Trust Score Demo ──────────────────────────────── */}
-      <section className="mt-10">
-        <p className="text-xs font-semibold uppercase tracking-widest text-[#9890A8] mb-3">
-          Trust Score デモ
+      <section className="pb-10" aria-labelledby="demo-heading">
+        <p
+          id="demo-heading"
+          className="text-xs font-semibold uppercase tracking-widest text-[#9890A8] mb-3"
+        >
+          信用スコア デモ
         </p>
         <TrustScore
           ownerName="Demo Owner"
@@ -71,16 +150,23 @@ export default function HomePage() {
       </section>
 
       {/* ── Bottom CTA ────────────────────────────────────── */}
-      <section className="mt-10 section-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <section
+        className="mb-10 section-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        aria-label="スキルを登録して収益化する"
+      >
         <div>
-          <h2 className="font-bold text-kuroko">今すぐ知能資産を出品する</h2>
-          <p className="mt-1 text-sm text-[#4A4464]">
-            良質な出品が、自動的に売れる市場へ。
+          <h2 className="font-bold text-kuroko">今すぐ「たからもの登録」する</h2>
+          <p className="mt-1 text-sm text-[#4A4464] leading-relaxed">
+            GitHubを選ぶだけ、AIが売れるロジックを自動提案。
           </p>
         </div>
-        <div className="flex gap-3 flex-shrink-0">
-          <Link href="/sell" className="btn-primary">出品する →</Link>
-          <Link href="/marketplace" className="btn-secondary">市場を見る</Link>
+        <div className="flex gap-3 flex-shrink-0 flex-wrap">
+          <Link href="/sell" className="btn-primary" aria-label="たからもの登録する">
+            たからもの登録する →
+          </Link>
+          <Link href="/marketplace" className="btn-secondary" aria-label="マーケットを見る">
+            マーケットを見る
+          </Link>
         </div>
       </section>
 
