@@ -14,6 +14,7 @@ import { AssetSpirit } from "@/components/AssetSpirit";
 import { Shimaenaga } from "@/components/Shimaenaga";
 import { buildAssetJsonLd } from "@/lib/structured-data";
 import { computeBundlePricing, computeMonthlyFromFloor } from "@/lib/checkout";
+import { ActivityPulse } from "@/components/ActivityPulse";
 
 const BASE_URL = "https://guild-ai.vercel.app";
 
@@ -91,6 +92,7 @@ export default function AssetPage({ params }: { params: { id: string } }) {
       <div className="mt-4 flex items-start gap-4">
         <div className="flex-1">
           <h1 className="text-2xl font-bold leading-tight text-kuroko">{listing.title}</h1>
+          <ActivityPulse assetId={listing.id} className="mt-2" />
         </div>
       </div>
 

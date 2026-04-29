@@ -19,6 +19,7 @@ import { UserIcon, BanknoteIcon } from "@/components/icons";
 import { RawDataPanel } from "@/components/RawDataPanel";
 import { ShareButton } from "@/components/ShareButton";
 import { getGithubGreenScore, getLearningProgress, applySkillBoost } from "@/lib/skill-sync";
+import { ActivityPulse } from "@/components/ActivityPulse";
 
 // ─── Rank styling ─────────────────────────────────────────────────────────────
 
@@ -220,6 +221,12 @@ function PassbookCard({ owned }: { owned: OwnershipRecord[] }) {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Activity Pulse — 保有資産の鼓動 */}
+      <div className="mt-4 pt-4 border-t border-kuroko/10">
+        <p className="text-xs font-semibold uppercase tracking-widest text-[#9890A8] mb-2">保有資産の鼓動</p>
+        <ActivityPulse assetId="demo-user-wallet" />
       </div>
 
       {/* Share passbook milestone */}

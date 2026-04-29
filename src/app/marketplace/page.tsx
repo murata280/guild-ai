@@ -17,6 +17,7 @@ import { ShoppingBagIcon } from "@/components/icons";
 import { HumanThumbnail } from "@/components/HumanThumbnail";
 import { mapToEmotionalTags } from "@/lib/emotional-tags";
 import { FlipCard } from "@/components/FlipCard";
+import { ActivityPulse } from "@/components/ActivityPulse";
 
 const SORT_LABELS: { key: SortKey; label: string }[] = [
   { key: "trust", label: "信用スコア" },
@@ -232,6 +233,7 @@ function MarketplaceContent() {
                     <li key={r} className="text-[10px] text-white/60 flex gap-1"><span className="text-kaki">·</span>{r}</li>
                   ))}
                 </ul>
+                <ActivityPulse assetId={item.listing.id} />
                 {hasDetailPage && (
                   <Link
                     href={`/asset/${item.listing.id}`}
