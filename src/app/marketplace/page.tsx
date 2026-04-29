@@ -15,9 +15,9 @@ import { StepIndicator } from "@/components/StepIndicator";
 import type { Rank, MarketplaceListing } from "@/types";
 import { ShoppingBagIcon } from "@/components/icons";
 import { HumanThumbnail } from "@/components/HumanThumbnail";
-import { mapToEmotionalTags } from "@/lib/emotional-tags";
 import { FlipCard } from "@/components/FlipCard";
 import { ActivityPulse } from "@/components/ActivityPulse";
+import { generatePersonaCards, type Persona } from "@/lib/persona-cards";
 
 const SORT_LABELS: { key: SortKey; label: string }[] = [
   { key: "trust", label: "信用スコア" },
@@ -35,6 +35,7 @@ function MarketplaceContent() {
   const [minTrustScore, setMinTrustScore] = useState(0);
   const [customListings, setCustomListings] = useState<MarketplaceListing[]>([]);
   const [highlightId, setHighlightId] = useState<string | null>(null);
+  const [persona, setPersona] = useState<Persona>("general");
 
   useEffect(() => {
     try {
@@ -143,6 +144,20 @@ function MarketplaceContent() {
           />
         </div>
 
+        <fieldset>
+          <legend className="mb-2 text-xs font-semibold uppercase tracking-widest text-[#9890A8]">表示スタイル</legend>
+          <div className="flex gap-1.5">
+            {(["general", "pm", "engineer"] as Persona[]).map((p) => (
+              <button key={p} onClick={() => setPersona(p)} aria-pressed={persona === p}
+                className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-all active:scale-[0.97] ${
+                  persona === p ? "border-kaki bg-kaki text-white" : "border-kuroko/20 text-[#3A3664] hover:border-kaki/40"
+                }`}>
+                {p === "general" ? "一般" : p === "pm" ? "PM" : "エンジニア"}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+
         <p className="ml-auto text-sm text-[#9890A8] self-end">{items.length} 件</p>
       </div>
 
@@ -156,11 +171,8 @@ function MarketplaceContent() {
           {items.map((item) => {
             const isNew = item.listing.id === highlightId;
             const hasDetailPage = isMock(item.listing.id);
-            const cardClass = `section-card block p-4 transition-all active:scale-[0.97] hover:shadow-card-hover relative ${
-              isNew ? "ring-2 ring-kaki animate-pulse" : ""
-            }`;
-
-            const emotionalTags = mapToEmotionalTags(item);
+            const personaCards = generatePersonaCards(item);
+            const personaCard = personaCards[persona];
 
             const frontContent = (
               <div className={`section-card p-4 transition-all ${isNew ? "ring-2 ring-kaki animate-pulse" : ""}`}>
@@ -175,9 +187,9 @@ function MarketplaceContent() {
                   )}
                 </div>
 
-                {/* Emotional tags */}
+                {/* Emotional tags — persona-driven */}
                 <div className="flex flex-wrap gap-1 mb-2">
-                  {emotionalTags.map((tag) => (
+                  {personaCard.emotionalTags.map((tag) => (
                     <span
                       key={tag}
                       className="rounded-full bg-kaki/10 border border-kaki/20 px-2 py-0.5 text-[10px] font-semibold text-kaki"
@@ -189,27 +201,26 @@ function MarketplaceContent() {
 
                 <div className="flex items-start justify-between gap-2">
                   <h2 className="text-base font-semibold leading-snug text-kuroko line-clamp-2 flex-1">
-                    {item.listing.title}
+                    {personaCard.headline}
                   </h2>
                   <StarRating rank={item.listing.rank} size="sm" />
                 </div>
 
-                <dl className="mt-3 space-y-1.5">
-                  <div className="flex justify-between text-sm">
-                    <dt className="text-[#9890A8]">信用スコア</dt>
-                    <dd className="font-semibold tabular-nums text-kuroko">
-                      {item.trustScore.score} <span className="text-[#9890A8] font-normal">/ 1000</span>
-                    </dd>
-                  </div>
-                  <div className="flex justify-between items-baseline pt-2 border-t border-kuroko/10">
-                    <dt className="text-sm text-[#9890A8]">お値段</dt>
-                    <dd>
-                      <span className="text-xl font-bold text-kuroko">
-                        ¥{item.listing.floorPrice.toLocaleString("ja-JP")}
-                      </span>
-                    </dd>
-                  </div>
-                </dl>
+                {/* Persona bullets */}
+                <ul className="mt-2 space-y-1">
+                  {personaCard.bullets.slice(0, 2).map((bullet) => (
+                    <li key={bullet} className="flex gap-1.5 text-xs text-[#4A4464]">
+                      <span className="text-kaki mt-0.5">·</span>
+                      {bullet}
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="mt-3 flex items-baseline justify-between border-t border-kuroko/10 pt-2">
+                  <span className="text-sm text-[#9890A8]">{personaCard.priceCallout}</span>
+                  <span className="text-xs font-semibold text-kaki">{personaCard.ctaLabel}</span>
+                </div>
+
                 {hasDetailPage && (
                   <p className="mt-2 text-[10px] text-[#9890A8] text-right">ホバーで技術仕様を見る →</p>
                 )}
