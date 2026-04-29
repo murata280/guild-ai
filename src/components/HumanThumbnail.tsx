@@ -2,26 +2,24 @@
 
 import { useState, useEffect } from "react";
 import { AssetEmblem } from "@/components/AssetEmblem";
-import { AssetSpirit } from "@/components/AssetSpirit";
 import { getPhoto } from "@/lib/asset-photos";
 import type { Rank } from "@/types";
 
 interface HumanThumbnailProps {
   assetId: string;
   title: string;
-  rank?: Rank;      // if provided, renders AssetSpirit; else falls back to AssetEmblem
+  rank?: Rank;
   size?: number;
   className?: string;
 }
 
-// 3-layer visual hierarchy:
+// 2-layer visual hierarchy:
 //   1. Photo (user-uploaded) — highest priority
-//   2. AssetSpirit (kawaii face + emblem) — standard when rank is known
-//   3. AssetEmblem (geometric flower) — bare fallback when rank is absent
+//   2. AssetEmblem (geometric flower) — fallback
 //
-// SSR renders layer 2 or 3 immediately (no hydration mismatch).
+// SSR renders layer 2 immediately (no hydration mismatch).
 // Photo is loaded client-side via useEffect.
-export function HumanThumbnail({ assetId, title, rank, size = 80, className }: HumanThumbnailProps) {
+export function HumanThumbnail({ assetId, title, rank: _rank, size = 80, className }: HumanThumbnailProps) {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [imgErr, setImgErr] = useState(false);
 
@@ -40,10 +38,6 @@ export function HumanThumbnail({ assetId, title, rank, size = 80, className }: H
         className={`object-cover ${className ?? ""}`}
       />
     );
-  }
-
-  if (rank) {
-    return <AssetSpirit assetId={assetId} rank={rank} size={size} className={className} />;
   }
 
   return <AssetEmblem assetId={assetId} size={size} className={className} />;

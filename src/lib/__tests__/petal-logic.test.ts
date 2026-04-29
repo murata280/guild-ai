@@ -31,25 +31,24 @@ describe("AssetSpirit component", () => {
   });
 });
 
-describe("HumanThumbnail 3-layer system", () => {
+describe("HumanThumbnail 2-layer system", () => {
   const src = readFileSync(resolve(root, "src/components/HumanThumbnail.tsx"), "utf8");
 
-  it("imports AssetSpirit as secondary layer", () => {
-    expect(src).toContain("AssetSpirit");
-  });
-
-  it("imports AssetEmblem as tertiary fallback", () => {
+  it("imports AssetEmblem as fallback layer", () => {
     expect(src).toContain("AssetEmblem");
   });
 
+  it("does NOT import AssetSpirit (sublimated from product cards)", () => {
+    expect(src).not.toContain("AssetSpirit");
+  });
+
   it("accepts optional rank prop", () => {
-    expect(src).toContain("rank?:");
+    expect(src).toContain("rank?");
     expect(src).toContain("Rank");
   });
 
-  it("uses AssetSpirit when rank is present", () => {
-    expect(src).toContain("if (rank)");
-    expect(src).toContain("<AssetSpirit");
+  it("renders AssetEmblem as fallback", () => {
+    expect(src).toContain("<AssetEmblem");
   });
 });
 
