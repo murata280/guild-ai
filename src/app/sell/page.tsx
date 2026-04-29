@@ -23,6 +23,7 @@ import { AssetEmblem } from "@/components/AssetEmblem";
 import { setPhoto } from "@/lib/asset-photos";
 import { Shimaenaga } from "@/components/Shimaenaga";
 import { computeBundlePricing } from "@/lib/checkout";
+import { ClaimFlow } from "@/components/ClaimFlow";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -833,6 +834,7 @@ function SellContent() {
   const params = useSearchParams();
   const remixId = params.get("remix");
   const remixFrom = params.get("from");
+  const claimId = params.get("claim");
 
   const [activePath, setActivePath] = useState<RegistrationPath>("ai");
   const [completion, setCompletion] = useState<CompletionData | null>(null);
@@ -884,6 +886,9 @@ function SellContent() {
 
   return (
     <main className="px-4 sm:px-6 lg:px-8 py-8 max-w-3xl mx-auto">
+
+      {/* Claim flow — shown when ?claim= param is present */}
+      {claimId && <ClaimFlow assetId={claimId} />}
 
       {/* Do It For Me overlay */}
       {doItForMeActive && (
