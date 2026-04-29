@@ -4,17 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const SIDEBAR_ITEMS = [
-  { href: "/", label: "Home", exact: true },
-  { href: "/marketplace", label: "Marketplace", exact: false },
-  { href: "/sell", label: "出品する", exact: false },
-  { href: "/dashboard", label: "Dashboard", exact: false },
+  { href: "/", label: "ホーム", exact: true },
+  { href: "/showcase", label: "✨ つくったもの", exact: false },
+  { href: "/marketplace", label: "マーケット", exact: false },
+  { href: "/sell", label: "おしごとに登録", exact: false },
+  { href: "/wallet", label: "💰 お財布", exact: false },
 ];
 
 const BOTTOM_ITEMS = [
-  { href: "/", label: "Home", exact: true },
-  { href: "/marketplace", label: "Market", exact: false },
-  { href: "/sell", label: "出品", exact: false },
-  { href: "/dashboard", label: "Board", exact: false },
+  { href: "/", label: "ホーム", exact: true },
+  { href: "/showcase", label: "✨ 作品", exact: false },
+  { href: "/marketplace", label: "マーケット", exact: false },
+  { href: "/sell", label: "登録", exact: false },
+  { href: "/wallet", label: "💰 財布", exact: false },
 ];
 
 function isActive(pathname: string, href: string, exact: boolean) {
