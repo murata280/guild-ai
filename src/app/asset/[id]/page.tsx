@@ -12,6 +12,7 @@ import { RawDataPanel } from "@/components/RawDataPanel";
 import { AssetReview } from "@/components/AssetReview";
 import { AssetSpirit } from "@/components/AssetSpirit";
 import { Shimaenaga } from "@/components/Shimaenaga";
+import { buildAssetJsonLd } from "@/lib/structured-data";
 
 const BASE_URL = "https://guild-ai.vercel.app";
 
@@ -33,10 +34,10 @@ export function generateMetadata({ params }: { params: { id: string } }) {
       title,
       description,
       url,
-      images: [{ url: "/og.png", width: 1200, height: 630, alt: listing.title }],
+      images: [{ url: `/api/emblem/${listing.id}`, width: 1200, height: 630, alt: listing.title }],
       type: "website",
     },
-    twitter: { card: "summary_large_image", title, description, images: ["/og.png"] },
+    twitter: { card: "summary_large_image", title, description, images: [`/api/emblem/${listing.id}`] },
   };
 }
 
@@ -63,6 +64,12 @@ export default function AssetPage({ params }: { params: { id: string } }) {
 
   return (
     <main className="px-4 sm:px-6 lg:px-8 py-8 max-w-3xl mx-auto">
+
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildAssetJsonLd(item)) }}
+      />
 
       {/* Back */}
       <Link href="/marketplace" className="text-xs text-[#9890A8] hover:text-kaki transition-colors">
