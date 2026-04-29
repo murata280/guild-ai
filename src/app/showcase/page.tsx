@@ -10,6 +10,7 @@ import { StepIndicator } from "@/components/StepIndicator";
 import { HumanThumbnail } from "@/components/HumanThumbnail";
 import type { MarketplaceListing } from "@/types";
 import { mapToEmotionalTags } from "@/lib/emotional-tags";
+import { FlipCard } from "@/components/FlipCard";
 
 function djb2(s: string): number {
   let h = 5381;
@@ -39,7 +40,7 @@ function ShowcaseCard({
 
   const emotionalTags = mapToEmotionalTags(item);
 
-  return (
+  const frontFace = (
     <article
       aria-label={`${item.listing.title} — ${item.listing.rank}ランク`}
       className="section-card overflow-hidden hover:shadow-card-hover transition-shadow"
@@ -92,7 +93,7 @@ function ShowcaseCard({
         </div>
 
         {/* Actions */}
-        <div className="mt-3 flex items-center gap-2">
+        <div className="mt-3 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
             onClick={handleLike}
@@ -121,6 +122,7 @@ function ShowcaseCard({
             href={`/asset/${item.listing.id}`}
             className="ml-auto inline-flex items-center gap-1 rounded-full bg-kaki px-3 py-1.5 text-xs font-bold text-white hover:bg-kaki/90 active:scale-[0.97] transition-all"
             aria-label={`${item.listing.title}に投資する・買う`}
+            onClick={(e) => e.stopPropagation()}
           >
             この分身に投資する →
           </Link>
@@ -128,7 +130,7 @@ function ShowcaseCard({
 
         {/* Share panel */}
         {showShare && (
-          <div className="mt-3 pt-3 border-t border-kuroko/10">
+          <div className="mt-3 pt-3 border-t border-kuroko/10" onClick={(e) => e.stopPropagation()}>
             <ShareButton
               context={{ type: "listing_published", title: item.listing.title, assetId: item.listing.id }}
               url={`https://guild-ai.vercel.app/asset/${item.listing.id}`}
@@ -140,6 +142,30 @@ function ShowcaseCard({
       </div>
     </article>
   );
+
+  const backFace = (
+    <div className="section-card p-4 bg-kuroko text-kami overflow-hidden" style={{ minHeight: "100%" }}>
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mb-3">技術仕様</p>
+      <pre className="text-[10px] font-mono text-accent-green leading-relaxed overflow-hidden">
+{JSON.stringify({ id: item.listing.id, rank: item.listing.rank, trustScore: item.trustScore.score, floorPrice: item.listing.floorPrice }, null, 2)}
+      </pre>
+      <div className="mt-3">
+        <p className="text-[10px] text-white/40 mb-1">エージェント接続</p>
+        <code className="text-[10px] font-mono text-accent-green break-all">
+          curl /api/atoa/{item.listing.id}
+        </code>
+      </div>
+      <Link
+        href={`/asset/${item.listing.id}`}
+        className="mt-4 inline-flex items-center justify-center rounded-lg bg-kaki px-3 py-1.5 text-xs font-bold text-white"
+        onClick={(e) => e.stopPropagation()}
+      >
+        詳細を見る →
+      </Link>
+    </div>
+  );
+
+  return <FlipCard front={frontFace} back={backFace} />;
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────

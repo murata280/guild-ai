@@ -16,6 +16,7 @@ import type { Rank, MarketplaceListing } from "@/types";
 import { ShoppingBagIcon } from "@/components/icons";
 import { HumanThumbnail } from "@/components/HumanThumbnail";
 import { mapToEmotionalTags } from "@/lib/emotional-tags";
+import { FlipCard } from "@/components/FlipCard";
 
 const SORT_LABELS: { key: SortKey; label: string }[] = [
   { key: "trust", label: "信用スコア" },
@@ -160,8 +161,8 @@ function MarketplaceContent() {
 
             const emotionalTags = mapToEmotionalTags(item);
 
-            const content = (
-              <>
+            const frontContent = (
+              <div className={`section-card p-4 transition-all ${isNew ? "ring-2 ring-kaki animate-pulse" : ""}`}>
                 {/* Thumbnail + rank badge — aspect-[3/2] hero */}
                 <div className="aspect-[3/2] bg-gradient-to-br from-kami to-kaki/5 rounded-xl flex items-center justify-center relative mb-3 overflow-hidden">
                   <HumanThumbnail assetId={item.listing.id} title={item.listing.title} rank={item.listing.rank} size={80} />
@@ -208,18 +209,44 @@ function MarketplaceContent() {
                     </dd>
                   </div>
                 </dl>
-              </>
+                {hasDetailPage && (
+                  <p className="mt-2 text-[10px] text-[#9890A8] text-right">ホバーで技術仕様を見る →</p>
+                )}
+              </div>
+            );
+
+            const backContent = (
+              <div className="section-card p-4 bg-kuroko text-kami h-full min-h-[300px] flex flex-col gap-3">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">技術仕様</p>
+                <pre className="text-[10px] font-mono text-accent-green leading-relaxed overflow-hidden">
+{JSON.stringify({ id: item.listing.id, rank: item.listing.rank, trustScore: item.trustScore.score, floorPrice: item.listing.floorPrice }, null, 2)}
+                </pre>
+                <div className="mt-auto">
+                  <p className="text-[10px] text-white/40 mb-1">エージェント向け接続</p>
+                  <code className="text-[10px] font-mono text-accent-green break-all">
+                    curl /api/atoa/{item.listing.id}
+                  </code>
+                </div>
+                <ul className="space-y-1">
+                  {item.auditResult.reasons.slice(0, 2).map((r) => (
+                    <li key={r} className="text-[10px] text-white/60 flex gap-1"><span className="text-kaki">·</span>{r}</li>
+                  ))}
+                </ul>
+                {hasDetailPage && (
+                  <Link
+                    href={`/asset/${item.listing.id}`}
+                    className="mt-1 inline-flex items-center justify-center rounded-lg bg-kaki px-3 py-1.5 text-xs font-bold text-white"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    詳細を見る →
+                  </Link>
+                )}
+              </div>
             );
 
             return (
               <li key={item.listing.id}>
-                {hasDetailPage ? (
-                  <Link href={`/asset/${item.listing.id}`} className={cardClass} aria-label={`${item.listing.title}の詳細を見る`}>
-                    {content}
-                  </Link>
-                ) : (
-                  <div className={cardClass}>{content}</div>
-                )}
+                <FlipCard front={frontContent} back={backContent} />
               </li>
             );
           })}
