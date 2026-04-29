@@ -4,6 +4,7 @@ import "./globals.css";
 import { SidebarNav, BottomNav } from "@/components/SidebarNav";
 import { OnboardingGuide } from "@/components/OnboardingGuide";
 import { Shimaenaga } from "@/components/Shimaenaga";
+import { ShimaenagaGuide } from "@/components/ShimaenagaGuide";
 
 const notoSansJP = Noto_Sans_JP({
   subsets: ["latin"],
@@ -83,6 +84,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
         {/* Onboarding guide — renders only on first visit */}
         <OnboardingGuide />
+
+        {/* Shimaenaga contextual guide — right-bottom, kawaii theme */}
+        <ShimaenagaGuide />
 
       </body>
     </html>
