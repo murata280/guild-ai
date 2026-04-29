@@ -76,6 +76,23 @@
   }
 }
 
+/* Asset thumbnail shimmer — loading skeleton for HumanThumbnail */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.45) 50%, transparent 75%);
+  background-size: 200% 100%;
+  animation: shimmer 0.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shimmer {
+    animation: none;
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
 /* Reduced-motion: disable all animations */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

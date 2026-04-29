@@ -289,3 +289,51 @@ legacy (peer fields omitted): 0.5q + 0.3d + 0.2x  ← 既存テスト互換
 ```
 
 `getAmbassadorNotifications()` / `getAllNotifications()` で /wallet 通知ベルから分配履歴を確認可能。
+
+---
+
+## #38 Hybrid Visual Asset Hierarchy
+
+詳細: `docs/Hybrid-Visual設計.md`
+
+### 知能の紋章（Asset Emblem）
+
+`src/lib/asset-emblem/index.ts`:
+- `generateEmblemSpec(assetId)` — djb2 ハッシュで 10 色パレットから 3 色選択、5/7 軸対称花びら構造を決定
+- `renderEmblemSvg(spec, size?)` — SVG 文字列生成（API エンドポイント用）
+- `specToVectorEmbedding(spec)` — 14 次元 float32 ベクトル（AtoA 類似度マッチング）
+
+### HumanThumbnail: 写真 > 紋章
+
+```
+HumanThumbnail（use client）
+  → photoUrl あり: <img src={dataUrl}>
+  → フォールバック: <AssetEmblem> (JSX SVG, no dangerouslySetInnerHTML)
+```
+
+### 適用ページ
+
+| ページ | 変更 |
+|--------|------|
+| `/showcase` | グラデーション thumbnail → HumanThumbnail |
+| `/marketplace` | カード上部に HumanThumbnail サムネイル追加 |
+| `/asset/[id]` | タイトル行左に AssetEmblem（56px） |
+| `/sell` 完了画面 | 写真アップロードセクション追加 |
+
+### API 追加
+
+| エンドポイント | 追加 |
+|--------------|------|
+| `GET /api/emblem/[assetId]` | `image/svg+xml` レスポンス（新規） |
+| `GET /api/catalog` | `emblem: { spec, svgUrl, vectorEmbedding }` |
+| `POST /api/atoa/[id]` | `emblem: { vectorEmbedding, svgUrl }` |
+
+### Shimmer アニメーション
+
+`globals.css` に `.shimmer` クラス（0.6s、prefers-reduced-motion 対応）追加。
+
+### テスト: 45 件追加（計 284 件）
+
+- `asset-emblem/__tests__/asset-emblem.test.ts`: 14 件
+- `asset-photos/__tests__/asset-photos.test.ts`: 12 件（AssetEmblem / HumanThumbnail コンポーネント含む）
+- `__tests__/visual-hierarchy.test.ts`: 19 件（API・CSS・ページ統合）

@@ -13,6 +13,7 @@ import { RankBadge } from "@/components/RankBadge";
 import { StepIndicator } from "@/components/StepIndicator";
 import type { Rank, MarketplaceListing } from "@/types";
 import { ShoppingBagIcon } from "@/components/icons";
+import { HumanThumbnail } from "@/components/HumanThumbnail";
 
 const SORT_LABELS: { key: SortKey; label: string }[] = [
   { key: "trust", label: "信用スコア" },
@@ -157,11 +158,14 @@ function MarketplaceContent() {
 
             const content = (
               <>
-                {/* Rank badge */}
-                <div className="flex items-start justify-between gap-2 mb-3">
-                  <RankBadge rank={item.listing.rank} large />
+                {/* Thumbnail + rank badge */}
+                <div className="h-24 bg-kuroko/5 rounded-xl flex items-center justify-center relative mb-3 overflow-hidden">
+                  <HumanThumbnail assetId={item.listing.id} title={item.listing.title} size={72} />
+                  <div className="absolute top-2 right-2">
+                    <RankBadge rank={item.listing.rank} large />
+                  </div>
                   {isNew && (
-                    <span className="text-[10px] font-semibold text-kaki uppercase tracking-widest">NEW</span>
+                    <span className="absolute top-2 left-2 text-[10px] font-semibold text-kaki uppercase tracking-widest">NEW</span>
                   )}
                 </div>
 

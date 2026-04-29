@@ -7,37 +7,13 @@ import { StarRating } from "@/components/StarRating";
 import { ShareButton } from "@/components/ShareButton";
 import { RankBadge } from "@/components/RankBadge";
 import { StepIndicator } from "@/components/StepIndicator";
+import { HumanThumbnail } from "@/components/HumanThumbnail";
 import type { MarketplaceListing } from "@/types";
-
-// ─── Deterministic thumbnail placeholder ──────────────────────────────────────
-
-const THUMB_COLORS = [
-  "from-kaki/30 to-kaki/10",
-  "from-[#9B6BB5]/30 to-[#9B6BB5]/10",
-  "from-accent-green/30 to-accent-green/10",
-  "from-[#2D7FBF]/30 to-[#2D7FBF]/10",
-  "from-[#E8621C]/30 to-[#E8621C]/10",
-  "from-kaki/20 to-[#9B6BB5]/20",
-];
 
 function djb2(s: string): number {
   let h = 5381;
   for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
   return Math.abs(h);
-}
-
-function thumbGradient(id: string) {
-  return THUMB_COLORS[djb2(id) % THUMB_COLORS.length];
-}
-
-function thumbInitials(title: string) {
-  return title
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w.charAt(0))
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
 }
 
 // ─── Showcase card ────────────────────────────────────────────────────────────
@@ -53,9 +29,6 @@ function ShowcaseCard({
   const [likeCount, setLikeCount] = useState(djb2(item.listing.id + "_likes") % 40 + 5);
   const [showShare, setShowShare] = useState(false);
 
-  const gradient = thumbGradient(item.listing.id);
-  const initials = thumbInitials(item.listing.title);
-
   function handleLike() {
     if (!liked) {
       setLiked(true);
@@ -69,10 +42,8 @@ function ShowcaseCard({
       className="section-card overflow-hidden hover:shadow-card-hover transition-shadow"
     >
       {/* Thumbnail */}
-      <div
-        className={`h-36 bg-gradient-to-br ${gradient} flex items-center justify-center relative`}
-      >
-        <span className="text-3xl font-black text-kuroko/30 select-none">{initials}</span>
+      <div className="h-36 bg-kuroko/5 flex items-center justify-center relative overflow-hidden">
+        <HumanThumbnail assetId={item.listing.id} title={item.listing.title} size={96} />
         <div className="absolute top-2 right-2">
           <RankBadge rank={item.listing.rank} />
         </div>

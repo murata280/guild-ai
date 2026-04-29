@@ -19,6 +19,8 @@ import { voiceLogToProofOfMake, generateProductPitch } from "@/lib/proof-of-make
 import type { CCAF, MarketplaceListing, Currency, Rank } from "@/types";
 import { PackageIcon, SearchIcon } from "@/components/icons";
 import { ShareButton } from "@/components/ShareButton";
+import { AssetEmblem } from "@/components/AssetEmblem";
+import { setPhoto } from "@/lib/asset-photos";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -141,7 +143,20 @@ function AutoProgress({
 
 function CompletionCard({ data }: { data: CompletionData }) {
   const [copied, setCopied] = useState<"deploy" | "api" | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const router = useRouter();
+
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target?.result as string;
+      setPhoto(data.listingId, dataUrl);
+      setPhotoPreview(dataUrl);
+    };
+    reader.readAsDataURL(file);
+  }
 
   const copy = (text: string, key: "deploy" | "api") => {
     navigator.clipboard.writeText(text).catch(() => {});
@@ -159,6 +174,25 @@ function CompletionCard({ data }: { data: CompletionData }) {
           ランク <RankBadge rank={data.rank} /> ·
           お値段 <span className="font-bold text-kuroko">¥{data.floorPrice.toLocaleString("ja-JP")}</span>
         </p>
+      </div>
+
+      {/* Photo upload (optional) */}
+      <div className="section-card p-4 flex items-center gap-4">
+        <div className="shrink-0">
+          {photoPreview ? (
+            <img src={photoPreview} alt="プレビュー" width={56} height={56} className="rounded-xl object-cover" />
+          ) : (
+            <AssetEmblem assetId={data.listingId} size={56} className="rounded-xl" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-kuroko">写真でも見せる（任意）</p>
+          <p className="text-xs text-[#9890A8] mt-0.5">顔写真や作品画像を追加できます</p>
+          <label className="mt-2 inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-kuroko/20 px-3 py-1.5 text-xs font-medium text-[#3A3664] hover:border-kaki/40 transition-colors">
+            📷 画像を選ぶ
+            <input type="file" accept="image/*" className="sr-only" onChange={handlePhotoChange} aria-label="写真をアップロード" />
+          </label>
+        </div>
       </div>
 
       {/* 3 parallel links */}
