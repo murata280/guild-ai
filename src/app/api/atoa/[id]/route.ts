@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { MOCK_MARKETPLACE } from "@/lib/marketplace";
 import { runWithQA } from "@/lib/atoa-runner";
 import { generateEmblemSpec, specToVectorEmbedding } from "@/lib/asset-emblem";
+import { mintGuildIdForAsset } from "@/lib/guild-id";
 
 export const dynamic = "force-dynamic";
 
@@ -47,6 +48,7 @@ export async function POST(
   const spec = generateEmblemSpec(params.id);
   return NextResponse.json({
     agentId: params.id,
+    guildId: mintGuildIdForAsset(params.id),
     instanceId: result.instanceId,
     output: result.output,
     durationMs: result.durationMs,
