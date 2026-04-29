@@ -233,3 +233,59 @@ attributeAmbassadorReward(ambassadorId, saleAmount, 0.05)
 | `src/lib/discord-bridge/index.ts` | attributeAmbassadorReward() 追加 |
 | `src/lib/trust-score/index.ts` | computeFloorPrice() 2オーバーロード |
 | `src/lib/social-share/index.ts` | CLOSING 定数・全15テンプレート |
+
+---
+
+## Refinement v2: EtoE star sync, Skill-to-Asset, Ambassador smart-contract feel
+
+### 用語最終統一（Refinement v2）
+
+| 旧表記（廃止） | 新表記 |
+|--------------|--------|
+| AI連携窓口 | おしごと窓口 |
+| 利用窓口（API） | おしごと窓口（接続先） |
+| 資産を登録する | たからもの登録する |
+| 分身として登録する | たからもの登録する |
+| 登録する（Step 1） | たからもの登録 |
+| マーケットへ（Step 3） | マーケットに並ぶ |
+| 自動で入金（Step 4） | 買われたら自動でお金が入る |
+
+ホームページ追加タグライン：「自慢が、そのまま"たからもの"になる場所です。」
+
+### EtoE ピアレビュー → 信用スコア直結
+
+`computeTrustScore()` が `peerRatings?: number[]` と `peerComments?: number` を受け付ける。
+
+```
+EtoE-enhanced: 0.4q + 0.2d + 0.15x + 0.15*peerAvg + 0.10*log(comments)*30
+legacy (peer fields omitted): 0.5q + 0.3d + 0.2x  ← 既存テスト互換
+```
+
+`/asset/[id]` の `AssetReview` コンポーネントで★投票・コメントを受け付け、Trust Score へフィードバック。
+
+### Skill-to-Asset Sync
+
+`src/lib/skill-sync/index.ts`:
+
+| 関数 | 入力 | 出力 |
+|------|------|------|
+| `getGithubGreenScore(username)` | GitHub username | 0–100（90日活動量） |
+| `getLearningProgress(userId)` | userId | 0–20（完了モジュール数） |
+| `applySkillBoost(rank, green, learning)` | Rank + 2 scores | boosted Rank |
+
+**昇格条件:**
+- `green ≥ 70 AND learning ≥ 10` → +1 rank
+- `green ≥ 85 AND learning ≥ 17` → +2 ranks (cap S)
+
+`/wallet` 通帳上部の「スキル成長カード」（3カラム）で可視化。
+
+### Ambassador Smart-Contract Feel
+
+`attributeAmbassadorReward()` が `txHash: string` (0x + 64 hex) を返すようになった。
+
+通知メッセージ例：
+```
+アンバサダー ◯◯ さんに ¥500 を分配しました（tx: 0x1a2b3c...）
+```
+
+`getAmbassadorNotifications()` / `getAllNotifications()` で /wallet 通知ベルから分配履歴を確認可能。
