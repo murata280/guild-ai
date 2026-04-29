@@ -389,3 +389,32 @@ HumanThumbnail（use client）
 4. **アクセシビリティ** — reduced-motion・aria-live・aria-pressed で全操作に対応
 5. **SEO** — JSON-LD (Product + SoftwareApplication) + OGP を各資産ページに自動注入
 
+---
+
+## Mass Merchandising (v2)
+
+詳細: `docs/Mass-Merchandising設計.md`
+
+### 3x 密度戦略
+
+同一資産を3つのペルソナ（一般・PM・エンジニア）向けにコンテキストを切り替えて訴求する。
+
+- **ペルソナフィルタ** — `/marketplace` に「表示スタイル」フィルタ（一般 / PM / エンジニア）を追加。タブ切り替えでカードのヘッドライン・バレット・CTA が即座に変わる
+- **BeforeAfterHero** — `AssetSpirit` の代替として、djb2 ハッシュで決定論的に Before/After の二分割 SVG を自動生成。5テンプレート × 3ランクカラーで多様な見た目を実現
+- **Lazy Mount** — `useLazyMount` (IntersectionObserver + `rootMargin: 200px`) でカードを遅延マウント。スクロール中の描画負荷を軽減し、スケルトンでレイアウトシフトを防止
+- **マスコット配置ルール確定** — `AssetSpirit` / `Shimaenaga` は商品カードから撤退。Trust-Lock・サイドバー・エラー画面・ローディングのみに限定
+
+### 追加コンポーネント
+
+| コンポーネント | パス | 説明 |
+|--------------|------|------|
+| `BeforeAfterHero` | `src/components/BeforeAfterHero.tsx` | Before/After 二分割 JSX SVG ヒーロー |
+| `useLazyMount` | `src/hooks/useLazyMount.ts` | IntersectionObserver ベースの遅延マウント |
+
+### 追加ライブラリ
+
+| モジュール | パス | 説明 |
+|-----------|------|------|
+| `before-after` | `src/lib/before-after/index.ts` | SVG 仕様生成 + SVG 文字列レンダラー |
+| `persona-cards` | `src/lib/persona-cards/index.ts` | 3 ペルソナ別カード仕様生成 |
+
