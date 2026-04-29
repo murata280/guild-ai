@@ -418,3 +418,22 @@ HumanThumbnail（use client）
 | `before-after` | `src/lib/before-after/index.ts` | SVG 仕様生成 + SVG 文字列レンダラー |
 | `persona-cards` | `src/lib/persona-cards/index.ts` | 3 ペルソナ別カード仕様生成 |
 
+
+## Double-Layer UI (v3)
+
+双層 UI アーキテクチャ — 詳細は `docs/Double-Layer-UI設計.md` 参照。
+
+### 追加コンポーネント
+
+| コンポーネント | パス | 説明 |
+|---|---|---|
+| `BilingualLayout` | `src/components/BilingualLayout.tsx` | モバイルタブ / デスクトップ2カラム切り替え |
+| `IntelligenceCore` | `src/components/IntelligenceCore.tsx` | ガラス玉型知能コアSVGウィジェット |
+| `Shimaenaga` (mode拡張) | `src/components/Shimaenaga.tsx` | avatar/seal/guardian モード追加 |
+
+### 追加ライブラリ
+
+| モジュール | パス | 説明 |
+|---|---|---|
+| `morph` | `src/lib/morph/index.ts` | assignMorphTag + startViewTransition |
+| `guild-id` | `src/lib/guild-id/index.ts` | GUILD:XXXX-XXXX-XXXX 名前空間 + URI パーサー |
