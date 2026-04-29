@@ -277,6 +277,37 @@ export interface IncomeNotification {
   createdAt: string;
 }
 
+// ─── Magic Guild — Weapon & Job ───────────────────────────────────────────────
+
+export interface Weapon {
+  id: string;
+  title: string;
+  noteContent: string;
+  rank: Rank;
+  score: number;
+  tags: string[];
+  mintedAt: string; // ISO8601
+  jobsCompleted: string[]; // job IDs
+}
+
+export interface Job {
+  id: string;
+  title: string;
+  description: string;
+  requiredRank: Rank;
+  requiredTags: string[];
+  reward: number; // JPY
+  category: string;
+  status: "open" | "applied" | "completed";
+}
+
+export interface JobApplication {
+  jobId: string;
+  weaponId: string;
+  appliedAt: string;
+  reward: number;
+}
+
 // ─── SES Leverage ─────────────────────────────────────────────────────────────
 
 export interface LeverageBreakdown {
