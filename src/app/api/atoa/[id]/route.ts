@@ -3,6 +3,7 @@ import { MOCK_MARKETPLACE } from "@/lib/marketplace";
 import { runWithQA } from "@/lib/atoa-runner";
 import { generateEmblemSpec, specToVectorEmbedding } from "@/lib/asset-emblem";
 import { mintGuildIdForAsset } from "@/lib/guild-id";
+import { getLicenseQuote, recordMicropayment, type CallerType } from "@/lib/api-licensing";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,9 @@ export async function POST(
       { status: 401 }
     );
   }
+
+  const callerType: CallerType =
+    (req.headers.get("X-Caller-Type") as CallerType | null) ?? "agent";
 
   const agent = MOCK_MARKETPLACE.find((m) => m.listing.id === params.id);
   if (!agent) {
@@ -45,6 +49,9 @@ export async function POST(
     );
   }
 
+  const licenseQuote = getLicenseQuote(callerType, { floorPrice: agent.listing.floorPrice });
+  recordMicropayment(params.id, callerType, licenseQuote.perCallJpyc);
+
   const spec = generateEmblemSpec(params.id);
   return NextResponse.json({
     agentId: params.id,
@@ -53,6 +60,7 @@ export async function POST(
     output: result.output,
     durationMs: result.durationMs,
     billedJpy: agent.listing.floorPrice,
+    licenseQuote,
     emblem: {
       vectorEmbedding: specToVectorEmbedding(spec),
       svgUrl: `/api/emblem/${params.id}`,
