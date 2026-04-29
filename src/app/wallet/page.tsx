@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
-import type { OwnershipRecord, Currency } from "@/types";
+import type { OwnershipRecord, Currency, Rank } from "@/types";
 import { computeContributionRank } from "@/lib/contribution-rank";
 import type { ContributionRank } from "@/lib/contribution-rank";
 import { getAssetHealth } from "@/lib/asset-health";
@@ -17,6 +17,7 @@ import { toggleMute, playSuccessChime } from "@/lib/sound";
 import { UserIcon, BanknoteIcon } from "@/components/icons";
 import { RawDataPanel } from "@/components/RawDataPanel";
 import { ShareButton } from "@/components/ShareButton";
+import { getGithubGreenScore, getLearningProgress, applySkillBoost } from "@/lib/skill-sync";
 
 // ─── Rank styling ─────────────────────────────────────────────────────────────
 
@@ -38,6 +39,64 @@ function StatBar({ value, color = "bg-kaki" }: { value: number; color?: string }
   return (
     <div className="mt-1 h-1.5 w-full rounded-full bg-kuroko/10">
       <div className={`h-1.5 rounded-full ${color} transition-all`} style={{ width: `${Math.min(100, value)}%` }} />
+    </div>
+  );
+}
+
+// ─── スキル成長カード ─────────────────────────────────────────────────────────
+
+function SkillProgressBar({ value, color = "bg-kaki" }: { value: number; color?: string }) {
+  return (
+    <div className="mt-1.5 h-2 w-full rounded-full bg-kuroko/10">
+      <div
+        className={`h-2 rounded-full ${color} transition-all`}
+        style={{ width: `${Math.min(100, value)}%` }}
+      />
+    </div>
+  );
+}
+
+function SkillGrowthCard({ currentRank }: { currentRank: Rank }) {
+  const greenScore = getGithubGreenScore("demo-user");
+  const learningProgress = getLearningProgress("demo-user");
+  const boostedRank = applySkillBoost(currentRank, greenScore, learningProgress);
+  const greenPct = Math.min(100, Math.round((greenScore / 70) * 100));
+  const learnPct = Math.min(100, Math.round((learningProgress / 10) * 100));
+  const overallPct = Math.round((greenPct + learnPct) / 2);
+  const rankChanged = boostedRank !== currentRank;
+
+  let hint: string;
+  if (rankChanged) {
+    hint = `あなたの活動が反映されています。現在の予測ランクは ${boostedRank} です。`;
+  } else if (overallPct >= 80) {
+    hint = `もう少しでランクが上がります（あと ${100 - overallPct}%）。GitHubへの継続的なコミットをお勧めします。`;
+  } else {
+    hint = `GitHubの活動と学習を続けることで、ランクアップが見込まれます（現在 ${overallPct}%）。`;
+  }
+
+  return (
+    <div className="mt-5 section-card p-5">
+      <h2 className="text-sm font-bold text-[#9890A8] uppercase tracking-widest mb-4">スキル成長</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div>
+          <p className="text-xs text-[#9890A8] font-semibold">GitHubの草</p>
+          <p className="mt-1 text-2xl font-bold text-kuroko tabular-nums">{greenScore}<span className="text-sm text-[#9890A8]"> / 100</span></p>
+          <SkillProgressBar value={greenScore} color="bg-accent-green" />
+        </div>
+        <div>
+          <p className="text-xs text-[#9890A8] font-semibold">学習の進み</p>
+          <p className="mt-1 text-2xl font-bold text-kuroko tabular-nums">{learningProgress}<span className="text-sm text-[#9890A8]"> / 20</span></p>
+          <SkillProgressBar value={learnPct} color="bg-[#9B6BB5]" />
+        </div>
+        <div>
+          <p className="text-xs text-[#9890A8] font-semibold">予測ランク</p>
+          <p className={`mt-1 text-2xl font-bold tabular-nums ${rankChanged ? "text-kaki" : "text-kuroko"}`}>
+            {boostedRank} {rankChanged && <span className="text-sm text-kaki">↑</span>}
+          </p>
+          <SkillProgressBar value={overallPct} color={rankChanged ? "bg-kaki" : "bg-kuroko/30"} />
+        </div>
+      </div>
+      <p className="mt-3 text-xs text-[#4A4464] leading-relaxed">{hint}</p>
     </div>
   );
 }
@@ -534,6 +593,9 @@ export default function WalletPage() {
         <>
           {/* 今月の通帳 — always shown */}
           <PassbookCard owned={owned} />
+
+          {/* スキル成長カード */}
+          <SkillGrowthCard currentRank="B" />
 
           {/* Gamification header */}
           <GamificationHeader owned={owned} />

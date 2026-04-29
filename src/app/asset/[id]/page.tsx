@@ -9,6 +9,7 @@ import { HelpHint } from "@/components/HelpHint";
 import { messages } from "@/lib/microcopy";
 import { SearchIcon, LinkIcon } from "@/components/icons";
 import { RawDataPanel } from "@/components/RawDataPanel";
+import { AssetReview } from "@/components/AssetReview";
 
 const BASE_URL = "https://guild-ai.vercel.app";
 
@@ -252,6 +253,9 @@ export default function AssetPage({ params }: { params: { id: string } }) {
           </p>
         </div>
       </section>
+
+      {/* ★ レビューセクション */}
+      <AssetReview assetId={listing.id} />
 
       {/* Raw Data タブ — エンジニア向け技術詳細 */}
       <RawDataPanel data={{
