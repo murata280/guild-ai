@@ -22,6 +22,7 @@ import { ShareButton } from "@/components/ShareButton";
 import { AssetEmblem } from "@/components/AssetEmblem";
 import { setPhoto } from "@/lib/asset-photos";
 import { Shimaenaga } from "@/components/Shimaenaga";
+import { computeBundlePricing } from "@/lib/checkout";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -783,6 +784,28 @@ function TextPath({
         <p className="text-xs text-[#9890A8]">
           ※ 最低価格の目安です。信用スコアにより自動調整されます。
         </p>
+        {/* Two-Way Pricing derived values */}
+        {(() => {
+          const monthly = Math.round(floor / 12);
+          const pricing = computeBundlePricing(monthly);
+          return (
+            <div className="rounded-xl bg-kaki/5 border border-kaki/10 p-3 space-y-1.5">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-[#9890A8]">自動計算される料金プラン</p>
+              <div className="flex justify-between text-xs">
+                <span className="text-[#4A4464]">月額（目安）</span>
+                <span className="font-semibold tabular-nums text-kuroko">¥{pricing.monthlyJpy.toLocaleString("ja-JP")} / 月</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-[#4A4464]">買い切り（目安）</span>
+                <span className="font-semibold tabular-nums text-kuroko">¥{pricing.oneoffJpy.toLocaleString("ja-JP")}</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-[#4A4464]">リクエスト単価</span>
+                <span className="font-semibold tabular-nums text-kaki">{pricing.perCallJpyc} デジタル円</span>
+              </div>
+            </div>
+          );
+        })()}
         <div>
           <p className="text-sm font-semibold text-[#3A3664] mb-2">売上の受け取り方</p>
           <div className="flex gap-4">

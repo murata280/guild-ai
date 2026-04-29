@@ -13,6 +13,7 @@ import { AssetReview } from "@/components/AssetReview";
 import { AssetSpirit } from "@/components/AssetSpirit";
 import { Shimaenaga } from "@/components/Shimaenaga";
 import { buildAssetJsonLd } from "@/lib/structured-data";
+import { computeBundlePricing, computeMonthlyFromFloor } from "@/lib/checkout";
 
 const BASE_URL = "https://guild-ai.vercel.app";
 
@@ -142,6 +143,31 @@ export default function AssetPage({ params }: { params: { id: string } }) {
           <p className="text-xs text-[#9890A8]">日</p>
         </div>
       </div>
+
+      {/* Two-Way Pricing */}
+      {(() => {
+        const monthly = computeMonthlyFromFloor(listing.floorPrice);
+        const pricing = computeBundlePricing(monthly);
+        return (
+          <div className="mt-4 section-card p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-[#9890A8] mb-3">料金プラン</p>
+            <div className="space-y-1.5 text-sm">
+              <div className="flex justify-between">
+                <span className="text-[#4A4464]">月額</span>
+                <span className="font-semibold tabular-nums text-kuroko">¥{pricing.monthlyJpy.toLocaleString("ja-JP")} / 月</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#4A4464]">買い切り</span>
+                <span className="font-semibold tabular-nums text-kuroko">¥{pricing.oneoffJpy.toLocaleString("ja-JP")}</span>
+              </div>
+              <div className="flex justify-between pt-1.5 border-t border-kuroko/10">
+                <span className="text-[#4A4464]">1リクエスト</span>
+                <span className="font-semibold tabular-nums text-kaki">{pricing.perCallJpyc} デジタル円</span>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* お墨付きパネル */}
       <TrustPanel
